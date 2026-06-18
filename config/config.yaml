@@ -1,6 +1,7 @@
 defaults:
   - _self_
-  - agent: sac
+  - agent: td3
+  - override hydra/launcher: joblib 
 
 # --- run control ---
 mode: train
