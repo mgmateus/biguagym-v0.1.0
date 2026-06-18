@@ -1,0 +1,53 @@
+simple_navigation:
+  - BlueBoatNav-v0
+  - BlueROV2Nav-v0
+  - BlueROVHeavyNav-v0
+  - DjiMatriceNav-v0
+  - HydroneNav-v0
+  - TorpedoNav-v0
+
+trajectory_follower:
+  - BlueBoatTrajectoryFollower-v0
+  - BlueROV2TrajectoryFollower-v0
+  - BlueROVHeavyTrajectoryFollower-v0
+  - DjiMatriceTrajectoryFollower-v0
+  - HydroneTrajectoryFollower-v0
+  - TorpedoTrajectoryFollower-v0
+
+docking:
+  - BlueROV2Dock-v0
+  - BlueROVHeavyDock-v0
+  - HydroneDock-v0
+  - TorpedoDock-v0
+
+landing:
+  - DjiMatriceLand-v0
+  - HydroneLand-v0
+
+complex_navigation:
+  - HydroneNav-v1
+  - HydroneNav-v2
+
+td3:
+  - simple_navigation
+  - trajectory_follower
+  - docking
+  - landing
+
+ppo: 
+  - simple_navigation
+  - trajectory_follower
+  - docking
+  - landing
+
+sac:
+  complex_navigation:
+  - HydroneNav-v2
+
+ddpg:
+  complex_navigation:
+  - HydroneNav-v2
+
+cuprl:
+  complex_navigation:
+  - HydroneNav-v1

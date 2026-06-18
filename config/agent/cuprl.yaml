@@ -1,0 +1,47 @@
+# CURL prioritized SAC over (rgb, depth, pose) — pixel agent.
+# Requires a biguagym pixel (-v1/-v2) env exposing a Dict obs with rgb/depth and
+# a 9-d pose. Defaults adapted from aux/cprl.py.
+name: cuprl
+family: cuprl
+
+hidden_dim: 1024
+image_size: 84
+buffer_size: 100000
+batch_size: 128
+learning_starts: 1000
+
+encoder:
+  _target_: src.agents.cuprl.PixelEncoder
+  feature_dim: 50
+  num_layers: 4
+  num_filters: 32
+  output_logits: false
+
+actor:
+  _target_: src.agents.cuprl.Actor
+  log_std_min: -10
+  log_std_max: 2
+
+critic:
+  _target_: src.agents.cuprl.Critic
+
+algo:
+  _target_: src.agents.cuprl.CurlPriorSacAgent
+  discount: 0.99
+  init_temperature: 0.1
+  alpha_lr: 1e-4
+  alpha_beta: 0.5
+  actor_lr: 1e-3
+  actor_beta: 0.9
+  actor_update_freq: 2
+  critic_lr: 1e-3
+  critic_beta: 0.9
+  critic_tau: 0.01
+  critic_target_update_freq: 2
+  encoder_feature_dim: 50
+  encoder_lr: 1e-3
+  encoder_tau: 0.05
+  cl_update_freq: 1
+  detach_encoder: false
+  curl_latent_dim: 128
+  batch_size: ${agent.batch_size}

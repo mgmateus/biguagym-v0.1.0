@@ -1,0 +1,28 @@
+# Proximal Policy Optimization (on-policy, continuous Gaussian policy).
+# Defaults from aux/ppo_continuous_action.py. learning_starts=0 (no warmup);
+# updates fire once each rollout of num_steps transitions is full.
+name: ppo
+family: ppo
+
+hidden_dim: 64
+num_steps: 2048
+gamma: 0.99
+gae_lambda: 0.95
+anneal_lr: true
+learning_starts: 0
+
+net:
+  _target_: src.agents.ppo.ActorCritic
+
+algo:
+  _target_: src.agents.ppo.PPOAgent
+  learning_rate: 3e-4
+  num_minibatches: 32
+  update_epochs: 10
+  clip_coef: 0.2
+  ent_coef: 0.0
+  vf_coef: 0.5
+  max_grad_norm: 0.5
+  norm_adv: true
+  clip_vloss: true
+  target_kl: null

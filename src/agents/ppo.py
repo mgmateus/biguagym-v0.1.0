@@ -13,15 +13,16 @@
 # `rollout_buffer.get(minibatch_size)`. Advantage/return computation (GAE) is a
 # responsibility of the buffer, mirroring ./src/ppo.py's training loop.
 #
-# This implementation targets a discrete action space (Categorical policy),
-# matching ./src/ppo.py.
+# This implementation targets a continuous action space (diagonal Gaussian
+# policy), following ./aux/ppo_continuous_action.py, so it matches biguagym's
+# continuous Box action spaces.
 
 import torch
 
 import numpy as np
 import torch.nn as nn
 import torch.optim as optim
-from torch.distributions.categorical import Categorical
+from torch.distributions.normal import Normal
 
 
 def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
@@ -31,10 +32,11 @@ def layer_init(layer, std=np.sqrt(2), bias_const=0.0):
 
 
 class ActorCritic(nn.Module):
-    """Separate (non-shared) actor and critic MLP heads."""
+    """Separate (non-shared) actor and critic MLP heads with a diagonal Gaussian
+    policy: a state-dependent mean and a state-independent log-std parameter."""
     def __init__(self,
                  observation_shape: tuple,
-                 num_actions: int,
+                 action_dim: int,
                  hidden_dim: int = 64
                  ):
         super().__init__()
@@ -47,23 +49,27 @@ class ActorCritic(nn.Module):
             nn.Tanh(),
             layer_init(nn.Linear(hidden_dim, 1), std=1.0),
         )
-        self.actor = nn.Sequential(
+        self.actor_mean = nn.Sequential(
             layer_init(nn.Linear(obs_dim, hidden_dim)),
             nn.Tanh(),
             layer_init(nn.Linear(hidden_dim, hidden_dim)),
             nn.Tanh(),
-            layer_init(nn.Linear(hidden_dim, num_actions), std=0.01),
+            layer_init(nn.Linear(hidden_dim, action_dim), std=0.01),
         )
+        self.actor_logstd = nn.Parameter(torch.zeros(1, action_dim))
 
     def get_value(self, x):
         return self.critic(x)
 
     def get_action_and_value(self, x, action=None):
-        logits = self.actor(x)
-        probs = Categorical(logits=logits)
+        action_mean = self.actor_mean(x)
+        action_logstd = self.actor_logstd.expand_as(action_mean)
+        action_std = torch.exp(action_logstd)
+        probs = Normal(action_mean, action_std)
         if action is None:
             action = probs.sample()
-        return action, probs.log_prob(action), probs.entropy(), self.critic(x)
+        # sum over the action dimension -> joint log-prob / entropy per sample
+        return action, probs.log_prob(action).sum(1), probs.entropy().sum(1), self.critic(x)
 
 
 class PPOAgent:
@@ -115,15 +121,16 @@ class PPOAgent:
         """Linearly scale the learning rate; `frac` in (0, 1]."""
         self.optimizer.param_groups[0]["lr"] = frac * self.optimizer.defaults["lr"]
 
-    def update(self, rollout_buffer):
+    def update(self, rollout_buffer, logger, step):
         clipfracs = []
         approx_kl = None
+        pg_loss = v_loss = entropy_loss = None
 
         for _ in range(self.update_epochs):
             for batch in rollout_buffer.get(self.minibatch_size):
                 obs = batch.observations
-                # buffer yields discrete actions as (N, 1); Categorical expects (N,)
-                actions = batch.actions.long().flatten()
+                # continuous actions are stored as float (N, action_dim)
+                actions = batch.actions
 
                 _, newlogprob, entropy, newvalue = self.ac.get_action_and_value(obs, actions)
                 logratio = newlogprob - batch.old_log_prob
@@ -168,6 +175,15 @@ class PPOAgent:
 
             if self.target_kl is not None and approx_kl is not None and approx_kl > self.target_kl:
                 break
+
+        # log the final-minibatch losses (mapped to the shared actor/critic
+        # columns) plus PPO-specific diagnostics
+        if pg_loss is not None:
+            logger.log('train/actor/loss', pg_loss, step)
+            logger.log('train/critic/loss', v_loss, step)
+            logger.log('train/entropy', entropy_loss, step)
+            logger.log('train/approx_kl', approx_kl, step)
+            logger.log('train/clipfrac', float(np.mean(clipfracs)) if clipfracs else 0.0, step)
 
     def save(self, model_dir):
         agent_path = '%s/agent_last.pt' % (model_dir)

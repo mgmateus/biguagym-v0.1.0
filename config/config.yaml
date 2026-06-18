@@ -1,0 +1,32 @@
+defaults:
+  - _self_
+  - agent: sac
+
+# --- run control ---
+mode: train
+runs: 1
+seed: 0
+tensorboard: false
+curves_path: ''
+logs_path: ''
+
+# --- training schedule ---
+num_train_steps: 1000000
+num_eval_episodes: 5
+eval_freq: 10000
+# first step at which the agent may update (off-policy warmup; 0 for PPO)
+init_steps: ${agent.learning_starts}
+
+# --- environment ---
+# Pass any biguagym gym id directly, e.g.  python run.py env=DjiMatriceLand-v0
+env: BlueBoatNav-v0
+# extra kwargs forwarded to gym.make (e.g. +env_kwargs.pixel_channels=[rgb,depth])
+env_kwargs: {}
+# observation tag for log/curve names; null -> derived from the -vN suffix
+# (v0 -> state, v1 -> pixel, v2 -> range). Override with e.g. obs_type=[rgb,depth].
+obs_type: null
+
+hydra:
+  run:
+    dir: .
+  output_subdir: null

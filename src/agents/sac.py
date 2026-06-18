@@ -186,7 +186,7 @@ class SACAgent:
             action = pi if sample else mu
             return action.cpu().data.numpy().flatten()
 
-    def update_critic(self, obs, action, reward, next_obs, not_done):
+    def update_critic(self, obs, action, reward, next_obs, not_done, logger, step):
         with torch.no_grad():
             _, policy_action, log_pi, _ = self.actor(next_obs)
             target_Q1, target_Q2 = self.critic_target(next_obs, policy_action)
@@ -197,17 +197,24 @@ class SACAgent:
         current_Q1, current_Q2 = self.critic(obs, action)
         critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(current_Q2, target_Q)
 
+        logger.log('train/critic/loss', critic_loss, step)
+
         # optimize the critic
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
         self.critic_optimizer.step()
 
-    def update_actor_and_alpha(self, obs):
-        _, pi, log_pi, _ = self.actor(obs)
+    def update_actor_and_alpha(self, obs, logger, step):
+        _, pi, log_pi, log_std = self.actor(obs)
         actor_Q1, actor_Q2 = self.critic(obs, pi)
 
         actor_Q = torch.min(actor_Q1, actor_Q2)
         actor_loss = (self.alpha.detach() * log_pi - actor_Q).mean()
+
+        logger.log('train/actor/loss', actor_loss, step)
+        logger.log('train/actor/target_entropy', self.target_entropy, step)
+        entropy = 0.5 * log_std.shape[1] * (1.0 + np.log(2 * np.pi)) + log_std.sum(dim=-1)
+        logger.log('train/actor/entropy', entropy.mean(), step)
 
         # optimize the actor
         self.actor_optimizer.zero_grad()
@@ -217,10 +224,12 @@ class SACAgent:
         # optimize the temperature
         self.log_alpha_optimizer.zero_grad()
         alpha_loss = (self.alpha * (-log_pi - self.target_entropy).detach()).mean()
+        logger.log('train/alpha/loss', alpha_loss, step)
+        logger.log('train/alpha/value', self.alpha, step)
         alpha_loss.backward()
         self.log_alpha_optimizer.step()
 
-    def update(self, replay_buffer, step):
+    def update(self, replay_buffer, logger, step):
         data = replay_buffer.sample(self.batch_size)
         obs = data.observations
         action = data.actions
@@ -228,10 +237,12 @@ class SACAgent:
         next_obs = data.next_observations
         not_done = 1.0 - data.dones
 
-        self.update_critic(obs, action, reward, next_obs, not_done)
+        logger.log('train/batch_reward', reward.mean(), step)
+
+        self.update_critic(obs, action, reward, next_obs, not_done, logger, step)
 
         if step % self.actor_update_freq == 0:
-            self.update_actor_and_alpha(obs)
+            self.update_actor_and_alpha(obs, logger, step)
 
         if step % self.critic_target_update_freq == 0:
             soft_update_params(self.critic.Q1, self.critic_target.Q1, self.critic_tau)

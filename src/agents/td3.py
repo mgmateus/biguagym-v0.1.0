@@ -152,7 +152,7 @@ class TD3Agent:
                 action = torch.clamp(action, self.action_low, self.action_high)
             return action.cpu().data.numpy().flatten()
 
-    def update_critic(self, obs, action, reward, next_obs, not_done):
+    def update_critic(self, obs, action, reward, next_obs, not_done, logger, step):
         with torch.no_grad():
             # target policy smoothing: add clipped noise to the target action
             noise = (torch.randn_like(action) * self.policy_noise).clamp(
@@ -170,21 +170,25 @@ class TD3Agent:
         current_Q1, current_Q2 = self.critic(obs, action)
         critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(current_Q2, target_Q)
 
+        logger.log('train/critic/loss', critic_loss, step)
+
         # optimize the critic
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
         self.critic_optimizer.step()
 
-    def update_actor(self, obs):
+    def update_actor(self, obs, logger, step):
         # deterministic policy gradient through Q1 only
         actor_loss = -self.critic.Q1(obs, self.actor(obs)).mean()
+
+        logger.log('train/actor/loss', actor_loss, step)
 
         # optimize the actor
         self.actor_optimizer.zero_grad()
         actor_loss.backward()
         self.actor_optimizer.step()
 
-    def update(self, replay_buffer, step):
+    def update(self, replay_buffer, logger, step):
         data = replay_buffer.sample(self.batch_size)
         obs = data.observations
         action = data.actions
@@ -192,11 +196,13 @@ class TD3Agent:
         next_obs = data.next_observations
         not_done = 1.0 - data.dones
 
-        self.update_critic(obs, action, reward, next_obs, not_done)
+        logger.log('train/batch_reward', reward.mean(), step)
+
+        self.update_critic(obs, action, reward, next_obs, not_done, logger, step)
 
         # delayed policy update + target sync
         if step % self.policy_freq == 0:
-            self.update_actor(obs)
+            self.update_actor(obs, logger, step)
             soft_update_params(self.actor, self.actor_target, self.tau)
             soft_update_params(self.critic, self.critic_target, self.tau)
 

@@ -134,7 +134,7 @@ class DDPGAgent:
                 action = torch.clamp(action, self.action_low, self.action_high)
             return action.cpu().data.numpy().flatten()
 
-    def update_critic(self, obs, action, reward, next_obs, not_done):
+    def update_critic(self, obs, action, reward, next_obs, not_done, logger, step):
         with torch.no_grad():
             next_action = self.actor_target(next_obs)
             target_Q = self.critic_target(next_obs, next_action)
@@ -144,21 +144,25 @@ class DDPGAgent:
         current_Q = self.critic(obs, action)
         critic_loss = F.mse_loss(current_Q, target_Q)
 
+        logger.log('train/critic/loss', critic_loss, step)
+
         # optimize the critic
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
         self.critic_optimizer.step()
 
-    def update_actor(self, obs):
+    def update_actor(self, obs, logger, step):
         # deterministic policy gradient: maximize Q(s, mu(s))
         actor_loss = -self.critic(obs, self.actor(obs)).mean()
+
+        logger.log('train/actor/loss', actor_loss, step)
 
         # optimize the actor
         self.actor_optimizer.zero_grad()
         actor_loss.backward()
         self.actor_optimizer.step()
 
-    def update(self, replay_buffer, step):
+    def update(self, replay_buffer, logger, step):
         data = replay_buffer.sample(self.batch_size)
         obs = data.observations
         action = data.actions
@@ -166,11 +170,13 @@ class DDPGAgent:
         next_obs = data.next_observations
         not_done = 1.0 - data.dones
 
-        self.update_critic(obs, action, reward, next_obs, not_done)
+        logger.log('train/batch_reward', reward.mean(), step)
+
+        self.update_critic(obs, action, reward, next_obs, not_done, logger, step)
 
         # delayed policy update + target sync (TD3-style delay support)
         if step % self.policy_freq == 0:
-            self.update_actor(obs)
+            self.update_actor(obs, logger, step)
             soft_update_params(self.actor, self.actor_target, self.tau)
             soft_update_params(self.critic, self.critic_target, self.tau)
 

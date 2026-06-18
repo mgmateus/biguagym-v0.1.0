@@ -1,0 +1,28 @@
+# Deep Deterministic Policy Gradient (off-policy, continuous).
+# Defaults from aux/ddpg_continuous_action.py. The deterministic actor rescales
+# tanh output to the env action range via action_bounds (injected by the runner).
+name: ddpg
+family: off_policy
+
+hidden_dim: 256
+buffer_size: 1000000
+batch_size: 256
+learning_starts: 25000
+
+actor:
+  _target_: src.agents.ddpg.Actor
+
+critic:
+  _target_: src.agents.ddpg.QFunction
+
+algo:
+  _target_: src.agents.ddpg.DDPGAgent
+  actor_lr: 3e-4
+  critic_lr: 3e-4
+  actor_beta: 0.9
+  critic_beta: 0.9
+  tau: 0.005
+  discount: 0.99
+  exploration_noise: 0.1
+  policy_freq: 2
+  batch_size: ${agent.batch_size}
