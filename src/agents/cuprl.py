@@ -176,12 +176,12 @@ class Actor(nn.Module):
 
 
 class QFunction(nn.Module):
-    """MLP for q-function."""
-    def __init__(self, obs_dim, action_dim, hidden_dim):
+    """MLP for q-function over (encoded image, pose, action)."""
+    def __init__(self, obs_dim, action_dim, hidden_dim, pose_dim):
         super(QFunction, self).__init__()
 
         self.trunk = nn.Sequential(
-            nn.Linear(obs_dim + 3+6 + action_dim, hidden_dim), nn.ReLU(),
+            nn.Linear(obs_dim + pose_dim + action_dim, hidden_dim), nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim), nn.ReLU(),
             nn.Linear(hidden_dim, 1)
         )
@@ -197,17 +197,17 @@ class QFunction(nn.Module):
 class Critic(nn.Module):
     """Critic network, employes two q-functions."""
     def __init__(
-        self, encoder_cfg, action_shape, hidden_dim):
+        self, encoder_cfg, action_shape, hidden_dim, pose_dim):
         super(Critic, self).__init__()
 
 
         self.encoder = encoder_cfg
 
         self.Q1 = QFunction(
-            self.encoder.feature_dim, action_shape, hidden_dim
+            self.encoder.feature_dim, action_shape, hidden_dim, pose_dim
         )
         self.Q2 = QFunction(
-            self.encoder.feature_dim, action_shape, hidden_dim
+            self.encoder.feature_dim, action_shape, hidden_dim, pose_dim
         )
 
         self.outputs = dict()

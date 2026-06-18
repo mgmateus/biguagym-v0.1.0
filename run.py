@@ -59,6 +59,14 @@ def _resolve_env(cfg):
     obs_type = list(cfg.obs_type) if cfg.get('obs_type') else _obs_type_from_id(env_id)
     kwargs = OmegaConf.to_container(cfg.env_kwargs, resolve=True) if cfg.get('env_kwargs') else {}
 
+    # CUPRL is a pixel + pose + PER agent: it needs rgb + depth + proprioceptive
+    # state, and a raw frame larger than the crop size. Supply sensible defaults
+    # on a pixel env unless the user overrode them.
+    if cfg.get('agent') is not None and cfg.agent.get('family') == 'cuprl':
+        kwargs.setdefault('pixel_channels', ['rgb', 'depth'])
+        kwargs.setdefault('include_state', True)
+        kwargs.setdefault('frame_size', [100, 100])
+
     OmegaConf.set_struct(cfg, False)
     cfg.env = OmegaConf.create({
         'name': env_id,

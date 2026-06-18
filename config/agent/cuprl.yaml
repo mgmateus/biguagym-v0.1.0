@@ -6,7 +6,10 @@ family: cuprl
 
 hidden_dim: 1024
 image_size: 84
-buffer_size: 100000
+# PER stores RAW frames (rgb uint8 + depth float32) for obs and next_obs, so the
+# buffer is memory-heavy: ~ buffer_size * frame_pixels * (1+1+4) bytes. Keep this
+# modest and scale to available RAM.
+buffer_size: 10000
 batch_size: 128
 learning_starts: 1000
 

@@ -194,28 +194,28 @@ class CuprlRunner:
     but should be validated on a real pixel env.
     """
 
-    def __init__(self, agent, buffer, learning_starts, device):
+    def __init__(self, agent, buffer, learning_starts, device, pose_key='state'):
         self.agent = agent
         self.buffer = buffer
         self.learning_starts = int(learning_starts)
         self.device = device
+        self.pose_key = pose_key
         self.training = True
 
     def train(self, mode=True):
         self.training = mode
         self.agent.train(mode)
 
-    @staticmethod
-    def _split_obs(obs):
-        """Map a biguagym Dict observation -> (rgb, depth, pose)."""
-        rgb = obs['rgb']
-        depth = obs.get('depth', obs['rgb'])
-        pose = obs['pose'] if 'pose' in obs else obs['state']
-        return (
-            np.asarray(rgb, dtype=np.float32),
-            np.asarray(depth, dtype=np.float32),
-            np.asarray(pose, dtype=np.float32),
-        )
+    def _split_obs(self, obs):
+        """Map a biguagym pixel Dict observation -> (rgb, depth, pose).
+
+        rgb keeps its native (uint8) dtype to match the PER buffer's image
+        storage; depth and pose are floats.
+        """
+        rgb = np.asarray(obs['rgb'])
+        depth = np.asarray(obs['depth'], dtype=np.float32) if 'depth' in obs else rgb.astype(np.float32)
+        pose = np.asarray(obs[self.pose_key], dtype=np.float32)
+        return rgb, depth, pose
 
     def act(self, obs, eval_mode=False, step=None):
         rgb, _, pose = self._split_obs(obs)
@@ -316,38 +316,53 @@ def _build_ppo(cfg, env, device, total_steps):
 def _build_cuprl(cfg, env, device):
     obs_space = env.observation_space
     action_space = env.action_space
-    assert isinstance(obs_space, spaces.Dict), \
-        "CUPRL requires a Dict (pixel) observation space with rgb/depth/pose."
+    assert isinstance(obs_space, spaces.Dict) and 'rgb' in obs_space.spaces, \
+        "CUPRL requires a pixel Dict obs with an 'rgb' channel (and depth + state)."
     action_shape = _box_shape(action_space)
     action_dim = _action_dim(action_space)
-    rgb_shape = _box_shape(obs_space['rgb'])
-    pose_dim = _action_dim(obs_space['pose']) if 'pose' in obs_space.spaces else 9
+    image_size = int(cfg.agent.image_size)
     hidden_dim = int(cfg.agent.hidden_dim)
 
-    # one encoder per network; the agent ties their conv weights together
-    enc_actor = hydra.utils.instantiate(cfg.agent.encoder, obs_shape=rgb_shape)
-    enc_critic = hydra.utils.instantiate(cfg.agent.encoder, obs_shape=rgb_shape)
+    channels = int(obs_space['rgb'].shape[0])
+    # pose comes from the env proprioceptive channel ('state', fallback 'pose')
+    pose_key = 'state' if 'state' in obs_space.spaces else 'pose'
+    pose_dim = int(obs_space[pose_key].shape[0])
+    # depth defaults to rgb when the env does not expose a depth channel
+    depth_space = obs_space['depth'] if 'depth' in obs_space.spaces else obs_space['rgb']
+
+    # encoder / agent operate on the CROPPED frame (image_size), while the buffer
+    # stores the RAW frames and random-crops them at sample time.
+    crop_shape = (channels, image_size, image_size)
+    enc_actor = hydra.utils.instantiate(cfg.agent.encoder, obs_shape=crop_shape)
+    enc_critic = hydra.utils.instantiate(cfg.agent.encoder, obs_shape=crop_shape)
     actor = hydra.utils.instantiate(
         cfg.agent.actor, encoder_cfg=enc_actor, action_shape=action_shape,
         pose_dim=pose_dim, hidden_dim=hidden_dim,
     )
     critic = hydra.utils.instantiate(
         cfg.agent.critic, encoder_cfg=enc_critic, action_shape=action_dim,
-        hidden_dim=hidden_dim,
+        hidden_dim=hidden_dim, pose_dim=pose_dim,
     )
     agent = hydra.utils.instantiate(
         cfg.agent.algo, actor_cfg=actor, critic_cfg=critic,
-        obs_shape=rgb_shape, action_shape=action_shape, device=str(device),
+        obs_shape=crop_shape, action_shape=action_shape, device=str(device),
     )
+
+    # PER buffer keyed rgb/depth/pose (maps the env's 'state' channel to 'pose')
+    buffer_obs_space = spaces.Dict({
+        'rgb':   obs_space['rgb'],
+        'depth': depth_space,
+        'pose':  obs_space[pose_key],
+    })
     buffer = PrioritizedReplayBuffer(
         buffer_size=int(cfg.agent.buffer_size),
-        observation_space=obs_space,
+        observation_space=buffer_obs_space,
         action_space=action_space,
         device=device,
-        image_size=int(cfg.agent.image_size),
+        image_size=image_size,
         n_envs=1,
     )
-    return CuprlRunner(agent, buffer, cfg.agent.learning_starts, device)
+    return CuprlRunner(agent, buffer, cfg.agent.learning_starts, device, pose_key)
 
 
 def make_runner(cfg, env, device, total_steps):
