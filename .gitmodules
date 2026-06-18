@@ -1,0 +1,3 @@
+[submodule "biguagym"]
+	path = biguagym
+	url = https://github.com/hydrone-furg/biguagym.git

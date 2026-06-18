@@ -39,8 +39,10 @@ __all__ = [
     "BaseBuffer",
     "RolloutBuffer",
     "ReplayBuffer",
+    "PrioritizedReplayBuffer",
     "RolloutBufferSamples",
     "ReplayBufferSamples",
+    "PrioritizedReplayBufferSamples",
 ]
 
 
@@ -608,3 +610,186 @@ class RolloutBuffer(BaseBuffer):
             self.returns[batch_inds].flatten(),
         )
         return RolloutBufferSamples(*tuple(map(self.to_torch, data)))
+    
+
+from skimage.util.shape import view_as_windows
+def random_crop(imgs, output_size):
+    """
+    Vectorized way to do random crop using sliding windows
+    and picking out random ones
+
+    args:
+        imgs, batch images with shape (B,C,H,W)
+    """
+    # batch size
+    n = imgs.shape[0]
+    img_size = imgs.shape[-1]
+    crop_max = img_size - output_size
+    imgs = np.transpose(imgs, (0, 2, 3, 1))
+    w1 = np.random.randint(0, crop_max, n)
+    h1 = np.random.randint(0, crop_max, n)
+    # creates all sliding windows combinations of size (output_size)
+    windows = view_as_windows(
+        imgs, (1, output_size, output_size, 1))[..., 0,:,:, 0]
+    # selects a random window for each batch element
+    cropped_imgs = windows[np.arange(n), w1, h1]
+    return cropped_imgs
+
+
+class PrioritizedReplayBufferSamples(NamedTuple):
+    observations: th.Tensor       # RGB anchor crop  (B, C, image_size, image_size)
+    depths: th.Tensor             # depth crop, used as the CURL positive
+    poses: th.Tensor              # proprioceptive pose vector
+    actions: th.Tensor
+    next_observations: th.Tensor  # next RGB crop
+    next_poses: th.Tensor
+    dones: th.Tensor
+    rewards: th.Tensor
+    weights: th.Tensor            # PER importance-sampling weights (B, 1)
+    indices: np.ndarray           # sampled buffer indices (for update_priorities)
+
+
+class PrioritizedReplayBuffer(BaseBuffer):
+    """
+    Multimodal Prioritized Experience Replay buffer for CURL-style pixel agents.
+
+    Stores a multimodal observation made of an RGB image, a depth image and a
+    proprioceptive pose vector. Sampling follows Prioritized Experience Replay
+    (Schaul et al., 2015): transitions are drawn proportionally to ``p**alpha``
+    and corrected with importance-sampling weights whose exponent ``beta`` is
+    linearly annealed to 1. Image modalities are random-cropped at sampling
+    time to produce the contrastive views used by CURL: the RGB crop is the
+    anchor and the depth crop is the positive.
+
+    The observation space must be a ``gymnasium.spaces.Dict`` with keys
+    ``"rgb"``, ``"depth"`` and ``"pose"`` (``rgb`` and ``depth`` sharing the
+    same channel layout so they can be encoded by the same network). Only a
+    single environment is supported (``n_envs == 1``), matching the
+    pixel-control setting of the original implementation.
+
+    :param buffer_size: Max number of transitions to store
+    :param observation_space: Dict observation space (rgb, depth, pose)
+    :param action_space: Action space
+    :param device: PyTorch device
+    :param image_size: Side length of the random crop fed to the networks
+    :param alpha: Prioritization exponent (0 = uniform)
+    :param beta_start: Initial importance-sampling exponent
+    :param beta_frames: Number of samples over which beta is annealed to 1
+    :param n_envs: Number of parallel environments (must be 1)
+    """
+
+    def __init__(
+        self,
+        buffer_size: int,
+        observation_space: spaces.Dict,
+        action_space: spaces.Space,
+        device: th.device | str = "auto",
+        image_size: int = 84,
+        alpha: float = 0.6,
+        beta_start: float = 0.4,
+        beta_frames: int = 100000,
+        n_envs: int = 1,
+    ):
+        assert isinstance(observation_space, spaces.Dict), (
+            "PrioritizedReplayBuffer expects a Dict observation space with keys "
+            "'rgb', 'depth' and 'pose'."
+        )
+        assert n_envs == 1, "PrioritizedReplayBuffer only supports a single environment."
+        super().__init__(buffer_size, observation_space, action_space, device, n_envs=n_envs)
+
+        self.image_size = image_size
+        self.alpha = alpha
+        self.beta_start = beta_start
+        self.beta_frames = beta_frames
+        self.frame = 1  # for the beta annealing schedule
+
+        # self.obs_shape is a dict (see get_obs_shape for Dict spaces)
+        self.rgb_shape = self.obs_shape["rgb"]
+        self.depth_shape = self.obs_shape["depth"]
+        self.pose_shape = self.obs_shape["pose"]
+
+        rgb_dtype = observation_space["rgb"].dtype
+        depth_dtype = observation_space["depth"].dtype
+
+        self.observations = np.zeros((self.buffer_size, *self.rgb_shape), dtype=rgb_dtype)
+        self.depths = np.zeros((self.buffer_size, *self.depth_shape), dtype=depth_dtype)
+        self.next_observations = np.zeros((self.buffer_size, *self.rgb_shape), dtype=rgb_dtype)
+        self.poses = np.zeros((self.buffer_size, *self.pose_shape), dtype=np.float32)
+        self.next_poses = np.zeros((self.buffer_size, *self.pose_shape), dtype=np.float32)
+        self.actions = np.zeros((self.buffer_size, self.action_dim), dtype=np.float32)
+        self.rewards = np.zeros((self.buffer_size, 1), dtype=np.float32)
+        self.dones = np.zeros((self.buffer_size, 1), dtype=np.float32)
+        self.priorities = np.zeros((self.buffer_size,), dtype=np.float32)
+
+    @staticmethod
+    def _to_numpy(value) -> np.ndarray:
+        if isinstance(value, th.Tensor):
+            return value.detach().cpu().numpy()
+        return np.asarray(value)
+
+    def beta_by_frame(self, frame_idx: int) -> float:
+        """Linearly anneal beta from ``beta_start`` to 1 over ``beta_frames``.
+
+        See PER paper, 3.4 "Annealing the bias": the importance-sampling
+        correction is annealed over time, reaching 1 only at the end of training.
+        """
+        return min(1.0, self.beta_start + frame_idx * (1.0 - self.beta_start) / self.beta_frames)
+
+    def add(self, obs, depth, pose, action, reward, next_obs, next_pose, done) -> None:
+        # new transitions get the current maximum priority so they are replayed
+        max_prio = self.priorities.max() if (self.full or self.pos > 0) else 1.0
+
+        np.copyto(self.observations[self.pos], self._to_numpy(obs))
+        np.copyto(self.depths[self.pos], self._to_numpy(depth))
+        np.copyto(self.poses[self.pos], self._to_numpy(pose))
+        np.copyto(self.actions[self.pos], self._to_numpy(action))
+        np.copyto(self.rewards[self.pos], self._to_numpy(reward))
+        np.copyto(self.next_observations[self.pos], self._to_numpy(next_obs))
+        np.copyto(self.next_poses[self.pos], self._to_numpy(next_pose))
+        np.copyto(self.dones[self.pos], self._to_numpy(done))
+
+        self.priorities[self.pos] = max_prio
+        self.pos = (self.pos + 1) % self.buffer_size
+        self.full = self.full or self.pos == 0
+
+    def sample(self, batch_size: int) -> PrioritizedReplayBufferSamples:
+        upper_bound = self.buffer_size if self.full else self.pos
+
+        # P(i) = p_i**alpha / sum_k p_k**alpha
+        prios = self.priorities[:upper_bound]
+        probs = prios ** self.alpha
+        probs = probs / probs.sum()
+
+        indices = np.random.choice(upper_bound, batch_size, p=probs)
+
+        # importance-sampling weights w_i = (N * P(i))**(-beta), normalized
+        beta = self.beta_by_frame(self.frame)
+        self.frame += 1
+        weights = (upper_bound * probs[indices]) ** (-beta)
+        weights = weights / weights.max()
+        weights = np.array(weights, dtype=np.float32).reshape(-1, 1)
+
+        return self._get_samples(indices, weights)
+
+    def _get_samples(self, batch_inds: np.ndarray, weights: np.ndarray) -> PrioritizedReplayBufferSamples:
+        # random-crop the image modalities to build the CURL anchor / positive
+        obs = random_crop(self.observations[batch_inds], self.image_size)
+        depth = random_crop(self.depths[batch_inds], self.image_size)
+        next_obs = random_crop(self.next_observations[batch_inds], self.image_size)
+
+        return PrioritizedReplayBufferSamples(
+            observations=self.to_torch(obs).float(),
+            depths=self.to_torch(depth).float(),
+            poses=self.to_torch(self.poses[batch_inds]),
+            actions=self.to_torch(self.actions[batch_inds]),
+            next_observations=self.to_torch(next_obs).float(),
+            next_poses=self.to_torch(self.next_poses[batch_inds]),
+            dones=self.to_torch(self.dones[batch_inds]),
+            rewards=self.to_torch(self.rewards[batch_inds]),
+            weights=self.to_torch(weights),
+            indices=batch_inds,
+        )
+
+    def update_priorities(self, batch_indices: np.ndarray, batch_priorities: np.ndarray) -> None:
+        for idx, prio in zip(batch_indices, batch_priorities):
+            self.priorities[idx] = abs(prio)
