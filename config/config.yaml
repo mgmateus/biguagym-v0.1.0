@@ -5,7 +5,7 @@ defaults:
 
 # --- run control ---
 mode: train
-runs: 1
+runs: 3
 seed: 0
 tensorboard: false
 curves_path: ''
@@ -14,7 +14,7 @@ logs_path: ''
 # --- training schedule ---
 num_train_steps: 1000000
 num_eval_episodes: 5
-eval_freq: 10000
+eval_freq: 100000
 # first step at which the agent may update (off-policy warmup; 0 for PPO)
 init_steps: ${agent.learning_starts}
 
