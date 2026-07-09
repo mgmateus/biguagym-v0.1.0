@@ -2,6 +2,7 @@ import gc
 import time
 
 import torch
+import gymnasium as gym
 import numpy as np
 
 from src.agents.runner import make_runner
@@ -16,15 +17,17 @@ class Workspace:
     ``act / store / ready / update`` interface so this loop stays agent-agnostic.
     """
 
-    def __init__(self, cfg, env, eval_env, action_shape, logger, device):
+    def __init__(self, cfg, env, action_shape, logger, device):
         self.obs_type = cfg.env.obs_params.get('anchor', cfg.env.obs_params.type)
         self.init_steps = cfg.init_steps
         self.num_eval_episodes = cfg.num_eval_episodes
         self.num_train_steps = cfg.num_train_steps
         self.eval_freq = cfg.eval_freq
+        self.eval_env = cfg.env.name
+        self.seed = cfg.seed
         self.logger = logger
         self.env = env
-        self.eval_env = eval_env
+        
         self.device = device
         self.action_shape = action_shape
 
@@ -34,6 +37,13 @@ class Workspace:
         self.episode = 0
 
         self.agent = self._build_agent(cfg)
+
+    def _build_eval_env(self):
+        eval_env = gym.make(self.eval_env, render_mode="rgb_array")
+        eval_env.reset(seed=self.seed)
+        eval_env.action_space.seed(self.seed)
+
+        return eval_env
 
     # ------------------------------------------------------------------
     # Agent construction
@@ -77,15 +87,15 @@ class Workspace:
 
     def evaluate(self, max_average, step, record_path: str = None) -> tuple:
         from utils import eval_mode as _eval_mode
-
+        eval_env = self._build_eval_env()
         all_ep_rewards = []
         start = time.time()
         
         steps = 0
         for episode_num in range(self.num_eval_episodes):
-            self.eval_env.unwrapped.start_recording(f"{self.logger.eval_dir}/eval_{episode_num}.mp4")
+            eval_env.unwrapped.start_recording(f"{self.logger.eval_dir}/eval_{episode_num}.mp4")
 
-            obs = self._reset_env(self.eval_env)
+            obs = self._reset_env(eval_env)
             episode_reward = 0
             episode_over = False
 
@@ -95,18 +105,19 @@ class Workspace:
                         action = self._select_action(obs, step, eval_mode=True)
 
                 with self.logger.eval_profiler.record("env_step"):
-                    obs, reward_scalar, episode_over, truncated = self._step_env(self.eval_env, action)
+                    obs, reward_scalar, episode_over, truncated = self._step_env(eval_env, action)
 
-                self.eval_env.unwrapped.render()
+                eval_env.unwrapped.render()
                 episode_over = episode_over or truncated
                 episode_reward += reward_scalar
                 steps += 1
 
             steps = 0
 
-            self.eval_env.unwrapped.stop_recording()
+            eval_env.unwrapped.stop_recording()
             all_ep_rewards.append(episode_reward)
 
+        eval_env.close()
         mean_ep_reward = float(np.mean(all_ep_rewards))
         best_id = int(np.argmax(all_ep_rewards))
         best_ep_reward = all_ep_rewards[best_id]

@@ -156,19 +156,12 @@ class Experiment:
             env.reset(seed=idx)
             env.action_space.seed(idx)
 
-            # ``render_mode="rgb_array"`` so RecordVideo can capture eval frames.
-            eval_env = gym.make(cfg.env.name, 
-                                render_mode="rgb_array"
-                                )
-            eval_env.reset(seed=idx)
-            eval_env.action_space.seed(idx)
-
             cfg.seed = idx
 
             logs_path = make_log_dir(cfg.env.name,
                                      cfg.agent.name,
                                      cfg.env.obs_params.type,
-                                     run=idx,
+                                     run=cfg.seed,
                                      base_path=cfg.logs_path or None)
 
             logger = Logger(cfg, logs_path, self.curves_path,
@@ -176,7 +169,7 @@ class Experiment:
             # recorder = GymRecorder(eval_env, logger.eval_dir)
 
             workspace = Workspace(
-                cfg, env, eval_env, env.action_space.shape,
+                cfg, env, env.action_space.shape,
                 logger, self.device,
             )
 
