@@ -4,6 +4,7 @@ logs/
 build/
 .claude/
 .vscode/
+multirun/
 
 *log
 *.egg-info

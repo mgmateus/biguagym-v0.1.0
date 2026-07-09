@@ -24,20 +24,6 @@ def eval_mode(*models):
                 m.train(state)
 
 
-class NullRecorder:
-    """No-op video recorder (placeholder for the eval-rollout capture API).
-
-    ``Workspace.evaluate`` calls ``record(env, path)`` / ``stop(env)``; real video
-    capture can replace this later without touching the train loop.
-    """
-
-    def record(self, env=None, path=None, **kwargs):
-        pass
-
-    def stop(self, env=None, **kwargs):
-        pass
-
-
 def gpu():
     try:
         result = subprocess.run(

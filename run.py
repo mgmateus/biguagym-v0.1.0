@@ -19,13 +19,14 @@ import hydra.core.global_hydra
 import subprocess
 import torch
 import gymnasium as gym
+from gymnasium.wrappers import RecordVideo
 from omegaconf import OmegaConf
 
 from config.config import Run
 from logger import Logger, seed_curves, make_log_dir
-from utils import gpu, get_dir, NullRecorder
+from utils import gpu, get_dir
 
-from __init__ import Workspace
+from workspace import Workspace
 
 torch.backends.cudnn.benchmark = True
 
@@ -33,9 +34,26 @@ torch.backends.cudnn.benchmark = True
 # biguagym/register.py declares env ids with bare ``core.environments:...``
 # entry points, so the package dir must be importable as a top-level path.
 _BIGUAGYM_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'biguagym')
-if _BIGUAGYM_DIR not in sys.path:
-    sys.path.insert(0, _BIGUAGYM_DIR)
-import register  # noqa: E402,F401  (registers biguagym env ids on import)
+
+
+def _register_biguagym_envs():
+    """Put biguagym on the path and import ``register`` to declare env ids.
+
+    Called both at module import (single run / direct ``python run.py``) and at
+    the top of ``main()``. Under the joblib/loky multirun launcher each job runs
+    in a fresh worker process that does *not* re-execute this module's top-level
+    code before the task runs, so the gym registry would be empty there and
+    ``gym.make`` raises NameNotFound. Importing ``register`` from inside
+    ``main()`` guarantees registration happens in every worker. The ``import``
+    is cached in ``sys.modules``, so repeated calls in one process are no-ops
+    and the ``gym.register`` calls fire exactly once per process.
+    """
+    if _BIGUAGYM_DIR not in sys.path:
+        sys.path.insert(0, _BIGUAGYM_DIR)
+    import register  # noqa: F401  (registers biguagym env ids on import)
+
+
+_register_biguagym_envs()
 
 
 def _obs_type_from_id(env_id: str) -> list:
@@ -77,6 +95,46 @@ def _resolve_env(cfg):
     return cfg
 
 
+class GymRecorder:
+    """Eval-rollout video recorder backed by ``gymnasium.wrappers.RecordVideo``.
+
+    Wraps the eval env once and exposes the same ``record(env, path)`` /
+    ``stop(env)`` hooks the train loop calls (see ``Workspace.evaluate``).
+    Recording is driven manually rather than via RecordVideo's episode/step
+    triggers: ``record`` opens a clip whose filename is taken from ``path`` (so
+    the existing ``eval_<n>.mp4`` naming under ``video_folder`` is preserved) and
+    ``stop`` flushes it. RecordVideo grabs each frame by calling the biguagym
+    env's ``render()``, which returns the latest ``rgb_array`` frame, so the env
+    must be built with ``render_mode="rgb_array"``; otherwise this is a no-op.
+    """
+
+    def __init__(self, env, video_folder, fps: int = 20):
+        self.enabled = getattr(env, 'render_mode', None) == 'rgb_array'
+        if self.enabled:
+            self.env = RecordVideo(
+                env,
+                video_folder=video_folder,
+                episode_trigger=lambda episode_id: False,  # recording is triggered manually
+                name_prefix='eval',
+                fps=fps,
+                disable_logger=True,
+            )
+        else:
+            self.env = env
+
+    def record(self, env=None, path=None, **kwargs):
+        if not self.enabled or path is None:
+            return
+        # RecordVideo saves to ``{video_folder}/{video_name}.mp4``; derive the
+        # name from the requested path so the final file lands exactly there.
+        video_name = os.path.splitext(os.path.basename(path))[0]
+        self.env.start_recording(video_name)
+
+    def stop(self, env=None, **kwargs):
+        if self.enabled and self.env.recording:
+            self.env.stop_recording()
+
+
 class Experiment:
     def __init__(self, cfg):
         cfg = _resolve_env(cfg)
@@ -92,16 +150,18 @@ class Experiment:
         self.__getattribute__(cfg.mode)(cfg)
 
     def train(self, cfg):
-        env_kwargs = OmegaConf.to_container(cfg.env.kwargs, resolve=True) if cfg.env.get('kwargs') else {}
-
+ 
         for idx in range(self.seed, cfg.runs):
-            env = gym.make(cfg.env.name, **env_kwargs)
+            env = gym.make(cfg.env.name)
             env.reset(seed=idx)
             env.action_space.seed(idx)
 
-            eval_env = gym.make(cfg.env.name, **env_kwargs)
-            eval_env.reset(seed=idx + 10_000)
-            eval_env.action_space.seed(idx + 10_000)
+            # ``render_mode="rgb_array"`` so RecordVideo can capture eval frames.
+            eval_env = gym.make(cfg.env.name, 
+                                render_mode="rgb_array"
+                                )
+            eval_env.reset(seed=idx)
+            eval_env.action_space.seed(idx)
 
             cfg.seed = idx
 
@@ -113,10 +173,11 @@ class Experiment:
 
             logger = Logger(cfg, logs_path, self.curves_path,
                             env.action_space, cfg.tensorboard)
+            # recorder = GymRecorder(eval_env, logger.eval_dir)
 
             workspace = Workspace(
                 cfg, env, eval_env, env.action_space.shape,
-                logger, NullRecorder(), self.device,
+                logger, self.device,
             )
 
             workspace.train()
@@ -134,6 +195,7 @@ def is_tensorboard_alive(url="http://localhost:6006"):
 
 @hydra.main(version_base=None, config_path='config', config_name="config")
 def main(cfg: Run) -> None:
+    _register_biguagym_envs()  # ensure env ids exist in this (possibly worker) process
     if cfg.tensorboard and not is_tensorboard_alive():
         subprocess.Popen(["tensorboard", f"--logdir={get_dir(__file__)}/logs"])
 

@@ -16,14 +16,13 @@ class Workspace:
     ``act / store / ready / update`` interface so this loop stays agent-agnostic.
     """
 
-    def __init__(self, cfg, env, eval_env, action_shape, logger, recorder, device):
+    def __init__(self, cfg, env, eval_env, action_shape, logger, device):
         self.obs_type = cfg.env.obs_params.get('anchor', cfg.env.obs_params.type)
         self.init_steps = cfg.init_steps
         self.num_eval_episodes = cfg.num_eval_episodes
         self.num_train_steps = cfg.num_train_steps
         self.eval_freq = cfg.eval_freq
         self.logger = logger
-        self.recorder = recorder
         self.env = env
         self.eval_env = eval_env
         self.device = device
@@ -81,16 +80,14 @@ class Workspace:
 
         all_ep_rewards = []
         start = time.time()
-
+        
+        steps = 0
         for episode_num in range(self.num_eval_episodes):
+            self.eval_env.unwrapped.start_recording(f"{self.logger.eval_dir}/eval_{episode_num}.mp4")
+
             obs = self._reset_env(self.eval_env)
             episode_reward = 0
             episode_over = False
-
-            self.recorder.record(
-                env=self.eval_env,
-                path=f"{self.logger.eval_dir}/eval_{episode_num}.mp4"
-            )
 
             while not episode_over:
                 with torch.no_grad(), _eval_mode(self.agent):
@@ -99,10 +96,15 @@ class Workspace:
 
                 with self.logger.eval_profiler.record("env_step"):
                     obs, reward_scalar, episode_over, truncated = self._step_env(self.eval_env, action)
+
+                self.eval_env.unwrapped.render()
                 episode_over = episode_over or truncated
                 episode_reward += reward_scalar
+                steps += 1
 
-            self.recorder.stop(env=self.eval_env)
+            steps = 0
+
+            self.eval_env.unwrapped.stop_recording()
             all_ep_rewards.append(episode_reward)
 
         mean_ep_reward = float(np.mean(all_ep_rewards))
