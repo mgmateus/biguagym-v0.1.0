@@ -1,0 +1,140 @@
+{
+  "env": "BlueROV2TrajectoryFollower-v0",
+  "status": "ok",
+  "steps_requested": 200,
+  "seed": 0,
+  "date": "2026-09-28 18:29:26",
+  "vram_before_mb": 492,
+  "sim_procs_before": 0,
+  "show_viewer": true,
+  "make_s": 7.74,
+  "sim_pid": 54552,
+  "vram_after_make_mb": 2454,
+  "env_class": "TrajectoryEnv",
+  "agent_type": "BlueROV2",
+  "max_episode_steps": 600,
+  "observation_space": {
+    "type": "Box",
+    "shape": [
+      39
+    ],
+    "dtype": "float32",
+    "low": [
+      -Infinity
+    ],
+    "high": [
+      Infinity
+    ]
+  },
+  "action_space": {
+    "type": "Box",
+    "shape": [
+      6
+    ],
+    "dtype": "float32",
+    "low": [
+      -278.8999938964844
+    ],
+    "high": [
+      278.8999938964844
+    ]
+  },
+  "obs_dim": "39",
+  "act_dim": "6",
+  "observation_type": [
+    "DynamicsSensor"
+  ],
+  "sensors_config": [
+    {
+      "name": "DynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "RPYDynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "CameraView",
+      "type": "RGBCamera",
+      "res": [
+        1280,
+        720
+      ]
+    }
+  ],
+  "ticks_per_sec": 20,
+  "frames_per_sec": 20,
+  "reset_s": 2.29,
+  "sensors_state": {
+    "DynamicsSensor": {
+      "shape": [
+        19
+      ],
+      "dtype": "float32"
+    },
+    "RPYDynamicsSensor": {
+      "shape": [
+        18
+      ],
+      "dtype": "float32"
+    },
+    "CameraView": {
+      "shape": [
+        720,
+        1280,
+        4
+      ],
+      "dtype": "uint8"
+    }
+  },
+  "pos_initial": [
+    100.0,
+    100.0,
+    -0.2
+  ],
+  "target": null,
+  "steps_done": 200,
+  "steps_per_s": 19.82,
+  "steps_per_s_wall": 10.53,
+  "step_ms_mean": 50.45,
+  "step_ms_p95": 58.19,
+  "step_ms_max": 143.63,
+  "hours_per_100k": 2.64,
+  "episodes": 5,
+  "terminated": 4,
+  "truncated": 0,
+  "episode_lengths": [
+    69,
+    29,
+    17,
+    75,
+    10
+  ],
+  "obs_nan_steps": 0,
+  "obs_inf_steps": 0,
+  "reward_nan": 0,
+  "reward_inf": 0,
+  "reward_min": 1.1676350137671692,
+  "reward_max": 2.4651009608923675,
+  "reward_mean": 2.1826328365331507,
+  "obs_in_space": true,
+  "obs_not_in_space_steps": 0,
+  "obs_not_in_space_first": null,
+  "pos_final": [
+    99.973,
+    99.976,
+    -0.166
+  ],
+  "last_info": {
+    "waypoint_index": 0,
+    "progress": 0.0,
+    "cross_track_error": 0.034219462995320075,
+    "reached_end": false,
+    "reached_goals": 0
+  },
+  "vram_end_mb": 2447,
+  "sim_alive_after_env_close": true,
+  "sim_alive_after_on_exit": false,
+  "sim_procs_after": 0,
+  "vram_after_close_mb": 659
+}

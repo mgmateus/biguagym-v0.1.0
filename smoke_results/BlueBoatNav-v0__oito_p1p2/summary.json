@@ -1,0 +1,4601 @@
+{
+  "env": "BlueBoatNav-v0",
+  "status": "ok",
+  "steps_requested": 1080,
+  "seed": 0,
+  "date": "2026-09-28 19:06:03",
+  "vram_before_mb": 492,
+  "sim_procs_before": 0,
+  "show_viewer": true,
+  "control": "cmd_pos_yaw",
+  "program": "oito00@10:102.35,100.79,0,0;oito01@10:102.41,100.65,0,0;oito02@10:102.45,100.51,0,0;oito03@10:102.47,100.36,0,0;oito04@10:102.49,100.21,0,0;oito05@10:102.50,100.06,0,0;oito06@10:102.50,99.91,0,0;oito07@10:102.49,99.76,0,0;oito08@10:102.47,99.61,0,0;oito09@10:102.44,99.46,0,0;oito10@10:102.40,99.32,0,0;oito11@10:102.34,99.18,0,0;oito12@10:102.27,99.05,0,0;oito13@10:102.18,98.93,0,0;oito14@10:102.06,98.84,0,0;oito15@10:101.93,98.77,0,0;oito16@10:101.78,98.75,0,0;oito17@10:101.63,98.76,0,0;oito18@10:101.49,98.81,0,0;oito19@10:101.35,98.86,0,0;oito20@10:101.22,98.94,0,0;oito21@10:101.09,99.02,0,0;oito22@10:100.97,99.11,0,0;oito23@10:100.85,99.20,0,0;oito24@10:100.74,99.30,0,0;oito25@10:100.63,99.39,0,0;oito26@10:100.51,99.50,0,0;oito27@10:100.41,99.60,0,0;oito28@10:100.30,99.70,0,0;oito29@10:100.19,99.81,0,0;oito30@10:100.09,99.91,0,0;oito31@10:99.98,100.02,0,0;oito32@10:99.87,100.13,0,0;oito33@10:99.77,100.23,0,0;oito34@10:99.66,100.34,0,0;oito35@10:99.55,100.44,0,0;oito36@10:99.44,100.54,0,0;oito37@10:99.33,100.64,0,0;oito38@10:99.22,100.74,0,0;oito39@10:99.10,100.84,0,0;oito40@10:98.98,100.93,0,0;oito41@10:98.86,101.02,0,0;oito42@10:98.73,101.09,0,0;oito43@10:98.60,101.16,0,0;oito44@10:98.46,101.21,0,0;oito45@10:98.31,101.24,0,0;oito46@10:98.16,101.25,0,0;oito47@10:98.02,101.21,0,0;oito48@10:97.89,101.13,0,0;oito49@10:97.78,101.02,0,0;oito50@10:97.70,100.90,0,0;oito51@10:97.63,100.76,0,0;oito52@10:97.58,100.62,0,0;oito53@10:97.55,100.48,0,0;oito54@10:97.52,100.33,0,0;oito55@10:97.51,100.18,0,0;oito56@10:97.50,100.03,0,0;oito57@10:97.50,99.88,0,0;oito58@10:97.51,99.73,0,0;oito59@10:97.54,99.58,0,0;oito60@10:97.57,99.44,0,0;oito61@10:97.61,99.29,0,0;oito62@10:97.67,99.15,0,0;oito63@10:97.75,99.03,0,0;oito64@10:97.84,98.91,0,0;oito65@10:97.96,98.82,0,0;oito66@10:98.10,98.77,0,0;oito67@10:98.25,98.75,0,0;oito68@10:98.40,98.77,0,0;oito69@10:98.54,98.82,0,0;oito70@10:98.68,98.88,0,0;oito71@10:98.81,98.95,0,0;oito72@10:98.93,99.03,0,0;oito73@10:99.05,99.12,0,0;oito74@10:99.17,99.22,0,0;oito75@10:99.28,99.31,0,0;oito76@10:99.40,99.41,0,0;oito77@10:99.51,99.52,0,0;oito78@10:99.62,99.62,0,0;oito79@10:99.72,99.72,0,0;oito80@10:99.83,99.83,0,0;oito81@10:99.94,99.94,0,0;oito82@10:100.09,100.09,0,0;oito83@10:100.20,100.20,0,0;oito84@10:100.31,100.31,0,0;oito85@10:100.42,100.41,0,0;oito86@10:100.52,100.51,0,0;oito87@10:100.64,100.61,0,0;oito88@10:100.75,100.71,0,0;oito89@10:100.86,100.81,0,0;oito90@10:100.98,100.90,0,0;oito91@10:101.10,100.99,0,0;oito92@10:101.23,101.07,0,0;oito93@10:101.36,101.14,0,0;oito94@10:101.50,101.20,0,0;oito95@10:101.64,101.24,0,0;oito96@10:101.79,101.25,0,0;oito97@10:101.94,101.22,0,0;oito98@10:102.07,101.16,0,0;oito99@10:102.19,101.06,0,0;oito100@10:102.28,100.94,0,0;oito101@10:102.35,100.81,0,0;oito102@10:102.40,100.67,0,0;oito103@10:102.44,100.52,0,0;oito104@10:102.47,100.38,0,0;oito105@10:102.49,100.23,0,0;oito106@10:102.50,100.08,0,0;oito107@10:102.50,99.93,0,0",
+  "no_reset": true,
+  "make_s": 7.7,
+  "sim_pid": 63943,
+  "vram_after_make_mb": 2284,
+  "env_class": "NavEnv",
+  "agent_type": "BlueBoat",
+  "max_episode_steps": 400,
+  "observation_space": {
+    "type": "Box",
+    "shape": [
+      19
+    ],
+    "dtype": "float32",
+    "low": [
+      -Infinity
+    ],
+    "high": [
+      Infinity
+    ]
+  },
+  "action_space": {
+    "type": "Box",
+    "shape": [
+      3
+    ],
+    "dtype": "float32",
+    "low": [
+      -10.0
+    ],
+    "high": [
+      10.0
+    ]
+  },
+  "obs_dim": "19",
+  "act_dim": "3",
+  "observation_type": [
+    "DynamicsSensor"
+  ],
+  "sensors_config": [
+    {
+      "name": "DynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "RPYDynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "CameraView",
+      "type": "RGBCamera",
+      "res": [
+        1280,
+        720
+      ]
+    }
+  ],
+  "ticks_per_sec": 20,
+  "frames_per_sec": 20,
+  "reset_s": 2.14,
+  "sensors_state": {
+    "DynamicsSensor": {
+      "shape": [
+        19
+      ],
+      "dtype": "float32"
+    },
+    "RPYDynamicsSensor": {
+      "shape": [
+        18
+      ],
+      "dtype": "float32"
+    },
+    "CameraView": {
+      "shape": [
+        720,
+        1280,
+        4
+      ],
+      "dtype": "uint8"
+    }
+  },
+  "pos_initial": [
+    100.0,
+    100.0,
+    0.0
+  ],
+  "target": [
+    105.479,
+    98.778,
+    -0.056
+  ],
+  "steps_done": 1080,
+  "steps_per_s": 21.16,
+  "steps_per_s_wall": 21.13,
+  "step_ms_mean": 47.26,
+  "step_ms_p95": 64.94,
+  "step_ms_max": 113.7,
+  "hours_per_100k": 1.31,
+  "episodes": 1,
+  "terminated": 0,
+  "truncated": 681,
+  "episode_lengths": [
+    400,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "obs_nan_steps": 0,
+  "obs_inf_steps": 0,
+  "reward_nan": 0,
+  "reward_inf": 0,
+  "reward_min": -0.11594511015533887,
+  "reward_max": 0.03234931290920446,
+  "reward_mean": -0.027172235270990764,
+  "obs_in_space": true,
+  "obs_not_in_space_steps": 0,
+  "obs_not_in_space_first": null,
+  "pos_final": [
+    99.015,
+    101.094,
+    -0.046
+  ],
+  "segments": [
+    {
+      "seg": "oito00",
+      "steps": 10,
+      "action": "102.35 100.79 0 0",
+      "pos_start": [
+        100.0,
+        100.0,
+        0.0
+      ],
+      "pos_end": [
+        100.007,
+        100.0,
+        -0.075
+      ],
+      "dist_xy_m": 0.007,
+      "path_xy_m": 0.007,
+      "dz_m": -0.075,
+      "z_min_max": [
+        -0.075,
+        0.0
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        0.2
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.015,
+      "speed_xy_max": 0.03,
+      "speed_xy_cv": 0.675,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito01",
+      "steps": 10,
+      "action": "102.41 100.65 0 0",
+      "pos_start": [
+        100.009,
+        100.0,
+        -0.087
+      ],
+      "pos_end": [
+        100.031,
+        100.0,
+        -0.14
+      ],
+      "dist_xy_m": 0.022,
+      "path_xy_m": 0.024,
+      "dz_m": -0.053,
+      "z_min_max": [
+        -0.141,
+        -0.087
+      ],
+      "yaw_start_end_deg": [
+        0.3,
+        0.8
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.048,
+      "speed_xy_max": 0.061,
+      "speed_xy_cv": 0.181,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito02",
+      "steps": 10,
+      "action": "102.45 100.51 0 0",
+      "pos_start": [
+        100.034,
+        100.0,
+        -0.137
+      ],
+      "pos_end": [
+        100.068,
+        100.001,
+        -0.054
+      ],
+      "dist_xy_m": 0.034,
+      "path_xy_m": 0.037,
+      "dz_m": 0.083,
+      "z_min_max": [
+        -0.137,
+        -0.054
+      ],
+      "yaw_start_end_deg": [
+        0.9,
+        1.6
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.074,
+      "speed_xy_max": 0.085,
+      "speed_xy_cv": 0.093,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito03",
+      "steps": 10,
+      "action": "102.47 100.36 0 0",
+      "pos_start": [
+        100.073,
+        100.001,
+        -0.045
+      ],
+      "pos_end": [
+        100.116,
+        100.001,
+        -0.026
+      ],
+      "dist_xy_m": 0.043,
+      "path_xy_m": 0.048,
+      "dz_m": 0.019,
+      "z_min_max": [
+        -0.045,
+        -0.017
+      ],
+      "yaw_start_end_deg": [
+        1.6,
+        2.3
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.096,
+      "speed_xy_max": 0.103,
+      "speed_xy_cv": 0.055,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito04",
+      "steps": 10,
+      "action": "102.49 100.21 0 0",
+      "pos_start": [
+        100.121,
+        100.002,
+        -0.032
+      ],
+      "pos_end": [
+        100.172,
+        100.003,
+        -0.113
+      ],
+      "dist_xy_m": 0.05,
+      "path_xy_m": 0.056,
+      "dz_m": -0.081,
+      "z_min_max": [
+        -0.113,
+        -0.032
+      ],
+      "yaw_start_end_deg": [
+        2.4,
+        3.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.111,
+      "speed_xy_max": 0.117,
+      "speed_xy_cv": 0.035,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito05",
+      "steps": 10,
+      "action": "102.5 100.06 0 0",
+      "pos_start": [
+        100.178,
+        100.003,
+        -0.119
+      ],
+      "pos_end": [
+        100.233,
+        100.005,
+        -0.108
+      ],
+      "dist_xy_m": 0.056,
+      "path_xy_m": 0.062,
+      "dz_m": 0.011,
+      "z_min_max": [
+        -0.13,
+        -0.108
+      ],
+      "yaw_start_end_deg": [
+        3.0,
+        3.4
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.123,
+      "speed_xy_max": 0.127,
+      "speed_xy_cv": 0.023,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito06",
+      "steps": 10,
+      "action": "102.5 99.91 0 0",
+      "pos_start": [
+        100.24,
+        100.005,
+        -0.1
+      ],
+      "pos_end": [
+        100.299,
+        100.008,
+        -0.03
+      ],
+      "dist_xy_m": 0.059,
+      "path_xy_m": 0.066,
+      "dz_m": 0.07,
+      "z_min_max": [
+        -0.1,
+        -0.03
+      ],
+      "yaw_start_end_deg": [
+        3.4,
+        3.6
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.131,
+      "speed_xy_max": 0.134,
+      "speed_xy_cv": 0.015,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito07",
+      "steps": 10,
+      "action": "102.49 99.76 0 0",
+      "pos_start": [
+        100.306,
+        100.008,
+        -0.027
+      ],
+      "pos_end": [
+        100.367,
+        100.011,
+        -0.062
+      ],
+      "dist_xy_m": 0.062,
+      "path_xy_m": 0.068,
+      "dz_m": -0.035,
+      "z_min_max": [
+        -0.062,
+        -0.025
+      ],
+      "yaw_start_end_deg": [
+        3.6,
+        3.5
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.137,
+      "speed_xy_max": 0.138,
+      "speed_xy_cv": 0.009,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito08",
+      "steps": 10,
+      "action": "102.47 99.61 0 0",
+      "pos_start": [
+        100.374,
+        100.011,
+        -0.07
+      ],
+      "pos_end": [
+        100.437,
+        100.014,
+        -0.123
+      ],
+      "dist_xy_m": 0.063,
+      "path_xy_m": 0.07,
+      "dz_m": -0.053,
+      "z_min_max": [
+        -0.123,
+        -0.07
+      ],
+      "yaw_start_end_deg": [
+        3.5,
+        3.1
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.14,
+      "speed_xy_max": 0.141,
+      "speed_xy_cv": 0.005,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito09",
+      "steps": 10,
+      "action": "102.44 99.46 0 0",
+      "pos_start": [
+        100.444,
+        100.015,
+        -0.123
+      ],
+      "pos_end": [
+        100.508,
+        100.017,
+        -0.072
+      ],
+      "dist_xy_m": 0.064,
+      "path_xy_m": 0.071,
+      "dz_m": 0.052,
+      "z_min_max": [
+        -0.123,
+        -0.072
+      ],
+      "yaw_start_end_deg": [
+        3.1,
+        2.4
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.141,
+      "speed_xy_max": 0.142,
+      "speed_xy_cv": 0.002,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito10",
+      "steps": 10,
+      "action": "102.4 99.32 0 0",
+      "pos_start": [
+        100.515,
+        100.018,
+        -0.064
+      ],
+      "pos_end": [
+        100.578,
+        100.021,
+        -0.032
+      ],
+      "dist_xy_m": 0.064,
+      "path_xy_m": 0.071,
+      "dz_m": 0.032,
+      "z_min_max": [
+        -0.064,
+        -0.03
+      ],
+      "yaw_start_end_deg": [
+        2.4,
+        1.4
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.142,
+      "speed_xy_max": 0.142,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito11",
+      "steps": 10,
+      "action": "102.34 99.18 0 0",
+      "pos_start": [
+        100.585,
+        100.021,
+        -0.034
+      ],
+      "pos_end": [
+        100.649,
+        100.023,
+        -0.095
+      ],
+      "dist_xy_m": 0.063,
+      "path_xy_m": 0.071,
+      "dz_m": -0.061,
+      "z_min_max": [
+        -0.095,
+        -0.034
+      ],
+      "yaw_start_end_deg": [
+        1.3,
+        0.1
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.141,
+      "speed_xy_max": 0.141,
+      "speed_xy_cv": 0.002,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito12",
+      "steps": 10,
+      "action": "102.27 99.05 0 0",
+      "pos_start": [
+        100.656,
+        100.023,
+        -0.102
+      ],
+      "pos_end": [
+        100.719,
+        100.025,
+        -0.111
+      ],
+      "dist_xy_m": 0.063,
+      "path_xy_m": 0.07,
+      "dz_m": -0.009,
+      "z_min_max": [
+        -0.119,
+        -0.102
+      ],
+      "yaw_start_end_deg": [
+        -0.1,
+        -1.6
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.14,
+      "speed_xy_max": 0.14,
+      "speed_xy_cv": 0.003,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito13",
+      "steps": 10,
+      "action": "102.18 98.93 0 0",
+      "pos_start": [
+        100.726,
+        100.025,
+        -0.106
+      ],
+      "pos_end": [
+        100.788,
+        100.026,
+        -0.045
+      ],
+      "dist_xy_m": 0.062,
+      "path_xy_m": 0.069,
+      "dz_m": 0.061,
+      "z_min_max": [
+        -0.106,
+        -0.045
+      ],
+      "yaw_start_end_deg": [
+        -1.8,
+        -3.5
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.138,
+      "speed_xy_max": 0.139,
+      "speed_xy_cv": 0.004,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito14",
+      "steps": 10,
+      "action": "102.06 98.84 0 0",
+      "pos_start": [
+        100.795,
+        100.027,
+        -0.04
+      ],
+      "pos_end": [
+        100.856,
+        100.027,
+        -0.053
+      ],
+      "dist_xy_m": 0.061,
+      "path_xy_m": 0.068,
+      "dz_m": -0.013,
+      "z_min_max": [
+        -0.053,
+        -0.033
+      ],
+      "yaw_start_end_deg": [
+        -3.7,
+        -5.8
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.136,
+      "speed_xy_max": 0.137,
+      "speed_xy_cv": 0.006,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito15",
+      "steps": 10,
+      "action": "101.93 98.77 0 0",
+      "pos_start": [
+        100.862,
+        100.027,
+        -0.059
+      ],
+      "pos_end": [
+        100.922,
+        100.026,
+        -0.114
+      ],
+      "dist_xy_m": 0.06,
+      "path_xy_m": 0.066,
+      "dz_m": -0.055,
+      "z_min_max": [
+        -0.114,
+        -0.059
+      ],
+      "yaw_start_end_deg": [
+        -6.0,
+        -8.4
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.133,
+      "speed_xy_max": 0.134,
+      "speed_xy_cv": 0.007,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito16",
+      "steps": 10,
+      "action": "101.78 98.75 0 0",
+      "pos_start": [
+        100.928,
+        100.025,
+        -0.116
+      ],
+      "pos_end": [
+        100.986,
+        100.023,
+        -0.084
+      ],
+      "dist_xy_m": 0.058,
+      "path_xy_m": 0.065,
+      "dz_m": 0.032,
+      "z_min_max": [
+        -0.117,
+        -0.084
+      ],
+      "yaw_start_end_deg": [
+        -8.7,
+        -11.2
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.129,
+      "speed_xy_max": 0.131,
+      "speed_xy_cv": 0.009,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito17",
+      "steps": 10,
+      "action": "101.63 98.76 0 0",
+      "pos_start": [
+        100.993,
+        100.023,
+        -0.077
+      ],
+      "pos_end": [
+        101.049,
+        100.02,
+        -0.035
+      ],
+      "dist_xy_m": 0.056,
+      "path_xy_m": 0.062,
+      "dz_m": 0.042,
+      "z_min_max": [
+        -0.077,
+        -0.035
+      ],
+      "yaw_start_end_deg": [
+        -11.5,
+        -14.2
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.125,
+      "speed_xy_max": 0.127,
+      "speed_xy_cv": 0.011,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito18",
+      "steps": 10,
+      "action": "101.49 98.81 0 0",
+      "pos_start": [
+        101.055,
+        100.019,
+        -0.036
+      ],
+      "pos_end": [
+        101.109,
+        100.015,
+        -0.082
+      ],
+      "dist_xy_m": 0.054,
+      "path_xy_m": 0.06,
+      "dz_m": -0.046,
+      "z_min_max": [
+        -0.082,
+        -0.036
+      ],
+      "yaw_start_end_deg": [
+        -14.6,
+        -17.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.12,
+      "speed_xy_max": 0.123,
+      "speed_xy_cv": 0.013,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito19",
+      "steps": 10,
+      "action": "101.35 98.86 0 0",
+      "pos_start": [
+        101.115,
+        100.014,
+        -0.089
+      ],
+      "pos_end": [
+        101.166,
+        100.009,
+        -0.113
+      ],
+      "dist_xy_m": 0.052,
+      "path_xy_m": 0.057,
+      "dz_m": -0.024,
+      "z_min_max": [
+        -0.115,
+        -0.089
+      ],
+      "yaw_start_end_deg": [
+        -18.1,
+        -21.4
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.115,
+      "speed_xy_max": 0.117,
+      "speed_xy_cv": 0.013,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito20",
+      "steps": 10,
+      "action": "101.22 98.94 0 0",
+      "pos_start": [
+        101.171,
+        100.008,
+        -0.11
+      ],
+      "pos_end": [
+        101.22,
+        100.002,
+        -0.056
+      ],
+      "dist_xy_m": 0.049,
+      "path_xy_m": 0.055,
+      "dz_m": 0.054,
+      "z_min_max": [
+        -0.11,
+        -0.056
+      ],
+      "yaw_start_end_deg": [
+        -21.7,
+        -25.1
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.11,
+      "speed_xy_max": 0.112,
+      "speed_xy_cv": 0.015,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito21",
+      "steps": 10,
+      "action": "101.09 99.02 0 0",
+      "pos_start": [
+        101.225,
+        100.001,
+        -0.051
+      ],
+      "pos_end": [
+        101.272,
+        99.994,
+        -0.046
+      ],
+      "dist_xy_m": 0.047,
+      "path_xy_m": 0.052,
+      "dz_m": 0.005,
+      "z_min_max": [
+        -0.051,
+        -0.037
+      ],
+      "yaw_start_end_deg": [
+        -25.5,
+        -29.4
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.104,
+      "speed_xy_max": 0.106,
+      "speed_xy_cv": 0.015,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito22",
+      "steps": 10,
+      "action": "100.97 99.11 0 0",
+      "pos_start": [
+        101.277,
+        99.994,
+        -0.051
+      ],
+      "pos_end": [
+        101.32,
+        99.986,
+        -0.105
+      ],
+      "dist_xy_m": 0.044,
+      "path_xy_m": 0.05,
+      "dz_m": -0.054,
+      "z_min_max": [
+        -0.105,
+        -0.051
+      ],
+      "yaw_start_end_deg": [
+        -29.8,
+        -34.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.099,
+      "speed_xy_max": 0.101,
+      "speed_xy_cv": 0.014,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito23",
+      "steps": 10,
+      "action": "100.85 99.2 0 0",
+      "pos_start": [
+        101.325,
+        99.985,
+        -0.109
+      ],
+      "pos_end": [
+        101.367,
+        99.977,
+        -0.094
+      ],
+      "dist_xy_m": 0.042,
+      "path_xy_m": 0.047,
+      "dz_m": 0.015,
+      "z_min_max": [
+        -0.114,
+        -0.094
+      ],
+      "yaw_start_end_deg": [
+        -34.5,
+        -38.9
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.095,
+      "speed_xy_max": 0.096,
+      "speed_xy_cv": 0.012,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito24",
+      "steps": 10,
+      "action": "100.74 99.3 0 0",
+      "pos_start": [
+        101.371,
+        99.976,
+        -0.088
+      ],
+      "pos_end": [
+        101.411,
+        99.967,
+        -0.04
+      ],
+      "dist_xy_m": 0.041,
+      "path_xy_m": 0.046,
+      "dz_m": 0.048,
+      "z_min_max": [
+        -0.088,
+        -0.04
+      ],
+      "yaw_start_end_deg": [
+        -39.4,
+        -44.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.091,
+      "speed_xy_max": 0.092,
+      "speed_xy_cv": 0.01,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito25",
+      "steps": 10,
+      "action": "100.63 99.39 0 0",
+      "pos_start": [
+        101.416,
+        99.966,
+        -0.038
+      ],
+      "pos_end": [
+        101.454,
+        99.956,
+        -0.07
+      ],
+      "dist_xy_m": 0.04,
+      "path_xy_m": 0.044,
+      "dz_m": -0.032,
+      "z_min_max": [
+        -0.07,
+        -0.038
+      ],
+      "yaw_start_end_deg": [
+        -44.6,
+        -49.8
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.088,
+      "speed_xy_max": 0.089,
+      "speed_xy_cv": 0.006,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito26",
+      "steps": 10,
+      "action": "100.51 99.5 0 0",
+      "pos_start": [
+        101.458,
+        99.954,
+        -0.077
+      ],
+      "pos_end": [
+        101.496,
+        99.943,
+        -0.113
+      ],
+      "dist_xy_m": 0.039,
+      "path_xy_m": 0.044,
+      "dz_m": -0.036,
+      "z_min_max": [
+        -0.113,
+        -0.077
+      ],
+      "yaw_start_end_deg": [
+        -50.3,
+        -55.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.087,
+      "speed_xy_max": 0.088,
+      "speed_xy_cv": 0.003,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito27",
+      "steps": 10,
+      "action": "100.41 99.6 0 0",
+      "pos_start": [
+        101.5,
+        99.942,
+        -0.112
+      ],
+      "pos_end": [
+        101.537,
+        99.928,
+        -0.068
+      ],
+      "dist_xy_m": 0.039,
+      "path_xy_m": 0.043,
+      "dz_m": 0.045,
+      "z_min_max": [
+        -0.112,
+        -0.068
+      ],
+      "yaw_start_end_deg": [
+        -56.3,
+        -61.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.087,
+      "speed_xy_max": 0.087,
+      "speed_xy_cv": 0.001,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito28",
+      "steps": 10,
+      "action": "100.3 99.7 0 0",
+      "pos_start": [
+        101.541,
+        99.927,
+        -0.061
+      ],
+      "pos_end": [
+        101.577,
+        99.911,
+        -0.042
+      ],
+      "dist_xy_m": 0.039,
+      "path_xy_m": 0.044,
+      "dz_m": 0.02,
+      "z_min_max": [
+        -0.061,
+        -0.039
+      ],
+      "yaw_start_end_deg": [
+        -62.3,
+        -67.9
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.088,
+      "speed_xy_max": 0.088,
+      "speed_xy_cv": 0.004,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito29",
+      "steps": 10,
+      "action": "100.19 99.81 0 0",
+      "pos_start": [
+        101.581,
+        99.909,
+        -0.045
+      ],
+      "pos_end": [
+        101.617,
+        99.891,
+        -0.096
+      ],
+      "dist_xy_m": 0.04,
+      "path_xy_m": 0.045,
+      "dz_m": -0.051,
+      "z_min_max": [
+        -0.096,
+        -0.045
+      ],
+      "yaw_start_end_deg": [
+        -68.6,
+        -74.5
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.089,
+      "speed_xy_max": 0.09,
+      "speed_xy_cv": 0.006,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito30",
+      "steps": 10,
+      "action": "100.09 99.91 0 0",
+      "pos_start": [
+        101.621,
+        99.888,
+        -0.101
+      ],
+      "pos_end": [
+        101.656,
+        99.867,
+        -0.102
+      ],
+      "dist_xy_m": 0.041,
+      "path_xy_m": 0.046,
+      "dz_m": -0.001,
+      "z_min_max": [
+        -0.112,
+        -0.101
+      ],
+      "yaw_start_end_deg": [
+        -75.1,
+        -80.8
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.091,
+      "speed_xy_max": 0.092,
+      "speed_xy_cv": 0.007,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito31",
+      "steps": 10,
+      "action": "99.98 100.02 0 0",
+      "pos_start": [
+        101.659,
+        99.864,
+        -0.097
+      ],
+      "pos_end": [
+        101.693,
+        99.839,
+        -0.046
+      ],
+      "dist_xy_m": 0.042,
+      "path_xy_m": 0.047,
+      "dz_m": 0.051,
+      "z_min_max": [
+        -0.097,
+        -0.046
+      ],
+      "yaw_start_end_deg": [
+        -81.5,
+        -87.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.093,
+      "speed_xy_max": 0.094,
+      "speed_xy_cv": 0.007,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito32",
+      "steps": 10,
+      "action": "99.87 100.13 0 0",
+      "pos_start": [
+        101.697,
+        99.837,
+        -0.043
+      ],
+      "pos_end": [
+        101.729,
+        99.808,
+        -0.06
+      ],
+      "dist_xy_m": 0.043,
+      "path_xy_m": 0.048,
+      "dz_m": -0.017,
+      "z_min_max": [
+        -0.06,
+        -0.039
+      ],
+      "yaw_start_end_deg": [
+        -87.7,
+        -93.4
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.095,
+      "speed_xy_max": 0.096,
+      "speed_xy_cv": 0.005,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito33",
+      "steps": 10,
+      "action": "99.77 100.23 0 0",
+      "pos_start": [
+        101.733,
+        99.805,
+        -0.066
+      ],
+      "pos_end": [
+        101.762,
+        99.773,
+        -0.11
+      ],
+      "dist_xy_m": 0.043,
+      "path_xy_m": 0.048,
+      "dz_m": -0.044,
+      "z_min_max": [
+        -0.11,
+        -0.066
+      ],
+      "yaw_start_end_deg": [
+        -94.1,
+        -99.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.097,
+      "speed_xy_max": 0.097,
+      "speed_xy_cv": 0.003,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito34",
+      "steps": 10,
+      "action": "99.66 100.34 0 0",
+      "pos_start": [
+        101.765,
+        99.769,
+        -0.111
+      ],
+      "pos_end": [
+        101.791,
+        99.734,
+        -0.079
+      ],
+      "dist_xy_m": 0.044,
+      "path_xy_m": 0.049,
+      "dz_m": 0.033,
+      "z_min_max": [
+        -0.112,
+        -0.079
+      ],
+      "yaw_start_end_deg": [
+        -100.3,
+        -105.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.097,
+      "speed_xy_max": 0.097,
+      "speed_xy_cv": 0.001,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito35",
+      "steps": 10,
+      "action": "99.55 100.44 0 0",
+      "pos_start": [
+        101.794,
+        99.73,
+        -0.072
+      ],
+      "pos_end": [
+        101.815,
+        99.692,
+        -0.04
+      ],
+      "dist_xy_m": 0.044,
+      "path_xy_m": 0.048,
+      "dz_m": 0.032,
+      "z_min_max": [
+        -0.072,
+        -0.04
+      ],
+      "yaw_start_end_deg": [
+        -106.2,
+        -111.5
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.097,
+      "speed_xy_max": 0.097,
+      "speed_xy_cv": 0.001,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito36",
+      "steps": 10,
+      "action": "99.44 100.54 0 0",
+      "pos_start": [
+        101.817,
+        99.687,
+        -0.041
+      ],
+      "pos_end": [
+        101.831,
+        99.646,
+        -0.086
+      ],
+      "dist_xy_m": 0.043,
+      "path_xy_m": 0.048,
+      "dz_m": -0.044,
+      "z_min_max": [
+        -0.086,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        -112.1,
+        -117.4
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.097,
+      "speed_xy_max": 0.097,
+      "speed_xy_cv": 0.001,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito37",
+      "steps": 10,
+      "action": "99.33 100.64 0 0",
+      "pos_start": [
+        101.832,
+        99.642,
+        -0.091
+      ],
+      "pos_end": [
+        101.837,
+        99.598,
+        -0.108
+      ],
+      "dist_xy_m": 0.044,
+      "path_xy_m": 0.049,
+      "dz_m": -0.016,
+      "z_min_max": [
+        -0.111,
+        -0.091
+      ],
+      "yaw_start_end_deg": [
+        -118.0,
+        -123.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.098,
+      "speed_xy_max": 0.099,
+      "speed_xy_cv": 0.008,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito38",
+      "steps": 10,
+      "action": "99.22 100.74 0 0",
+      "pos_start": [
+        101.837,
+        99.593,
+        -0.104
+      ],
+      "pos_end": [
+        101.83,
+        99.547,
+        -0.054
+      ],
+      "dist_xy_m": 0.046,
+      "path_xy_m": 0.051,
+      "dz_m": 0.05,
+      "z_min_max": [
+        -0.104,
+        -0.054
+      ],
+      "yaw_start_end_deg": [
+        -123.5,
+        -128.3
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.103,
+      "speed_xy_max": 0.107,
+      "speed_xy_cv": 0.024,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito39",
+      "steps": 10,
+      "action": "99.1 100.84 0 0",
+      "pos_start": [
+        101.828,
+        99.542,
+        -0.05
+      ],
+      "pos_end": [
+        101.806,
+        99.494,
+        -0.051
+      ],
+      "dist_xy_m": 0.053,
+      "path_xy_m": 0.058,
+      "dz_m": -0.002,
+      "z_min_max": [
+        -0.051,
+        -0.04
+      ],
+      "yaw_start_end_deg": [
+        -128.8,
+        -133.5
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.116,
+      "speed_xy_max": 0.125,
+      "speed_xy_cv": 0.046,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito40",
+      "steps": 10,
+      "action": "98.98 100.93 0 0",
+      "pos_start": [
+        101.803,
+        99.489,
+        -0.056
+      ],
+      "pos_end": [
+        101.762,
+        99.44,
+        -0.105
+      ],
+      "dist_xy_m": 0.064,
+      "path_xy_m": 0.07,
+      "dz_m": -0.049,
+      "z_min_max": [
+        -0.105,
+        -0.056
+      ],
+      "yaw_start_end_deg": [
+        -134.0,
+        -138.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.14,
+      "speed_xy_max": 0.154,
+      "speed_xy_cv": 0.061,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito41",
+      "steps": 10,
+      "action": "98.86 101.02 0 0",
+      "pos_start": [
+        101.757,
+        99.434,
+        -0.108
+      ],
+      "pos_end": [
+        101.695,
+        99.384,
+        -0.089
+      ],
+      "dist_xy_m": 0.08,
+      "path_xy_m": 0.087,
+      "dz_m": 0.019,
+      "z_min_max": [
+        -0.111,
+        -0.089
+      ],
+      "yaw_start_end_deg": [
+        -139.2,
+        -143.5
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.175,
+      "speed_xy_max": 0.193,
+      "speed_xy_cv": 0.065,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito42",
+      "steps": 10,
+      "action": "98.73 101.09 0 0",
+      "pos_start": [
+        101.687,
+        99.378,
+        -0.083
+      ],
+      "pos_end": [
+        101.602,
+        99.328,
+        -0.041
+      ],
+      "dist_xy_m": 0.099,
+      "path_xy_m": 0.109,
+      "dz_m": 0.042,
+      "z_min_max": [
+        -0.083,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        -144.0,
+        -148.1
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.218,
+      "speed_xy_max": 0.239,
+      "speed_xy_cv": 0.061,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito43",
+      "steps": 10,
+      "action": "98.6 101.16 0 0",
+      "pos_start": [
+        101.591,
+        99.322,
+        -0.04
+      ],
+      "pos_end": [
+        101.481,
+        99.271,
+        -0.075
+      ],
+      "dist_xy_m": 0.121,
+      "path_xy_m": 0.133,
+      "dz_m": -0.034,
+      "z_min_max": [
+        -0.075,
+        -0.04
+      ],
+      "yaw_start_end_deg": [
+        -148.6,
+        -152.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.266,
+      "speed_xy_max": 0.289,
+      "speed_xy_cv": 0.054,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito44",
+      "steps": 10,
+      "action": "98.46 101.21 0 0",
+      "pos_start": [
+        101.468,
+        99.266,
+        -0.081
+      ],
+      "pos_end": [
+        101.333,
+        99.216,
+        -0.11
+      ],
+      "dist_xy_m": 0.143,
+      "path_xy_m": 0.158,
+      "dz_m": -0.029,
+      "z_min_max": [
+        -0.111,
+        -0.081
+      ],
+      "yaw_start_end_deg": [
+        -153.2,
+        -157.1
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.316,
+      "speed_xy_max": 0.338,
+      "speed_xy_cv": 0.045,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito45",
+      "steps": 10,
+      "action": "98.31 101.24 0 0",
+      "pos_start": [
+        101.317,
+        99.211,
+        -0.109
+      ],
+      "pos_end": [
+        101.159,
+        99.163,
+        -0.064
+      ],
+      "dist_xy_m": 0.165,
+      "path_xy_m": 0.182,
+      "dz_m": 0.045,
+      "z_min_max": [
+        -0.109,
+        -0.064
+      ],
+      "yaw_start_end_deg": [
+        -157.5,
+        -161.2
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.364,
+      "speed_xy_max": 0.384,
+      "speed_xy_cv": 0.037,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito46",
+      "steps": 10,
+      "action": "98.16 101.25 0 0",
+      "pos_start": [
+        101.14,
+        99.158,
+        -0.058
+      ],
+      "pos_end": [
+        100.962,
+        99.113,
+        -0.045
+      ],
+      "dist_xy_m": 0.184,
+      "path_xy_m": 0.204,
+      "dz_m": 0.013,
+      "z_min_max": [
+        -0.058,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        -161.6,
+        -165.2
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.407,
+      "speed_xy_max": 0.425,
+      "speed_xy_cv": 0.029,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito47",
+      "steps": 10,
+      "action": "98.02 101.21 0 0",
+      "pos_start": [
+        100.941,
+        99.108,
+        -0.049
+      ],
+      "pos_end": [
+        100.744,
+        99.067,
+        -0.098
+      ],
+      "dist_xy_m": 0.201,
+      "path_xy_m": 0.222,
+      "dz_m": -0.05,
+      "z_min_max": [
+        -0.098,
+        -0.049
+      ],
+      "yaw_start_end_deg": [
+        -165.6,
+        -169.1
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.444,
+      "speed_xy_max": 0.459,
+      "speed_xy_cv": 0.022,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito48",
+      "steps": 10,
+      "action": "97.89 101.13 0 0",
+      "pos_start": [
+        100.721,
+        99.063,
+        -0.102
+      ],
+      "pos_end": [
+        100.511,
+        99.027,
+        -0.098
+      ],
+      "dist_xy_m": 0.214,
+      "path_xy_m": 0.237,
+      "dz_m": 0.005,
+      "z_min_max": [
+        -0.111,
+        -0.098
+      ],
+      "yaw_start_end_deg": [
+        -169.5,
+        -172.8
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.474,
+      "speed_xy_max": 0.485,
+      "speed_xy_cv": 0.015,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito49",
+      "steps": 10,
+      "action": "97.78 101.02 0 0",
+      "pos_start": [
+        100.487,
+        99.023,
+        -0.093
+      ],
+      "pos_end": [
+        100.266,
+        98.992,
+        -0.045
+      ],
+      "dist_xy_m": 0.223,
+      "path_xy_m": 0.248,
+      "dz_m": 0.048,
+      "z_min_max": [
+        -0.093,
+        -0.045
+      ],
+      "yaw_start_end_deg": [
+        -173.1,
+        -176.2
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.495,
+      "speed_xy_max": 0.503,
+      "speed_xy_cv": 0.01,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito50",
+      "steps": 10,
+      "action": "97.7 100.9 0 0",
+      "pos_start": [
+        100.241,
+        98.989,
+        -0.043
+      ],
+      "pos_end": [
+        100.013,
+        98.964,
+        -0.064
+      ],
+      "dist_xy_m": 0.229,
+      "path_xy_m": 0.255,
+      "dz_m": -0.022,
+      "z_min_max": [
+        -0.064,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        -176.5,
+        -179.5
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.509,
+      "speed_xy_max": 0.514,
+      "speed_xy_cv": 0.006,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito51",
+      "steps": 10,
+      "action": "97.63 100.76 0 0",
+      "pos_start": [
+        99.987,
+        98.961,
+        -0.07
+      ],
+      "pos_end": [
+        99.755,
+        98.944,
+        -0.11
+      ],
+      "dist_xy_m": 0.233,
+      "path_xy_m": 0.258,
+      "dz_m": -0.04,
+      "z_min_max": [
+        -0.11,
+        -0.07
+      ],
+      "yaw_start_end_deg": [
+        -179.8,
+        177.3
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.517,
+      "speed_xy_max": 0.519,
+      "speed_xy_cv": 0.003,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito52",
+      "steps": 10,
+      "action": "97.58 100.62 0 0",
+      "pos_start": [
+        99.729,
+        98.942,
+        -0.11
+      ],
+      "pos_end": [
+        99.496,
+        98.932,
+        -0.074
+      ],
+      "dist_xy_m": 0.234,
+      "path_xy_m": 0.26,
+      "dz_m": 0.036,
+      "z_min_max": [
+        -0.11,
+        -0.074
+      ],
+      "yaw_start_end_deg": [
+        177.0,
+        174.4
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.519,
+      "speed_xy_max": 0.519,
+      "speed_xy_cv": 0.0,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito53",
+      "steps": 10,
+      "action": "97.55 100.48 0 0",
+      "pos_start": [
+        99.47,
+        98.932,
+        -0.068
+      ],
+      "pos_end": [
+        99.237,
+        98.931,
+        -0.042
+      ],
+      "dist_xy_m": 0.233,
+      "path_xy_m": 0.258,
+      "dz_m": 0.027,
+      "z_min_max": [
+        -0.068,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        174.1,
+        171.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.517,
+      "speed_xy_max": 0.519,
+      "speed_xy_cv": 0.002,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito54",
+      "steps": 10,
+      "action": "97.52 100.33 0 0",
+      "pos_start": [
+        99.212,
+        98.932,
+        -0.043
+      ],
+      "pos_end": [
+        98.982,
+        98.942,
+        -0.089
+      ],
+      "dist_xy_m": 0.23,
+      "path_xy_m": 0.256,
+      "dz_m": -0.046,
+      "z_min_max": [
+        -0.089,
+        -0.043
+      ],
+      "yaw_start_end_deg": [
+        171.4,
+        168.9
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.512,
+      "speed_xy_max": 0.514,
+      "speed_xy_cv": 0.004,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito55",
+      "steps": 10,
+      "action": "97.51 100.18 0 0",
+      "pos_start": [
+        98.956,
+        98.944,
+        -0.094
+      ],
+      "pos_end": [
+        98.73,
+        98.965,
+        -0.105
+      ],
+      "dist_xy_m": 0.227,
+      "path_xy_m": 0.252,
+      "dz_m": -0.01,
+      "z_min_max": [
+        -0.11,
+        -0.094
+      ],
+      "yaw_start_end_deg": [
+        168.7,
+        166.4
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.505,
+      "speed_xy_max": 0.508,
+      "speed_xy_cv": 0.005,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito56",
+      "steps": 10,
+      "action": "97.5 100.03 0 0",
+      "pos_start": [
+        98.706,
+        98.968,
+        -0.101
+      ],
+      "pos_end": [
+        98.485,
+        98.999,
+        -0.052
+      ],
+      "dist_xy_m": 0.223,
+      "path_xy_m": 0.248,
+      "dz_m": 0.049,
+      "z_min_max": [
+        -0.101,
+        -0.052
+      ],
+      "yaw_start_end_deg": [
+        166.1,
+        164.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.495,
+      "speed_xy_max": 0.5,
+      "speed_xy_cv": 0.006,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito57",
+      "steps": 10,
+      "action": "97.5 99.88 0 0",
+      "pos_start": [
+        98.461,
+        99.003,
+        -0.048
+      ],
+      "pos_end": [
+        98.246,
+        99.04,
+        -0.055
+      ],
+      "dist_xy_m": 0.218,
+      "path_xy_m": 0.242,
+      "dz_m": -0.007,
+      "z_min_max": [
+        -0.055,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        163.8,
+        161.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.484,
+      "speed_xy_max": 0.49,
+      "speed_xy_cv": 0.007,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito58",
+      "steps": 10,
+      "action": "97.51 99.73 0 0",
+      "pos_start": [
+        98.223,
+        99.044,
+        -0.06
+      ],
+      "pos_end": [
+        98.016,
+        99.086,
+        -0.107
+      ],
+      "dist_xy_m": 0.212,
+      "path_xy_m": 0.235,
+      "dz_m": -0.046,
+      "z_min_max": [
+        -0.107,
+        -0.06
+      ],
+      "yaw_start_end_deg": [
+        161.5,
+        159.4
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.471,
+      "speed_xy_max": 0.477,
+      "speed_xy_cv": 0.009,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito59",
+      "steps": 10,
+      "action": "97.54 99.58 0 0",
+      "pos_start": [
+        97.993,
+        99.091,
+        -0.109
+      ],
+      "pos_end": [
+        97.793,
+        99.135,
+        -0.085
+      ],
+      "dist_xy_m": 0.205,
+      "path_xy_m": 0.228,
+      "dz_m": 0.024,
+      "z_min_max": [
+        -0.11,
+        -0.085
+      ],
+      "yaw_start_end_deg": [
+        159.2,
+        157.2
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.456,
+      "speed_xy_max": 0.463,
+      "speed_xy_cv": 0.01,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito60",
+      "steps": 10,
+      "action": "97.57 99.44 0 0",
+      "pos_start": [
+        97.771,
+        99.14,
+        -0.079
+      ],
+      "pos_end": [
+        97.58,
+        99.186,
+        -0.041
+      ],
+      "dist_xy_m": 0.197,
+      "path_xy_m": 0.219,
+      "dz_m": 0.038,
+      "z_min_max": [
+        -0.079,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        157.0,
+        154.8
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.439,
+      "speed_xy_max": 0.447,
+      "speed_xy_cv": 0.011,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito61",
+      "steps": 10,
+      "action": "97.61 99.29 0 0",
+      "pos_start": [
+        97.559,
+        99.191,
+        -0.041
+      ],
+      "pos_end": [
+        97.375,
+        99.238,
+        -0.079
+      ],
+      "dist_xy_m": 0.189,
+      "path_xy_m": 0.211,
+      "dz_m": -0.038,
+      "z_min_max": [
+        -0.079,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        154.5,
+        151.1
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.422,
+      "speed_xy_max": 0.43,
+      "speed_xy_cv": 0.012,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito62",
+      "steps": 10,
+      "action": "97.67 99.15 0 0",
+      "pos_start": [
+        97.355,
+        99.243,
+        -0.085
+      ],
+      "pos_end": [
+        97.179,
+        99.293,
+        -0.109
+      ],
+      "dist_xy_m": 0.183,
+      "path_xy_m": 0.203,
+      "dz_m": -0.024,
+      "z_min_max": [
+        -0.11,
+        -0.085
+      ],
+      "yaw_start_end_deg": [
+        150.6,
+        145.2
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.407,
+      "speed_xy_max": 0.413,
+      "speed_xy_cv": 0.009,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito63",
+      "steps": 10,
+      "action": "97.75 99.03 0 0",
+      "pos_start": [
+        97.16,
+        99.299,
+        -0.107
+      ],
+      "pos_end": [
+        96.991,
+        99.354,
+        -0.06
+      ],
+      "dist_xy_m": 0.178,
+      "path_xy_m": 0.198,
+      "dz_m": 0.046,
+      "z_min_max": [
+        -0.107,
+        -0.06
+      ],
+      "yaw_start_end_deg": [
+        144.5,
+        137.8
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.396,
+      "speed_xy_max": 0.4,
+      "speed_xy_cv": 0.007,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito64",
+      "steps": 10,
+      "action": "97.84 98.91 0 0",
+      "pos_start": [
+        96.973,
+        99.36,
+        -0.055
+      ],
+      "pos_end": [
+        96.81,
+        99.421,
+        -0.048
+      ],
+      "dist_xy_m": 0.173,
+      "path_xy_m": 0.193,
+      "dz_m": 0.007,
+      "z_min_max": [
+        -0.055,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        137.0,
+        129.3
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.386,
+      "speed_xy_max": 0.39,
+      "speed_xy_cv": 0.007,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito65",
+      "steps": 10,
+      "action": "97.96 98.82 0 0",
+      "pos_start": [
+        96.793,
+        99.428,
+        -0.052
+      ],
+      "pos_end": [
+        96.638,
+        99.495,
+        -0.101
+      ],
+      "dist_xy_m": 0.168,
+      "path_xy_m": 0.188,
+      "dz_m": -0.049,
+      "z_min_max": [
+        -0.101,
+        -0.052
+      ],
+      "yaw_start_end_deg": [
+        128.5,
+        120.5
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.375,
+      "speed_xy_max": 0.38,
+      "speed_xy_cv": 0.009,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito66",
+      "steps": 10,
+      "action": "98.1 98.77 0 0",
+      "pos_start": [
+        96.621,
+        99.502,
+        -0.105
+      ],
+      "pos_end": [
+        96.475,
+        99.573,
+        -0.094
+      ],
+      "dist_xy_m": 0.162,
+      "path_xy_m": 0.181,
+      "dz_m": 0.01,
+      "z_min_max": [
+        -0.11,
+        -0.094
+      ],
+      "yaw_start_end_deg": [
+        119.7,
+        112.2
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.361,
+      "speed_xy_max": 0.368,
+      "speed_xy_cv": 0.012,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito67",
+      "steps": 10,
+      "action": "98.25 98.75 0 0",
+      "pos_start": [
+        96.459,
+        99.581,
+        -0.089
+      ],
+      "pos_end": [
+        96.323,
+        99.654,
+        -0.044
+      ],
+      "dist_xy_m": 0.154,
+      "path_xy_m": 0.172,
+      "dz_m": 0.045,
+      "z_min_max": [
+        -0.089,
+        -0.044
+      ],
+      "yaw_start_end_deg": [
+        111.4,
+        104.3
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.344,
+      "speed_xy_max": 0.352,
+      "speed_xy_cv": 0.015,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito68",
+      "steps": 10,
+      "action": "98.4 98.77 0 0",
+      "pos_start": [
+        96.309,
+        99.662,
+        -0.042
+      ],
+      "pos_end": [
+        96.184,
+        99.737,
+        -0.068
+      ],
+      "dist_xy_m": 0.145,
+      "path_xy_m": 0.162,
+      "dz_m": -0.027,
+      "z_min_max": [
+        -0.068,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        103.5,
+        96.3
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.324,
+      "speed_xy_max": 0.333,
+      "speed_xy_cv": 0.02,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito69",
+      "steps": 10,
+      "action": "98.54 98.82 0 0",
+      "pos_start": [
+        96.171,
+        99.745,
+        -0.074
+      ],
+      "pos_end": [
+        96.06,
+        99.821,
+        -0.11
+      ],
+      "dist_xy_m": 0.134,
+      "path_xy_m": 0.15,
+      "dz_m": -0.036,
+      "z_min_max": [
+        -0.11,
+        -0.074
+      ],
+      "yaw_start_end_deg": [
+        95.5,
+        88.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.3,
+      "speed_xy_max": 0.311,
+      "speed_xy_cv": 0.025,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito70",
+      "steps": 10,
+      "action": "98.68 98.88 0 0",
+      "pos_start": [
+        96.049,
+        99.83,
+        -0.11
+      ],
+      "pos_end": [
+        95.953,
+        99.905,
+        -0.07
+      ],
+      "dist_xy_m": 0.122,
+      "path_xy_m": 0.136,
+      "dz_m": 0.039,
+      "z_min_max": [
+        -0.11,
+        -0.07
+      ],
+      "yaw_start_end_deg": [
+        88.0,
+        81.9
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.273,
+      "speed_xy_max": 0.285,
+      "speed_xy_cv": 0.029,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito71",
+      "steps": 10,
+      "action": "98.81 98.95 0 0",
+      "pos_start": [
+        95.943,
+        99.913,
+        -0.064
+      ],
+      "pos_end": [
+        95.862,
+        99.987,
+        -0.043
+      ],
+      "dist_xy_m": 0.109,
+      "path_xy_m": 0.122,
+      "dz_m": 0.022,
+      "z_min_max": [
+        -0.064,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        81.2,
+        75.3
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.244,
+      "speed_xy_max": 0.257,
+      "speed_xy_cv": 0.034,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito72",
+      "steps": 10,
+      "action": "98.93 99.03 0 0",
+      "pos_start": [
+        95.854,
+        99.995,
+        -0.045
+      ],
+      "pos_end": [
+        95.79,
+        100.066,
+        -0.093
+      ],
+      "dist_xy_m": 0.096,
+      "path_xy_m": 0.108,
+      "dz_m": -0.047,
+      "z_min_max": [
+        -0.093,
+        -0.045
+      ],
+      "yaw_start_end_deg": [
+        74.6,
+        68.8
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.215,
+      "speed_xy_max": 0.228,
+      "speed_xy_cv": 0.039,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito73",
+      "steps": 10,
+      "action": "99.05 99.12 0 0",
+      "pos_start": [
+        95.784,
+        100.074,
+        -0.098
+      ],
+      "pos_end": [
+        95.737,
+        100.143,
+        -0.102
+      ],
+      "dist_xy_m": 0.083,
+      "path_xy_m": 0.093,
+      "dz_m": -0.005,
+      "z_min_max": [
+        -0.11,
+        -0.098
+      ],
+      "yaw_start_end_deg": [
+        68.2,
+        62.9
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.187,
+      "speed_xy_max": 0.199,
+      "speed_xy_cv": 0.042,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito74",
+      "steps": 10,
+      "action": "99.17 99.22 0 0",
+      "pos_start": [
+        95.732,
+        100.15,
+        -0.098
+      ],
+      "pos_end": [
+        95.703,
+        100.216,
+        -0.049
+      ],
+      "dist_xy_m": 0.072,
+      "path_xy_m": 0.081,
+      "dz_m": 0.049,
+      "z_min_max": [
+        -0.098,
+        -0.049
+      ],
+      "yaw_start_end_deg": [
+        62.4,
+        57.5
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.161,
+      "speed_xy_max": 0.172,
+      "speed_xy_cv": 0.042,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito75",
+      "steps": 10,
+      "action": "99.28 99.31 0 0",
+      "pos_start": [
+        95.7,
+        100.223,
+        -0.046
+      ],
+      "pos_end": [
+        95.688,
+        100.284,
+        -0.059
+      ],
+      "dist_xy_m": 0.063,
+      "path_xy_m": 0.071,
+      "dz_m": -0.013,
+      "z_min_max": [
+        -0.059,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        57.0,
+        52.3
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.141,
+      "speed_xy_max": 0.149,
+      "speed_xy_cv": 0.033,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito76",
+      "steps": 10,
+      "action": "99.4 99.41 0 0",
+      "pos_start": [
+        95.688,
+        100.291,
+        -0.064
+      ],
+      "pos_end": [
+        95.694,
+        100.349,
+        -0.108
+      ],
+      "dist_xy_m": 0.058,
+      "path_xy_m": 0.065,
+      "dz_m": -0.044,
+      "z_min_max": [
+        -0.108,
+        -0.064
+      ],
+      "yaw_start_end_deg": [
+        51.7,
+        47.3
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.13,
+      "speed_xy_max": 0.133,
+      "speed_xy_cv": 0.012,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito77",
+      "steps": 10,
+      "action": "99.51 99.52 0 0",
+      "pos_start": [
+        95.696,
+        100.355,
+        -0.11
+      ],
+      "pos_end": [
+        95.72,
+        100.409,
+        -0.081
+      ],
+      "dist_xy_m": 0.059,
+      "path_xy_m": 0.065,
+      "dz_m": 0.029,
+      "z_min_max": [
+        -0.11,
+        -0.081
+      ],
+      "yaw_start_end_deg": [
+        46.8,
+        42.8
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.131,
+      "speed_xy_max": 0.134,
+      "speed_xy_cv": 0.015,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito78",
+      "steps": 10,
+      "action": "99.62 99.62 0 0",
+      "pos_start": [
+        95.723,
+        100.414,
+        -0.075
+      ],
+      "pos_end": [
+        95.764,
+        100.464,
+        -0.041
+      ],
+      "dist_xy_m": 0.064,
+      "path_xy_m": 0.071,
+      "dz_m": 0.034,
+      "z_min_max": [
+        -0.075,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        42.4,
+        38.6
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.141,
+      "speed_xy_max": 0.148,
+      "speed_xy_cv": 0.03,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito79",
+      "steps": 10,
+      "action": "99.72 99.72 0 0",
+      "pos_start": [
+        95.769,
+        100.469,
+        -0.042
+      ],
+      "pos_end": [
+        95.824,
+        100.514,
+        -0.083
+      ],
+      "dist_xy_m": 0.071,
+      "path_xy_m": 0.079,
+      "dz_m": -0.041,
+      "z_min_max": [
+        -0.083,
+        -0.042
+      ],
+      "yaw_start_end_deg": [
+        38.2,
+        34.6
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.158,
+      "speed_xy_max": 0.165,
+      "speed_xy_cv": 0.032,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito80",
+      "steps": 10,
+      "action": "99.83 99.83 0 0",
+      "pos_start": [
+        95.831,
+        100.519,
+        -0.089
+      ],
+      "pos_end": [
+        95.898,
+        100.56,
+        -0.108
+      ],
+      "dist_xy_m": 0.079,
+      "path_xy_m": 0.087,
+      "dz_m": -0.019,
+      "z_min_max": [
+        -0.11,
+        -0.089
+      ],
+      "yaw_start_end_deg": [
+        34.2,
+        30.9
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.175,
+      "speed_xy_max": 0.182,
+      "speed_xy_cv": 0.028,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito81",
+      "steps": 10,
+      "action": "99.94 99.94 0 0",
+      "pos_start": [
+        95.906,
+        100.565,
+        -0.105
+      ],
+      "pos_end": [
+        95.984,
+        100.602,
+        -0.057
+      ],
+      "dist_xy_m": 0.086,
+      "path_xy_m": 0.095,
+      "dz_m": 0.048,
+      "z_min_max": [
+        -0.105,
+        -0.057
+      ],
+      "yaw_start_end_deg": [
+        30.6,
+        27.6
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.19,
+      "speed_xy_max": 0.197,
+      "speed_xy_cv": 0.022,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito82",
+      "steps": 10,
+      "action": "100.09 100.09 0 0",
+      "pos_start": [
+        95.993,
+        100.606,
+        -0.052
+      ],
+      "pos_end": [
+        96.078,
+        100.64,
+        -0.05
+      ],
+      "dist_xy_m": 0.092,
+      "path_xy_m": 0.102,
+      "dz_m": 0.002,
+      "z_min_max": [
+        -0.052,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        27.3,
+        24.6
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.204,
+      "speed_xy_max": 0.209,
+      "speed_xy_cv": 0.017,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito83",
+      "steps": 10,
+      "action": "100.2 100.2 0 0",
+      "pos_start": [
+        96.088,
+        100.644,
+        -0.055
+      ],
+      "pos_end": [
+        96.18,
+        100.675,
+        -0.103
+      ],
+      "dist_xy_m": 0.097,
+      "path_xy_m": 0.107,
+      "dz_m": -0.048,
+      "z_min_max": [
+        -0.103,
+        -0.055
+      ],
+      "yaw_start_end_deg": [
+        24.3,
+        21.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.215,
+      "speed_xy_max": 0.219,
+      "speed_xy_cv": 0.013,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito84",
+      "steps": 10,
+      "action": "100.31 100.31 0 0",
+      "pos_start": [
+        96.19,
+        100.679,
+        -0.106
+      ],
+      "pos_end": [
+        96.286,
+        100.707,
+        -0.091
+      ],
+      "dist_xy_m": 0.1,
+      "path_xy_m": 0.111,
+      "dz_m": 0.016,
+      "z_min_max": [
+        -0.11,
+        -0.091
+      ],
+      "yaw_start_end_deg": [
+        21.4,
+        19.2
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.223,
+      "speed_xy_max": 0.226,
+      "speed_xy_cv": 0.009,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito85",
+      "steps": 10,
+      "action": "100.42 100.41 0 0",
+      "pos_start": [
+        96.297,
+        100.711,
+        -0.085
+      ],
+      "pos_end": [
+        96.397,
+        100.737,
+        -0.043
+      ],
+      "dist_xy_m": 0.103,
+      "path_xy_m": 0.114,
+      "dz_m": 0.043,
+      "z_min_max": [
+        -0.085,
+        -0.043
+      ],
+      "yaw_start_end_deg": [
+        18.9,
+        16.9
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.229,
+      "speed_xy_max": 0.231,
+      "speed_xy_cv": 0.006,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito86",
+      "steps": 10,
+      "action": "100.52 100.51 0 0",
+      "pos_start": [
+        96.408,
+        100.74,
+        -0.041
+      ],
+      "pos_end": [
+        96.51,
+        100.764,
+        -0.072
+      ],
+      "dist_xy_m": 0.105,
+      "path_xy_m": 0.116,
+      "dz_m": -0.031,
+      "z_min_max": [
+        -0.072,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        16.7,
+        14.9
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.233,
+      "speed_xy_max": 0.234,
+      "speed_xy_cv": 0.004,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito87",
+      "steps": 10,
+      "action": "100.64 100.61 0 0",
+      "pos_start": [
+        96.521,
+        100.767,
+        -0.078
+      ],
+      "pos_end": [
+        96.625,
+        100.789,
+        -0.11
+      ],
+      "dist_xy_m": 0.106,
+      "path_xy_m": 0.118,
+      "dz_m": -0.031,
+      "z_min_max": [
+        -0.11,
+        -0.078
+      ],
+      "yaw_start_end_deg": [
+        14.7,
+        13.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.236,
+      "speed_xy_max": 0.237,
+      "speed_xy_cv": 0.003,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito88",
+      "steps": 10,
+      "action": "100.75 100.71 0 0",
+      "pos_start": [
+        96.636,
+        100.792,
+        -0.109
+      ],
+      "pos_end": [
+        96.741,
+        100.813,
+        -0.066
+      ],
+      "dist_xy_m": 0.107,
+      "path_xy_m": 0.119,
+      "dz_m": 0.042,
+      "z_min_max": [
+        -0.109,
+        -0.066
+      ],
+      "yaw_start_end_deg": [
+        12.9,
+        11.5
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.238,
+      "speed_xy_max": 0.238,
+      "speed_xy_cv": 0.002,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito89",
+      "steps": 10,
+      "action": "100.86 100.81 0 0",
+      "pos_start": [
+        96.753,
+        100.815,
+        -0.061
+      ],
+      "pos_end": [
+        96.859,
+        100.834,
+        -0.045
+      ],
+      "dist_xy_m": 0.107,
+      "path_xy_m": 0.119,
+      "dz_m": 0.016,
+      "z_min_max": [
+        -0.061,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        11.3,
+        10.1
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.239,
+      "speed_xy_max": 0.239,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito90",
+      "steps": 10,
+      "action": "100.98 100.9 0 0",
+      "pos_start": [
+        96.871,
+        100.836,
+        -0.048
+      ],
+      "pos_end": [
+        96.977,
+        100.855,
+        -0.096
+      ],
+      "dist_xy_m": 0.108,
+      "path_xy_m": 0.12,
+      "dz_m": -0.048,
+      "z_min_max": [
+        -0.096,
+        -0.048
+      ],
+      "yaw_start_end_deg": [
+        10.0,
+        8.9
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.24,
+      "speed_xy_max": 0.24,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito91",
+      "steps": 10,
+      "action": "101.1 100.99 0 0",
+      "pos_start": [
+        96.989,
+        100.857,
+        -0.1
+      ],
+      "pos_end": [
+        97.095,
+        100.874,
+        -0.099
+      ],
+      "dist_xy_m": 0.108,
+      "path_xy_m": 0.12,
+      "dz_m": 0.001,
+      "z_min_max": [
+        -0.11,
+        -0.099
+      ],
+      "yaw_start_end_deg": [
+        8.8,
+        7.9
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.24,
+      "speed_xy_max": 0.24,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito92",
+      "steps": 10,
+      "action": "101.23 101.07 0 0",
+      "pos_start": [
+        97.107,
+        100.876,
+        -0.095
+      ],
+      "pos_end": [
+        97.214,
+        100.892,
+        -0.047
+      ],
+      "dist_xy_m": 0.108,
+      "path_xy_m": 0.12,
+      "dz_m": 0.048,
+      "z_min_max": [
+        -0.095,
+        -0.047
+      ],
+      "yaw_start_end_deg": [
+        7.8,
+        7.1
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.241,
+      "speed_xy_max": 0.241,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito93",
+      "steps": 10,
+      "action": "101.36 101.14 0 0",
+      "pos_start": [
+        97.226,
+        100.894,
+        -0.044
+      ],
+      "pos_end": [
+        97.334,
+        100.909,
+        -0.062
+      ],
+      "dist_xy_m": 0.108,
+      "path_xy_m": 0.121,
+      "dz_m": -0.018,
+      "z_min_max": [
+        -0.062,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        7.0,
+        6.4
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.241,
+      "speed_xy_max": 0.241,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito94",
+      "steps": 10,
+      "action": "101.5 101.2 0 0",
+      "pos_start": [
+        97.345,
+        100.911,
+        -0.068
+      ],
+      "pos_end": [
+        97.453,
+        100.926,
+        -0.109
+      ],
+      "dist_xy_m": 0.109,
+      "path_xy_m": 0.121,
+      "dz_m": -0.041,
+      "z_min_max": [
+        -0.109,
+        -0.068
+      ],
+      "yaw_start_end_deg": [
+        6.4,
+        5.9
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.242,
+      "speed_xy_max": 0.242,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito95",
+      "steps": 10,
+      "action": "101.64 101.24 0 0",
+      "pos_start": [
+        97.465,
+        100.928,
+        -0.11
+      ],
+      "pos_end": [
+        97.573,
+        100.942,
+        -0.077
+      ],
+      "dist_xy_m": 0.109,
+      "path_xy_m": 0.121,
+      "dz_m": 0.033,
+      "z_min_max": [
+        -0.11,
+        -0.077
+      ],
+      "yaw_start_end_deg": [
+        5.8,
+        5.5
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.242,
+      "speed_xy_max": 0.243,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito96",
+      "steps": 10,
+      "action": "101.79 101.25 0 0",
+      "pos_start": [
+        97.585,
+        100.943,
+        -0.071
+      ],
+      "pos_end": [
+        97.694,
+        100.957,
+        -0.042
+      ],
+      "dist_xy_m": 0.109,
+      "path_xy_m": 0.121,
+      "dz_m": 0.029,
+      "z_min_max": [
+        -0.071,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        5.4,
+        5.2
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.243,
+      "speed_xy_max": 0.243,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito97",
+      "steps": 10,
+      "action": "101.94 101.22 0 0",
+      "pos_start": [
+        97.706,
+        100.959,
+        -0.043
+      ],
+      "pos_end": [
+        97.815,
+        100.972,
+        -0.087
+      ],
+      "dist_xy_m": 0.11,
+      "path_xy_m": 0.122,
+      "dz_m": -0.044,
+      "z_min_max": [
+        -0.087,
+        -0.043
+      ],
+      "yaw_start_end_deg": [
+        5.1,
+        4.9
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.244,
+      "speed_xy_max": 0.244,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito98",
+      "steps": 10,
+      "action": "102.07 101.16 0 0",
+      "pos_start": [
+        97.827,
+        100.974,
+        -0.092
+      ],
+      "pos_end": [
+        97.936,
+        100.987,
+        -0.106
+      ],
+      "dist_xy_m": 0.11,
+      "path_xy_m": 0.122,
+      "dz_m": -0.014,
+      "z_min_max": [
+        -0.11,
+        -0.092
+      ],
+      "yaw_start_end_deg": [
+        4.9,
+        4.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.245,
+      "speed_xy_max": 0.245,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito99",
+      "steps": 10,
+      "action": "102.19 101.06 0 0",
+      "pos_start": [
+        97.948,
+        100.988,
+        -0.102
+      ],
+      "pos_end": [
+        98.058,
+        101.001,
+        -0.054
+      ],
+      "dist_xy_m": 0.11,
+      "path_xy_m": 0.123,
+      "dz_m": 0.049,
+      "z_min_max": [
+        -0.102,
+        -0.054
+      ],
+      "yaw_start_end_deg": [
+        4.7,
+        4.5
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.245,
+      "speed_xy_max": 0.245,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito100",
+      "steps": 10,
+      "action": "102.28 100.94 0 0",
+      "pos_start": [
+        98.07,
+        101.003,
+        -0.05
+      ],
+      "pos_end": [
+        98.179,
+        101.015,
+        -0.053
+      ],
+      "dist_xy_m": 0.11,
+      "path_xy_m": 0.123,
+      "dz_m": -0.004,
+      "z_min_max": [
+        -0.053,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        4.4,
+        4.2
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.245,
+      "speed_xy_max": 0.245,
+      "speed_xy_cv": 0.0,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito101",
+      "steps": 10,
+      "action": "102.35 100.81 0 0",
+      "pos_start": [
+        98.192,
+        101.017,
+        -0.058
+      ],
+      "pos_end": [
+        98.301,
+        101.029,
+        -0.105
+      ],
+      "dist_xy_m": 0.11,
+      "path_xy_m": 0.122,
+      "dz_m": -0.047,
+      "z_min_max": [
+        -0.105,
+        -0.058
+      ],
+      "yaw_start_end_deg": [
+        4.2,
+        3.8
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.245,
+      "speed_xy_max": 0.245,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito102",
+      "steps": 10,
+      "action": "102.4 100.67 0 0",
+      "pos_start": [
+        98.313,
+        101.03,
+        -0.108
+      ],
+      "pos_end": [
+        98.422,
+        101.042,
+        -0.087
+      ],
+      "dist_xy_m": 0.11,
+      "path_xy_m": 0.122,
+      "dz_m": 0.021,
+      "z_min_max": [
+        -0.11,
+        -0.087
+      ],
+      "yaw_start_end_deg": [
+        3.8,
+        3.4
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.244,
+      "speed_xy_max": 0.244,
+      "speed_xy_cv": 0.001,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito103",
+      "steps": 10,
+      "action": "102.44 100.52 0 0",
+      "pos_start": [
+        98.434,
+        101.043,
+        -0.081
+      ],
+      "pos_end": [
+        98.543,
+        101.054,
+        -0.042
+      ],
+      "dist_xy_m": 0.109,
+      "path_xy_m": 0.121,
+      "dz_m": 0.04,
+      "z_min_max": [
+        -0.081,
+        -0.042
+      ],
+      "yaw_start_end_deg": [
+        3.3,
+        2.8
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.242,
+      "speed_xy_max": 0.243,
+      "speed_xy_cv": 0.002,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito104",
+      "steps": 10,
+      "action": "102.47 100.38 0 0",
+      "pos_start": [
+        98.555,
+        101.055,
+        -0.041
+      ],
+      "pos_end": [
+        98.662,
+        101.065,
+        -0.076
+      ],
+      "dist_xy_m": 0.108,
+      "path_xy_m": 0.12,
+      "dz_m": -0.035,
+      "z_min_max": [
+        -0.076,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        2.8,
+        2.1
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.24,
+      "speed_xy_max": 0.241,
+      "speed_xy_cv": 0.002,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito105",
+      "steps": 10,
+      "action": "102.49 100.23 0 0",
+      "pos_start": [
+        98.674,
+        101.067,
+        -0.082
+      ],
+      "pos_end": [
+        98.781,
+        101.076,
+        -0.109
+      ],
+      "dist_xy_m": 0.107,
+      "path_xy_m": 0.119,
+      "dz_m": -0.027,
+      "z_min_max": [
+        -0.11,
+        -0.082
+      ],
+      "yaw_start_end_deg": [
+        2.0,
+        1.3
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.238,
+      "speed_xy_max": 0.239,
+      "speed_xy_cv": 0.003,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito106",
+      "steps": 10,
+      "action": "102.5 100.08 0 0",
+      "pos_start": [
+        98.793,
+        101.077,
+        -0.108
+      ],
+      "pos_end": [
+        98.898,
+        101.086,
+        -0.063
+      ],
+      "dist_xy_m": 0.106,
+      "path_xy_m": 0.118,
+      "dz_m": 0.045,
+      "z_min_max": [
+        -0.108,
+        -0.063
+      ],
+      "yaw_start_end_deg": [
+        1.2,
+        0.3
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.236,
+      "speed_xy_max": 0.237,
+      "speed_xy_cv": 0.003,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "oito107",
+      "steps": 10,
+      "action": "102.5 99.93 0 0",
+      "pos_start": [
+        98.91,
+        101.087,
+        -0.057
+      ],
+      "pos_end": [
+        99.015,
+        101.094,
+        -0.046
+      ],
+      "dist_xy_m": 0.105,
+      "path_xy_m": 0.117,
+      "dz_m": 0.011,
+      "z_min_max": [
+        -0.057,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        0.2,
+        -0.8
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.233,
+      "speed_xy_max": 0.234,
+      "speed_xy_cv": 0.003,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    }
+  ],
+  "last_info": {
+    "reached_goals": 0
+  },
+  "vram_end_mb": 1962,
+  "sim_alive_after_env_close": true,
+  "sim_alive_after_on_exit": false,
+  "sim_procs_after": 0,
+  "vram_after_close_mb": 659
+}

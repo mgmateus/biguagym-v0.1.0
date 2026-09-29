@@ -1,0 +1,316 @@
+{
+  "env": "BlueBoatNav-v0",
+  "status": "ok",
+  "steps_requested": 400,
+  "seed": 0,
+  "date": "2026-09-28 18:47:11",
+  "vram_before_mb": 492,
+  "sim_procs_before": 0,
+  "show_viewer": true,
+  "control": "cmd_vel_yaw",
+  "program": "parado@40:0,0,0,0;gira_90@100:0,0,0,90;frente_reto@100:1,0,0,0;frente_curva@120:1,0,0,-30;parado2@40:0,0,0,0",
+  "no_reset": true,
+  "make_s": 7.72,
+  "sim_pid": 58061,
+  "vram_after_make_mb": 2280,
+  "env_class": "NavEnv",
+  "agent_type": "BlueBoat",
+  "max_episode_steps": 400,
+  "observation_space": {
+    "type": "Box",
+    "shape": [
+      19
+    ],
+    "dtype": "float32",
+    "low": [
+      -Infinity
+    ],
+    "high": [
+      Infinity
+    ]
+  },
+  "action_space": {
+    "type": "Box",
+    "shape": [
+      3
+    ],
+    "dtype": "float32",
+    "low": [
+      -10.0
+    ],
+    "high": [
+      10.0
+    ]
+  },
+  "obs_dim": "19",
+  "act_dim": "3",
+  "observation_type": [
+    "DynamicsSensor"
+  ],
+  "sensors_config": [
+    {
+      "name": "DynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "RPYDynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "CameraView",
+      "type": "RGBCamera",
+      "res": [
+        1280,
+        720
+      ]
+    }
+  ],
+  "ticks_per_sec": 20,
+  "frames_per_sec": 20,
+  "reset_s": 2.21,
+  "sensors_state": {
+    "DynamicsSensor": {
+      "shape": [
+        19
+      ],
+      "dtype": "float32"
+    },
+    "RPYDynamicsSensor": {
+      "shape": [
+        18
+      ],
+      "dtype": "float32"
+    },
+    "CameraView": {
+      "shape": [
+        720,
+        1280,
+        4
+      ],
+      "dtype": "uint8"
+    }
+  },
+  "pos_initial": [
+    100.0,
+    100.0,
+    0.0
+  ],
+  "target": [
+    105.479,
+    98.778,
+    -0.056
+  ],
+  "steps_done": 400,
+  "steps_per_s": 20.09,
+  "steps_per_s_wall": 20.06,
+  "step_ms_mean": 49.79,
+  "step_ms_p95": 63.95,
+  "step_ms_max": 131.19,
+  "hours_per_100k": 1.39,
+  "episodes": 1,
+  "terminated": 0,
+  "truncated": 1,
+  "episode_lengths": [
+    400
+  ],
+  "obs_nan_steps": 0,
+  "obs_inf_steps": 0,
+  "reward_nan": 0,
+  "reward_inf": 0,
+  "reward_min": -0.0004758584225840409,
+  "reward_max": 0.07166613379768624,
+  "reward_mean": 0.03723853719156514,
+  "obs_in_space": true,
+  "obs_not_in_space_steps": 0,
+  "obs_not_in_space_first": null,
+  "pos_final": [
+    104.845,
+    100.122,
+    -0.049
+  ],
+  "segments": [
+    {
+      "seg": "parado",
+      "steps": 40,
+      "action": "0 0 0 0",
+      "pos_start": [
+        100.0,
+        100.0,
+        0.0
+      ],
+      "pos_end": [
+        100.0,
+        100.0,
+        -0.025
+      ],
+      "dist_xy_m": 0.0,
+      "path_xy_m": 0.0,
+      "dz_m": -0.025,
+      "z_min_max": [
+        -0.141,
+        0.0
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        -0.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.0,
+      "speed_xy_max": 0.0,
+      "speed_xy_cv": null,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "gira_90",
+      "steps": 100,
+      "action": "0 0 0 90",
+      "pos_start": [
+        100.0,
+        100.0,
+        -0.031
+      ],
+      "pos_end": [
+        100.0,
+        100.0,
+        -0.048
+      ],
+      "dist_xy_m": 0.0,
+      "path_xy_m": 0.0,
+      "dz_m": -0.017,
+      "z_min_max": [
+        -0.13,
+        -0.025
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        0.3
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.0,
+      "speed_xy_max": 0.0,
+      "speed_xy_cv": null,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "frente_reto",
+      "steps": 100,
+      "action": "1 0 0 0",
+      "pos_start": [
+        100.0,
+        100.0,
+        -0.043
+      ],
+      "pos_end": [
+        101.685,
+        100.02,
+        -0.097
+      ],
+      "dist_xy_m": 1.685,
+      "path_xy_m": 1.685,
+      "dz_m": -0.055,
+      "z_min_max": [
+        -0.117,
+        -0.033
+      ],
+      "yaw_start_end_deg": [
+        0.3,
+        0.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.337,
+      "speed_xy_max": 0.436,
+      "speed_xy_cv": 0.36,
+      "stall_steps": 4,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "frente_curva",
+      "steps": 120,
+      "action": "1 0 0 -30",
+      "pos_start": [
+        101.707,
+        100.02,
+        -0.092
+      ],
+      "pos_end": [
+        104.318,
+        100.096,
+        -0.04
+      ],
+      "dist_xy_m": 2.613,
+      "path_xy_m": 2.634,
+      "dz_m": 0.052,
+      "z_min_max": [
+        -0.113,
+        -0.038
+      ],
+      "yaw_start_end_deg": [
+        0.7,
+        0.5
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.439,
+      "speed_xy_max": 0.44,
+      "speed_xy_cv": 0.002,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "parado2",
+      "steps": 40,
+      "action": "0 0 0 0",
+      "pos_start": [
+        104.34,
+        100.097,
+        -0.04
+      ],
+      "pos_end": [
+        104.845,
+        100.122,
+        -0.049
+      ],
+      "dist_xy_m": 0.506,
+      "path_xy_m": 0.528,
+      "dz_m": -0.009,
+      "z_min_max": [
+        -0.111,
+        -0.04
+      ],
+      "yaw_start_end_deg": [
+        0.5,
+        0.1
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.264,
+      "speed_xy_max": 0.44,
+      "speed_xy_cv": 0.318,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    }
+  ],
+  "last_info": {
+    "reached_goals": 0
+  },
+  "vram_end_mb": 1961,
+  "sim_alive_after_env_close": true,
+  "sim_alive_after_on_exit": false,
+  "sim_procs_after": 0,
+  "vram_after_close_mb": 659
+}

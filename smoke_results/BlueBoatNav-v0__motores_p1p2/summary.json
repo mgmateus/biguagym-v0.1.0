@@ -1,0 +1,702 @@
+{
+  "env": "BlueBoatNav-v0",
+  "status": "ok",
+  "steps_requested": 600,
+  "seed": 0,
+  "date": "2026-09-28 19:03:16",
+  "vram_before_mb": 492,
+  "sim_procs_before": 0,
+  "show_viewer": true,
+  "control": "cmd_motor_speeds",
+  "program": "parado@40:0,0;frente_lento@80:60,60;frente@80:120,120;parado2@60:0,0;re@80:-100,-100;giro_esq@60:-80,80;giro_dir@60:80,-80;curva_esq@100:60,120;parado3@40:0,0",
+  "no_reset": true,
+  "make_s": 7.54,
+  "sim_pid": 62710,
+  "vram_after_make_mb": 2440,
+  "env_class": "NavEnv",
+  "agent_type": "BlueBoat",
+  "max_episode_steps": 400,
+  "observation_space": {
+    "type": "Box",
+    "shape": [
+      19
+    ],
+    "dtype": "float32",
+    "low": [
+      -Infinity
+    ],
+    "high": [
+      Infinity
+    ]
+  },
+  "action_space": {
+    "type": "Box",
+    "shape": [
+      2
+    ],
+    "dtype": "float32",
+    "low": [
+      -295.75
+    ],
+    "high": [
+      288.0799865722656
+    ]
+  },
+  "obs_dim": "19",
+  "act_dim": "2",
+  "observation_type": [
+    "DynamicsSensor"
+  ],
+  "sensors_config": [
+    {
+      "name": "DynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "RPYDynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "CameraView",
+      "type": "RGBCamera",
+      "res": [
+        1280,
+        720
+      ]
+    }
+  ],
+  "ticks_per_sec": 20,
+  "frames_per_sec": 20,
+  "reset_s": 2.2,
+  "sensors_state": {
+    "DynamicsSensor": {
+      "shape": [
+        19
+      ],
+      "dtype": "float32"
+    },
+    "RPYDynamicsSensor": {
+      "shape": [
+        18
+      ],
+      "dtype": "float32"
+    },
+    "CameraView": {
+      "shape": [
+        720,
+        1280,
+        4
+      ],
+      "dtype": "uint8"
+    }
+  },
+  "pos_initial": [
+    100.0,
+    100.0,
+    0.0
+  ],
+  "target": [
+    105.479,
+    98.778,
+    -0.056
+  ],
+  "steps_done": 600,
+  "steps_per_s": 20.16,
+  "steps_per_s_wall": 20.13,
+  "step_ms_mean": 49.61,
+  "step_ms_p95": 61.58,
+  "step_ms_max": 107.81,
+  "hours_per_100k": 1.38,
+  "episodes": 1,
+  "terminated": 46,
+  "truncated": 201,
+  "episode_lengths": [
+    236,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    119,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "obs_nan_steps": 0,
+  "obs_inf_steps": 0,
+  "reward_nan": 0,
+  "reward_inf": 0,
+  "reward_min": -0.22422773964897066,
+  "reward_max": 0.2065801691034206,
+  "reward_mean": -0.009395230662958847,
+  "obs_in_space": true,
+  "obs_not_in_space_steps": 0,
+  "obs_not_in_space_first": null,
+  "pos_final": [
+    104.774,
+    101.688,
+    -0.086
+  ],
+  "segments": [
+    {
+      "seg": "parado",
+      "steps": 40,
+      "action": "0 0",
+      "pos_start": [
+        100.0,
+        100.0,
+        0.0
+      ],
+      "pos_end": [
+        100.0,
+        100.0,
+        -0.025
+      ],
+      "dist_xy_m": 0.0,
+      "path_xy_m": 0.0,
+      "dz_m": -0.025,
+      "z_min_max": [
+        -0.141,
+        0.0
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        -0.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.0,
+      "speed_xy_max": 0.0,
+      "speed_xy_cv": null,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "frente_lento",
+      "steps": 80,
+      "action": "60 60",
+      "pos_start": [
+        100.0,
+        100.0,
+        -0.031
+      ],
+      "pos_end": [
+        102.428,
+        100.0,
+        -0.094
+      ],
+      "dist_xy_m": 2.428,
+      "path_xy_m": 2.428,
+      "dz_m": -0.063,
+      "z_min_max": [
+        -0.13,
+        -0.025
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        -0.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.607,
+      "speed_xy_max": 0.803,
+      "speed_xy_cv": 0.384,
+      "stall_steps": 3,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "frente",
+      "steps": 80,
+      "action": "120 120",
+      "pos_start": [
+        102.469,
+        100.0,
+        -0.1
+      ],
+      "pos_end": [
+        108.545,
+        100.0,
+        -0.113
+      ],
+      "dist_xy_m": 6.076,
+      "path_xy_m": 6.116,
+      "dz_m": -0.013,
+      "z_min_max": [
+        -0.119,
+        -0.033
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        -0.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 1.529,
+      "speed_xy_max": 1.616,
+      "speed_xy_cv": 0.12,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "parado2",
+      "steps": 60,
+      "action": "0 0",
+      "pos_start": [
+        108.625,
+        100.0,
+        -0.111
+      ],
+      "pos_end": [
+        110.446,
+        100.0,
+        -0.069
+      ],
+      "dist_xy_m": 1.821,
+      "path_xy_m": 1.901,
+      "dz_m": 0.041,
+      "z_min_max": [
+        -0.114,
+        -0.037
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        -0.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.634,
+      "speed_xy_max": 1.616,
+      "speed_xy_cv": 0.529,
+      "stall_steps": 0,
+      "terminated_steps": 25
+    },
+    {
+      "seg": "re",
+      "steps": 80,
+      "action": "-100 -100",
+      "pos_start": [
+        110.461,
+        100.0,
+        -0.076
+      ],
+      "pos_end": [
+        106.168,
+        100.0,
+        -0.11
+      ],
+      "dist_xy_m": 4.293,
+      "path_xy_m": 4.359,
+      "dz_m": -0.034,
+      "z_min_max": [
+        -0.113,
+        -0.039
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        -0.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 1.09,
+      "speed_xy_max": 1.347,
+      "speed_xy_cv": 0.363,
+      "stall_steps": 1,
+      "terminated_steps": 21
+    },
+    {
+      "seg": "giro_esq",
+      "steps": 60,
+      "action": "-80 80",
+      "pos_start": [
+        106.101,
+        100.0,
+        -0.111
+      ],
+      "pos_end": [
+        104.472,
+        99.74,
+        -0.051
+      ],
+      "dist_xy_m": 1.649,
+      "path_xy_m": 1.731,
+      "dz_m": 0.061,
+      "z_min_max": [
+        -0.112,
+        -0.04
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        102.7
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.577,
+      "speed_xy_max": 1.347,
+      "speed_xy_cv": 0.481,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "giro_dir",
+      "steps": 60,
+      "action": "80 -80",
+      "pos_start": [
+        104.459,
+        99.735,
+        -0.056
+      ],
+      "pos_end": [
+        103.882,
+        99.617,
+        -0.065
+      ],
+      "dist_xy_m": 0.589,
+      "path_xy_m": 0.613,
+      "dz_m": -0.009,
+      "z_min_max": [
+        -0.111,
+        -0.04
+      ],
+      "yaw_start_end_deg": [
+        104.9,
+        30.8
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.204,
+      "speed_xy_max": 0.279,
+      "speed_xy_cv": 0.168,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "curva_esq",
+      "steps": 100,
+      "action": "60 120",
+      "pos_start": [
+        103.874,
+        99.618,
+        -0.059
+      ],
+      "pos_end": [
+        105.968,
+        101.533,
+        -0.105
+      ],
+      "dist_xy_m": 2.838,
+      "path_xy_m": 3.904,
+      "dz_m": -0.046,
+      "z_min_max": [
+        -0.111,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        28.8,
+        165.6
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.781,
+      "speed_xy_max": 1.143,
+      "speed_xy_cv": 0.367,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "parado3",
+      "steps": 40,
+      "action": "0 0",
+      "pos_start": [
+        105.918,
+        101.546,
+        -0.102
+      ],
+      "pos_end": [
+        104.774,
+        101.688,
+        -0.086
+      ],
+      "dist_xy_m": 1.152,
+      "path_xy_m": 1.205,
+      "dz_m": 0.016,
+      "z_min_max": [
+        -0.11,
+        -0.041
+      ],
+      "yaw_start_end_deg": [
+        167.4,
+        -165.3
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.603,
+      "speed_xy_max": 1.038,
+      "speed_xy_cv": 0.32,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    }
+  ],
+  "last_info": {
+    "reached_goals": 0
+  },
+  "vram_end_mb": 2087,
+  "sim_alive_after_env_close": true,
+  "sim_alive_after_on_exit": false,
+  "sim_procs_after": 0,
+  "vram_after_close_mb": 659
+}

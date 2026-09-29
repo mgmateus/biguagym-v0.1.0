@@ -1,0 +1,6 @@
+env,status,steps_done,steps_per_s,steps_per_s_wall,hours_per_100k,obs_dim,act_dim,obs_nan_steps,obs_inf_steps,reward_nan,obs_in_space,episodes,make_s,sim_alive_after_env_close,sim_procs_after,error
+BlueBoatNav-v0,ok,200,20.04,19.98,1.39,19,2,0,0,0,True,1,7.98,True,0,
+BlueBoatTrajectoryFollower-v0,ok,200,20.07,20.03,1.39,39,2,0,0,0,True,1,7.53,True,0,
+BlueROV2Dock-v0,ok,200,19.44,5.36,5.19,19,6,0,0,0,True,13,7.87,True,0,
+BlueROV2Nav-v0,ok,200,19.81,10.41,2.67,19,6,0,0,0,True,5,7.7,True,0,
+BlueROV2TrajectoryFollower-v0,ok,200,19.82,10.53,2.64,39,6,0,0,0,True,5,7.74,True,0,

@@ -1,0 +1,336 @@
+{
+  "env": "BlueBoatNav-v0",
+  "status": "ok",
+  "steps_requested": 420,
+  "seed": 0,
+  "date": "2026-09-28 18:46:36",
+  "vram_before_mb": 492,
+  "sim_procs_before": 0,
+  "show_viewer": true,
+  "control": "cmd_vel",
+  "program": "parado@40:0,0,0;frente_1ms@120:1,0,0;frente_2ms@100:2,0,0;re_1ms@100:-1,0,0;parado2@60:0,0,0",
+  "no_reset": true,
+  "make_s": 7.99,
+  "sim_pid": 57791,
+  "vram_after_make_mb": 2440,
+  "env_class": "NavEnv",
+  "agent_type": "BlueBoat",
+  "max_episode_steps": 400,
+  "observation_space": {
+    "type": "Box",
+    "shape": [
+      19
+    ],
+    "dtype": "float32",
+    "low": [
+      -Infinity
+    ],
+    "high": [
+      Infinity
+    ]
+  },
+  "action_space": {
+    "type": "Box",
+    "shape": [
+      3
+    ],
+    "dtype": "float32",
+    "low": [
+      -10.0
+    ],
+    "high": [
+      10.0
+    ]
+  },
+  "obs_dim": "19",
+  "act_dim": "3",
+  "observation_type": [
+    "DynamicsSensor"
+  ],
+  "sensors_config": [
+    {
+      "name": "DynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "RPYDynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "CameraView",
+      "type": "RGBCamera",
+      "res": [
+        1280,
+        720
+      ]
+    }
+  ],
+  "ticks_per_sec": 20,
+  "frames_per_sec": 20,
+  "reset_s": 2.22,
+  "sensors_state": {
+    "DynamicsSensor": {
+      "shape": [
+        19
+      ],
+      "dtype": "float32"
+    },
+    "RPYDynamicsSensor": {
+      "shape": [
+        18
+      ],
+      "dtype": "float32"
+    },
+    "CameraView": {
+      "shape": [
+        720,
+        1280,
+        4
+      ],
+      "dtype": "uint8"
+    }
+  },
+  "pos_initial": [
+    100.0,
+    100.0,
+    0.0
+  ],
+  "target": [
+    105.479,
+    98.778,
+    -0.056
+  ],
+  "steps_done": 420,
+  "steps_per_s": 20.07,
+  "steps_per_s_wall": 20.04,
+  "step_ms_mean": 49.83,
+  "step_ms_p95": 64.34,
+  "step_ms_max": 145.23,
+  "hours_per_100k": 1.39,
+  "episodes": 1,
+  "terminated": 0,
+  "truncated": 21,
+  "episode_lengths": [
+    400,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "obs_nan_steps": 0,
+  "obs_inf_steps": 0,
+  "reward_nan": 0,
+  "reward_inf": 0,
+  "reward_min": -0.0002837727683163081,
+  "reward_max": 0.11130670359471818,
+  "reward_mean": 0.055712950968785806,
+  "obs_in_space": true,
+  "obs_not_in_space_steps": 0,
+  "obs_not_in_space_first": null,
+  "pos_final": [
+    103.99,
+    100.0,
+    -0.09
+  ],
+  "segments": [
+    {
+      "seg": "parado",
+      "steps": 40,
+      "action": "0 0 0",
+      "pos_start": [
+        100.0,
+        100.0,
+        0.0
+      ],
+      "pos_end": [
+        100.0,
+        100.0,
+        -0.025
+      ],
+      "dist_xy_m": 0.0,
+      "path_xy_m": 0.0,
+      "dz_m": -0.025,
+      "z_min_max": [
+        -0.141,
+        0.0
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        -0.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.0,
+      "speed_xy_max": 0.0,
+      "speed_xy_cv": null,
+      "stall_steps": null,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "frente_1ms",
+      "steps": 120,
+      "action": "1 0 0",
+      "pos_start": [
+        100.0,
+        100.0,
+        -0.031
+      ],
+      "pos_end": [
+        102.123,
+        100.0,
+        -0.113
+      ],
+      "dist_xy_m": 2.123,
+      "path_xy_m": 2.123,
+      "dz_m": -0.083,
+      "z_min_max": [
+        -0.13,
+        -0.025
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        -0.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.354,
+      "speed_xy_max": 0.438,
+      "speed_xy_cv": 0.331,
+      "stall_steps": 4,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "frente_2ms",
+      "steps": 100,
+      "action": "2 0 0",
+      "pos_start": [
+        102.145,
+        100.0,
+        -0.116
+      ],
+      "pos_end": [
+        105.324,
+        100.0,
+        -0.069
+      ],
+      "dist_xy_m": 3.179,
+      "path_xy_m": 3.201,
+      "dz_m": 0.046,
+      "z_min_max": [
+        -0.117,
+        -0.035
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        -0.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.64,
+      "speed_xy_max": 0.675,
+      "speed_xy_cv": 0.09,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "re_1ms",
+      "steps": 100,
+      "action": "-1 0 0",
+      "pos_start": [
+        105.357,
+        100.0,
+        -0.076
+      ],
+      "pos_end": [
+        104.626,
+        100.0,
+        -0.04
+      ],
+      "dist_xy_m": 0.731,
+      "path_xy_m": 1.504,
+      "dz_m": 0.036,
+      "z_min_max": [
+        -0.113,
+        -0.039
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        -0.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.301,
+      "speed_xy_max": 0.675,
+      "speed_xy_cv": 0.487,
+      "stall_steps": 6,
+      "terminated_steps": 0
+    },
+    {
+      "seg": "parado2",
+      "steps": 60,
+      "action": "0 0 0",
+      "pos_start": [
+        104.605,
+        100.0,
+        -0.041
+      ],
+      "pos_end": [
+        103.99,
+        100.0,
+        -0.09
+      ],
+      "dist_xy_m": 0.615,
+      "path_xy_m": 0.636,
+      "dz_m": -0.049,
+      "z_min_max": [
+        -0.111,
+        -0.04
+      ],
+      "yaw_start_end_deg": [
+        -0.0,
+        -0.0
+      ],
+      "roll_pitch_max_deg": [
+        0.0,
+        0.0
+      ],
+      "speed_xy_mean": 0.212,
+      "speed_xy_max": 0.427,
+      "speed_xy_cv": 0.438,
+      "stall_steps": 0,
+      "terminated_steps": 0
+    }
+  ],
+  "last_info": {
+    "reached_goals": 0
+  },
+  "vram_end_mb": 2085,
+  "sim_alive_after_env_close": true,
+  "sim_alive_after_on_exit": false,
+  "sim_procs_after": 0,
+  "vram_after_close_mb": 659
+}
