@@ -766,3 +766,12 @@ física do BlueBoat alterada (guinada, amortecimento, ganhos). Para voltar: `git
   `.gitignore` não foi alterado.
 - Esta seção foi escrita depois do commit (hash original `65abbc7`) e incluída nele com `git commit --amend`, a pedido
   do usuário ("inclui o TESTES.md no commit"). O amend mudou o hash; para ver o atual: `git log -1 testes-ambientes`.
+
+### Push da `testes-ambientes` (2026-09-28)
+- O push feito pelo Claude foi bloqueado pelo modo automático, porque o `origin` é o repositório do autor,
+  `github.com/mgmateus/biguagym-v0.1.0`. O próprio usuário rodou `git -C /home/teteu/biguagym-v0.1.0 push -u origin testes-ambientes`.
+- Resultado: branch nova `testes-ambientes` no remoto, com o commit `08d9ffb`; a local acompanha `origin/testes-ambientes`.
+  O GitHub sugeriu abrir um PR em https://github.com/mgmateus/biguagym-v0.1.0/pull/new/testes-ambientes (não aberto).
+- Não foram enviados: o ponteiro do submódulo, a branch `testes-ambientes` do submódulo (`32698e5`) e a
+  `testes-biguagym` do biguasim.
+- Esta seção foi escrita depois do push e commitada num commit à parte ("TESTES.md: registro do commit e do push"), sem amend, porque o commit anterior já estava no remoto.
