@@ -1056,3 +1056,10 @@ shell da run, pid 17887, cuja linha de comando continha o padrão.)
     `obs_in_space: true`. 0 processos do simulador no fim. Pastas temporárias apagadas.
   - Não testado: a extração do `SkyDive.tar.zst`, porque não há espaço no notebook. O tar foi validado com
     `zstd -t` e a listagem dele confere com o manifest (978 arquivos).
+
+### Push das branches nos forks (2026-10-03, autorizado pelo usuário: "pode fazer o push das branches nos forks")
+- `git -C ~/biguasim push git@github.com:ttszin/biguasim.git testes-biguagym` → `ttszin/biguasim` `testes-biguagym` = `53ad1f9d`.
+- `git -C biguagym push git@github.com:ttszin/biguagym.git testes-ambientes` → `ttszin/biguagym` `testes-ambientes` = `32698e5`.
+- Conferido com `git ls-remote`. Nada foi enviado aos repositórios dos autores (`hydrone-furg/*`).
+- O `.gitmodules` continua apontando para `hydrone-furg/biguagym`, e o `setup/instalar_pc_lab.sh` continua usando os
+  bundles de `~/leva`. O mundo não está no GitHub.
