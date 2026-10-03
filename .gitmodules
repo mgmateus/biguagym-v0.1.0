@@ -1,3 +1,4 @@
 [submodule "biguagym"]
 	path = biguagym
-	url = https://github.com/hydrone-furg/biguagym.git
+	url = https://github.com/ttszin/biguagym.git
+	branch = testes-ambientes
