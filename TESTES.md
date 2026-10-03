@@ -775,3 +775,284 @@ física do BlueBoat alterada (guinada, amortecimento, ganhos). Para voltar: `git
 - Não foram enviados: o ponteiro do submódulo, a branch `testes-ambientes` do submódulo (`32698e5`) e a
   `testes-biguagym` do biguasim.
 - Esta seção foi escrita depois do push e commitada num commit à parte ("TESTES.md: registro do commit e do push"), sem amend, porque o commit anterior já estava no remoto.
+
+## Taiga — sprint 1 (2026-09-30)
+- Acesso de leitura pela API (`api.taiga.io`), projeto "Artigo BiguaGym" (`teteu-artigo-biguagym`, id 1808212), Sprint 1
+  (id 533840, 2026-09-30 → 2026-10-07): 4 user stories e 21 tasks. Token em `~/.config/taiga/token`, nunca impresso.
+  A primeira tentativa deu HTTP 401 porque o token estava salvo entre aspas; as aspas foram removidas só no comando, sem alterar o arquivo.
+- **Alteração no quadro (pedido explícito do usuário):** `PATCH /tasks/{id}` com status Closed (9015410) nas tasks
+  **#4, #5, #6, #7, #8** (US #2, ambiente de execução) e **#12** (medir steps/s). Todas responderam HTTP 200 e ficaram `Closed`.
+  Evidência de cada uma nas seções da Etapa 1, do venv e da Etapa 3/4 deste arquivo.
+- Consequência: a US #2 passou a `is_closed = true`, porque todas as tasks estão fechadas, mas a coluna de status dela
+  continua "New". Não foi alterada.
+- Pendências apontadas ao usuário: #11 foi fechada no quadro, mas o DjiMatriceLand-v0 rodou sem viewer, e o píer e o
+  landing pad não aparecem nos frames.
+- Memória criada: `taiga-acesso` (caminho do token, ids e regras de uso da API).
+
+## Planilha de ambientes e movimentos do BlueBoat (2026-09-30)
+- Pedido do usuário: tabela com todos os ambientes, separada em v0/v1/v2, e outra com os movimentos do BlueBoat.
+  O usuário estimou 52 ambientes; são **54** (20 v0, 20 v1, 14 v2).
+- Arquivo novo: **`docs/ambientes_biguagym.xlsx`** (pasta `docs/` criada). Abas:
+  - `Resumo`: contagem veículo × versão e status do smoke test por versão (fórmulas `COUNTIF`/`SUM`), com legenda e notas.
+  - `v0_estado`, `v1_pixels`, `v2_distancia`: uma linha por ambiente, com veículo, domínio, tarefa, descrição, classe,
+    controle, spawn, máx. passos, observação e dimensão, sensores, dimensão/faixa da ação (com o patch 32698e5),
+    status/detalhe do smoke test e observações.
+  - `Movimentos BlueBoat`: 23 movimentos em 4 modos de controle + percursos (8, seno, random, spiral, plataforma
+    móvel), com comando, o que faz, resultado medido, situação e pasta de evidência.
+- Fonte dos dados: `gym.registry` (extraído com o venv, sem simulador), `core/environments.py` e as medições deste arquivo.
+  Gerada por `gera_planilha.py` (scratchpad) com o openpyxl do Python do sistema (o `venv-biguagym` não tem openpyxl;
+  nada foi instalado).
+- Recalculo: o `recalc.py` do skill de planilhas não rodou (o LibreOffice via snap não cria perfil no /tmp). Em vez
+  disso, a planilha foi marcada com `fullCalcOnLoad` (recalcula ao abrir) e as fórmulas foram conferidas em Python:
+  totais 20/20/14 = 54; status ok 6, erro 1, esperado falhar 13, não testado 34.
+- Inconsistências do `register.py` registradas na planilha: Torpedo TrajectoryFollower v0/v1 usam `cmd_motor_speeds` e
+  z = 0 (os outros Torpedo usam `cmd_rudders_sterns_motor_speed` e z = −0.2); HydroneNav-v2 com spawn z = −1 (v0/v1: z = 0).
+
+## Proposta dos 10 ambientes para o artigo (2026-10-01) — aguardando decisão do usuário (task #42 no Taiga)
+- O `train_routines.yaml` não define 10 ambientes: lista os 20 v0 (TD3/PPO) e HydroneNav-v1/v2 (SAC/DDPG/CUPRL).
+- Critérios: cobrir domínios e tarefas; comparar sensores mudando só v0/v1/v2 no mesmo veículo e tarefa; preferir o que já rodou.
+- Proposta: DjiMatriceNav-v0, DjiMatriceLand-v0, DjiMatriceTrajectoryFollower-v0, BlueBoatNav-v0,
+  BlueBoatTrajectoryFollower-v0, BlueROV2Nav-v0, BlueROV2Dock-v0, HydroneNav-v0, HydroneNav-v2, HydroneNav-v1.
+  Plano B, se o Hydrone não funcionar na versão nova: BlueBoatNav-v2, BlueBoatNav-v1 e BlueROV2TrajectoryFollower-v0.
+- Fora: BlueROVHeavy (crash, redundante), Torpedo (registro inconsistente, não testado), Hover (trivial), Land-v2 (multiagente).
+- Custo estimado: 3 M passos por algoritmo ≈ 42 h a 20 passos/s, mais resets; TD3 + PPO ≈ 90–100 h.
+- Usuário vai avaliar os ambientes e decidir.
+
+### Decisão: os 10 ambientes do artigo (2026-10-01)
+- **Decisão do usuário:** usar os 10 ambientes propostos acima, como o essencial para começar. O usuário considera 10
+  pouco para cobrir tudo, mas aceita como ponto de partida.
+  1. DjiMatriceNav-v0 · 2. DjiMatriceLand-v0 · 3. DjiMatriceTrajectoryFollower-v0 · 4. BlueBoatNav-v0 ·
+  5. BlueBoatTrajectoryFollower-v0 · 6. BlueROV2Nav-v0 · 7. BlueROV2Dock-v0 · 8. HydroneNav-v0 · 9. HydroneNav-v2 · 10. HydroneNav-v1
+- Dependências: 8–10 precisam da versão nova do simulador (Hydrone sem dinâmica no 1.0.0); o 10 (pixels) precisa
+  também da correção do `PixelStack` (Etapa 6). Plano B: BlueBoatNav-v2, BlueBoatNav-v1, BlueROV2TrajectoryFollower-v0.
+- Smoke test ainda não feito em: DjiMatriceNav-v0, DjiMatriceTrajectoryFollower-v0 e os 3 Hydrone.
+- Sobre o orçamento de 100k passos (explicado ao usuário): não é para medir convergência, e sim (1) mostrar que os
+  ambientes são aprendíveis contra a política aleatória, (2) comparar algoritmos e sensores com o mesmo orçamento
+  (eficiência amostral, como no Atari/DMControl 100k) e (3) servir de linha de base. Convergência só em poucos
+  ambientes, com runs mais longas. Antes do lote completo: versão nova, correção do vazamento do `close()` e um piloto
+  de 1 seed com ~20–30k passos por ambiente. Nenhum treino sem aprovação (regra 2).
+
+## Vídeo das rotinas do BlueBoat (2026-10-01)
+- Pedido do usuário: "salve o vídeo de um teste que mostre as trajetórias de todas as rotinas do blueboat", antes do
+  próximo smoke test.
+- Fechar a task #42 no Taiga (pedido do usuário) **não foi possível**: o token salvo expirou em 2026-09-30 20:46.
+  Fica pendente até o usuário gerar um token novo.
+- `~/biguasim` foi trocado para `testes-biguagym` (`53ad1f9d`) só durante a gravação e depois voltou para a `sitl-test` (`b0c6685e`).
+- Arquivo novo: **`tools/video_rotinas_blueboat.py`** (script de teste; não altera o `smoke_test.py`, só importa
+  `parse_program` e `PathFollower`). Cada quadro tem, lado a lado, a câmera do simulador (`CameraView` 960×540, com
+  rotina, segmento, ação, t, v, yaw e z) e a vista de cima (trajetória, rumo, alvo atual e referência no 8/seno, grade de
+  1 m). Cada rotina começa com uma vinheta de 1.5 s. 20 fps = tempo real. Encerra cada simulador com `__on_exit__()`.
+- Teste curto: `--only cmd_vel` (420 passos, 21 s); quadros conferidos visualmente.
+- Comando: `/home/teteu/venv-biguagym/bin/python tools/video_rotinas_blueboat.py` (log em `smoke_results/video_rotinas.log`);
+  `exit=0`, 0 processos do simulador no fim.
+- **Saída: `smoke_results/videos/blueboat_rotinas.mp4`** — 4 min 03 s, 1500×540, H.264, 20 fps, 44.5 MB. Gráficos do
+  8 e do seno em `smoke_results/videos/{oito,seno}/trajetoria.png`.
+
+| Rotina | Controle | Passos | Resultado |
+|---|---|---|---|
+| Motores diretos | cmd_motor_speeds | 600 | parado, frente lenta/rápida, ré, giros e curva |
+| Curvas longas | cmd_motor_speeds | 720 | círculos à esquerda e à direita |
+| Velocidade | cmd_vel | 420 | 1 m/s, 2 m/s, ré |
+| Velocidade + guinada | cmd_vel_yaw | 400 | girar, reto, curva |
+| Ir até pontos | cmd_pos_yaw | 600 | 3 alvos |
+| Percurso em 8 | cmd_pos_yaw (pure pursuit) | 1036 | completo; desvio médio 0.40 m, máx 1.29 m, 74% a <0.5 m (igual a `oito_p3`: simulação determinística) |
+| Seno | cmd_pos_yaw (pure pursuit) | 868 | completo; desvio médio 0.28 m, máx 0.59 m, 85% a <0.5 m (igual a `seno_p3`) |
+
+## Etapa 4 (continuação) e v1/v2 — ambientes restantes sem Hydrone (2026-10-01)
+- Pedido do usuário: smoke test de todos os ambientes que faltavam, exceto o Hydrone (sem versão nova do simulador).
+  BlueROVHeavy também ficou de fora: o crash do Unreal já estava confirmado e cada ambiente travaria até o timeout.
+- `~/biguasim` foi trocado para `testes-biguagym` (`53ad1f9d`) durante os lotes e depois voltou para a `sitl-test` (`b0c6685e`).
+- Comandos (log em `smoke_results/lotes_restantes.log`), cada lote numa pasta com o seu `resumo.csv`:
+  - `smoke_test.py --all --filter v0 --filter DjiMatrice,Torpedo --steps 200 --frame-every 100 --timeout 600 --out smoke_results/lote_v0`
+  - `... --filter v1 --filter DjiMatrice,BlueBoat,BlueROV2,Torpedo ... --out smoke_results/lote_v1`
+  - `... --filter v2 --filter DjiMatrice,BlueBoat,BlueROV2,Torpedo ... --out smoke_results/lote_v2`
+  - 0 processos do simulador ao fim de cada lote.
+
+| Lote | Resultado | Falhas |
+|---|---|---|
+| v0 (7) | **6/7 ok**: DjiMatrice Hover/Land/Nav/Trajectory (19.8 steps/s; obs 19/39; ação 4), TorpedoDock/Nav (20 steps/s; ação 5) | TorpedoTrajectoryFollower-v0 |
+| v1 (12) | **11/12 ok**: todos com obs `rgb: 9×84×84`, 19.4–19.9 steps/s (a câmera não deixa o simulador mais lento) | TorpedoTrajectoryFollower-v1 |
+| v2 (9) | **8/9 ok**: dimensões conferem com o esperado | DjiMatriceLand-v2 |
+
+Dimensões do v2 (esperado: aéreo +10, subaquático +100, superfície +110): DjiMatriceNav 29 ✅, DjiMatriceTrajectory 49 ✅,
+BlueBoatNav 129 ✅, BlueBoatTrajectory 149 ✅, BlueROV2Nav 119 ✅, BlueROV2Trajectory 139 ✅, TorpedoNav 119 ✅, TorpedoTrajectory 139 ✅.
+Nenhum NaN/inf; `obs_in_space` true em todos os que rodaram.
+
+### Problemas encontrados
+1. **TorpedoTrajectoryFollower v0 e v1 — erro de registro.** Traceback (final):
+   ```
+   File ".../biguasim/environments.py", line 635, in step
+     action = dynamics_model.step(state[agent_name], [cmds], dt)
+   File ".../biguasim/dynamics/base_model.py", line 157, in step
+     cmd_ctrl = torch.clip(
+   TypeError: clip() received an invalid combination of arguments - got (NoneType, Tensor, Tensor), ...
+   ```
+   Causa: `register.py` registra esses dois com `control_abstraction='cmd_motor_speeds'`, mas a dinâmica do TorpedoAUV
+   (`uuv.py:1350`, `get_cmd_motor_speeds`) só trata `cmd_rudders_sterns_motor_speed` e `cmd_depth_heading_rpm_surge`;
+   com outro modo, retorna `None`. **Correção proposta (não aplicada):** nos dois registros, usar
+   `control_abstraction='cmd_rudders_sterns_motor_speed'` e `location=[100, 100, -0.2]`, como no v2 e nos outros Torpedo.
+2. **DjiMatriceLand-v2 (cooperativo) — API ausente no biguasim 1.0.0:**
+   `environments.py:1546 _reset → self._env.move_agent('target_robot', ...)` →
+   `AttributeError: 'BiguaSimEnvironment' object has no attribute 'move_agent'`. Vale também para o HydroneLand-v2.
+   Mais uma diferença de API que provavelmente a 1.1.0 resolve.
+3. **Torpedo "congelado" (passa no smoke test, mas não se move).** Em todos os Torpedo que rodaram (Dock/Nav v0, v1 e v2),
+   a posição final é **igual** à inicial ([100.86, 100.03, -0.23]) e a recompensa é sempre 0. Ninguém conseguiria
+   treinar nesses ambientes. Ainda não foi investigado. Pistas: o `action_space` usa `low[0]`/`high[0]` = ±90 para as
+   5 dimensões (o rpm vai até ±1525); o spawn sai em x = 100.86, não em 100.
+4. **Sonar lento no BlueBoat e no BlueROV2 (v2).** Tempo médio por passo: BlueBoatNav-v2 **1732 ms** (p95 6975, máx 11575);
+   BlueROV2Nav-v2 **1393 ms** (máx 28 s); BlueBoatTrajectory-v2 308 ms; BlueROV2Trajectory-v2 274 ms. TorpedoNav/Trajectory-v2
+   (com sonar) ficam em 50 ms, mas o Torpedo não se move. Com o RangeFinder só (DjiMatrice v2), 20 steps/s normais.
+   - O que já se sabe: o sonar (`range.json`: `ProfilingSonar` a 20 Hz, `MultiPath: true`, 10×10 bins, 1–10 m) é a
+     diferença em relação ao v0. Nav e Trajectory do mesmo veículo fizeram **o mesmo percurso** (mesma posição final),
+     mas o Nav custou ~5× mais por passo; então não é só o que o sonar "enxerga". O desenho de debug também não explica:
+     o Trajectory desenha ~100 pontos por passo e o Nav, 1.
+   - Impacto: a ~0.6–0.7 steps/s, 100k passos levariam **~40–48 h por run**. Afeta o HydroneNav-v2 (um dos 10 do artigo,
+     também tem sonar).
+   - Proposta (não aplicada): diagnóstico dedicado. Medir o tempo por passo com `MultiPath: false` e com o sonar a
+     frequência menor, e repetir Nav × Trajectory com a mesma ação constante.
+
+### Situação dos 10 ambientes do artigo
+- Smoke test ok: DjiMatriceNav-v0, DjiMatriceLand-v0, DjiMatriceTrajectoryFollower-v0, BlueBoatNav-v0,
+  BlueBoatTrajectoryFollower-v0, BlueROV2Nav-v0, BlueROV2Dock-v0 (7/10).
+- Pendentes: HydroneNav-v0/v1/v2 (versão nova). Para o v2, o sonar lento é um risco de custo.
+
+### Taiga atualizado (2026-10-01)
+- Token novo salvo pelo usuário em `~/.config/taiga/token`. Pedido: "pode atualizar o taiga" (fechar a #42 com a lista e,
+  conforme oferecido, atualizar as tasks do smoke test).
+- A #42 já tinha sido fechada pelo próprio usuário, sem descrição nem comentário. Todas as alterações via `PATCH /tasks/{id}` com HTTP 200:
+  - **#42** (Selecionar os 10 ambientes): comentário com a tabela dos 10 ambientes, o plano B e o estado do smoke test. Continua Closed.
+  - **#13** (v0): comentário com os resultados (12 ok, erros de BlueROVHeavy e TorpedoTrajectoryFollower, Torpedo
+    congelado, Hydrone pendente). Continua In progress.
+  - **#14** (v2): New → **In progress**, com comentário (8/9 ok, dimensões conferidas, erro do Land-v2, sonar lento).
+  - **#15** (v1/Etapa 6): New → **In progress**, com comentário (11/12 ok; a comparação câmera × observação continua pendente).
+- Não alterada: #110, que o usuário renomeou para "Testar rotinas de movimento BlueBoat (Versão Simulador 1.1)".
+- Pedido seguinte do usuário: "nas tasks que já foram closed, coloque as informações, resultados e dados necessários
+  em cada uma". Comentário adicionado (`PATCH` com `comment`, todos HTTP 200, status inalterado) nas 9 tasks fechadas que
+  não tinham comentário: **#3** (clone e commits base), **#4** (branches dos 3 repositórios), **#5** (CLAUDE.md,
+  smoke_test.py e ferramentas criadas), **#6** (imports e versões do venv), **#7** (requirements, Python 3.12, biguasim
+  1.1.0 ausente), **#8** (GPU/VRAM e ~1.7 GB por simulador), **#10** (54 ids por versão e veículo, exceções),
+  **#11** (resultado do DjiMatriceLand-v0, com o aviso de que rodou sem viewer e de que píer e pad não aparecem),
+  **#12** (~20 steps/s, reset 2.2 s, exceção do sonar no v2). A #42 já tinha o comentário com a lista.
+
+## Etapa 5 / task #19 — reprodução do vazamento do simulador de avaliação (2026-10-02)
+
+### Taiga (pedido do usuário: "sim, pode fazer as duas")
+- Criadas na US #9 (status New, com descrição): **#111** sonar lento nos v2, **#112** Torpedo congelado,
+  **#113** registro do TorpedoTrajectoryFollower v0/v1.
+- **#19** → In progress. **Erro meu:** o primeiro PATCH usou um id deduzido pela sequência (9348388) em vez do id real
+  da lista e voltou **HTTP 403** ("You do not have permission"). Nada foi alterado: esse id não existe para o projeto
+  (GET → 404). Refeito com o id real (9348389) → HTTP 200.
+
+### Preparação
+- **Bloqueio novo:** `config/config.yaml` tem `override hydra/launcher: joblib`, mas o plugin `hydra-joblib-launcher` não
+  está instalado nem listado no `environment.yml` → `In 'hydra/config': Could not find 'hydra/launcher/joblib'`.
+  Contornado **sem instalar nada**, com `hydra/launcher=basic` na linha de comando (vale para uma run única; o multirun
+  com joblib continua quebrado).
+- **Risco evitado:** `seed_curves` lê o arquivo versionado `curves/td3-state-BlueBoatNav_v0.csv` (último `frame` 9600 ≥ 3000)
+  e começaria da seed 1. Com `runs=1`, **não treinaria nada**; em outro caso, o arquivo seria reescrito (linhas apagadas).
+  Por isso curvas e logs foram redirecionados para `smoke_results/repro_19/` (`curves_path`, `logs_path`).
+- `~/biguasim` foi trocado para `testes-biguagym` durante a run e depois voltou para a `sitl-test`.
+- Monitor `smoke_results/repro_19/monitor.sh`: a cada 10 s grava em `monitor.csv` os processos do simulador, a VRAM e a RAM.
+  Proteção: com VRAM ≥ 5700 MiB, encerra o grupo de processos da run.
+
+### Comando
+```
+python run.py hydra/launcher=basic env=BlueBoatNav-v0 agent=td3 num_train_steps=3000 eval_freq=500 num_eval_episodes=1 runs=1 agent.learning_starts=500 curves_path=smoke_results/repro_19/curves logs_path=smoke_results/repro_19/logs
+```
+
+### Resultado — **vazamento confirmado** (`smoke_results/repro_19/monitor.csv`, `run.log`)
+| t (s) | Simuladores reais | VRAM (MiB) | RAM dos simuladores (MiB) | Evento |
+|---|---|---|---|---|
+| 0 | 0 | 141 | — | início |
+| 10 | 1 | 1386 | 1386 | simulador de treino |
+| 20 | **2** | 2291 | 2870 | avaliação no passo 0 (`step % eval_freq == 0` inclui o 0) |
+| 71 | **3** | 3504 | 4110 | avaliação no passo 500 |
+| 131 | **4** | **5805** | 7008 | avaliação no passo 1000 → proteção disparou |
+
+(A coluna `procs_simulador` do CSV conta +1 em todas as linhas: um falso positivo do `pgrep -f`, que pegou o próprio
+shell da run, pid 17887, cuja linha de comando continha o padrão.)
+- **Cada avaliação abre um simulador novo (~1.2–2 GB de VRAM) e nenhum é fechado.** O `eval_env.close()` de
+  `Workspace.evaluate()` (`workspace.py:120`) só faz `del self._env`. Na RTX 3050, o limite chega na 3ª avaliação.
+  Com o padrão `eval_freq: 100000`, ao passo 800k seriam 9 simuladores: é o bug dos ~800k.
+- Laço de treino até ser interrompido: passo ~1000, episódios de treino e 2 avaliações (MR -8.85), vídeos `eval_*.mp4` gravados.
+
+### Problemas na própria reprodução (corrigidos)
+- **A proteção encerrou o grupo errado.** O `setsid` se bifurcou: o pid capturado (17887) era o processo de partida, e o
+  `run.py` virou o líder do grupo 17889. O `kill` no 17887 não pegou a run, que continuou com 4 simuladores
+  (5765 MiB). Encerrei manualmente o grupo **17889** (TERM, depois KILL; só processos iniciados por mim) →
+  0 processos do simulador, 0 `run.py`, VRAM em 147 MiB.
+- **Memória compartilhada órfã:** os simuladores mortos à força (sem `__on_exit__`) deixaram **52 entradas em `/dev/shm`**
+  (4 UUIDs × 11 segmentos `HOLODECK_MEM*` + 8 semáforos `sem.HOLODECK_SEMAPHORE_*`), 15 MB, todas criadas entre
+  14:56 e 14:58 (só desta run) e sem uso (`fuser` vazio). Removidas. É outro sintoma do mesmo problema: sem
+  `__on_exit__` / `client.unlink()`, a memória compartilhada também vaza.
+
+### Confirmação de passagem da task #23
+- A run sobrescreveu `crash.log` e `fault.log` na raiz (14:56): os logs anteriores (de 2026-09-28) se perderam.
+  Isso confirma o problema do modo `"w"` em `logger.py:56-61`.
+
+### Próximo passo
+- Abrir a spec **`vazamento-simulador`** (`/spec-requisitos`) com esta evidência: tasks #21 (close), #22 (um ambiente de
+  avaliação reutilizado), #24 (validação). E a spec `logs-por-run` para a #23.
+- Taiga: a #19 pode ser fechada com o resumo acima. O token expirou às 14:57, durante a run; fica pendente até ser renovado.
+
+## Onde vai rodar o treino (2026-10-02)
+- Decisão do usuário: os treinos do artigo vão rodar num **PC do laboratório**. O cluster fica para os experimentos do TCC.
+- Consequência: os resultados de código, lógica e física (dimensões, bugs, física do BlueBoat, mecanismo do vazamento)
+  valem lá também. Precisam ser **refeitos no PC do laboratório** os testes que dependem de hardware: instalação, GPU/VRAM
+  (quantos simuladores em paralelo), velocidade (inclusive o sonar), renderização da câmera (v1) e o teste com viewer da
+  #11. A validação da correção do vazamento (#24) também deve ser feita lá.
+- Atenção: os patches que fazem os ambientes rodarem (biguasim `testes-biguagym`, 4 commits; submódulo `32698e5`)
+  existem **só nesta máquina**. Para levá-los: esperar a versão nova do simulador ou exportar com `git format-patch`/`git bundle`.
+
+## Levar o ambiente para o PC do laboratório (2026-10-02/03)
+
+### Pacote em `~/leva` (no notebook, fora do repositório)
+- `biguasim.bundle` (429 MB): branches `testes-biguagym` (`53ad1f9d`) e `sitl-test` (`b0c6685e`), com `git bundle verify` ok.
+- `biguagym.bundle` (44 KB): `testes-ambientes` do submódulo (`32698e5`).
+- `SkyDive.tar.zst` (1,3 GB, md5 `bd371b063645adabe9ef38c13fdb5b6d`): o mundo com o patch do BlueBoat, comprimido de 18 GB.
+  Ficaram de fora os backups `_P_backups`, `_BASE_backups`, `Linux_pre_restauracao_pristina_*` e
+  `Linux_pacote_completo_quebrado_sem_mundo`. Quase todo o volume eram os JSON de octree
+  (`Octrees/Pier-Harbor`, 13,5 GB), que comprimem ~33× com zstd.
+- `skydive_manifest.txt`: os 978 arquivos do mundo com tamanhos (cópia em `setup/skydive_manifest.txt`).
+- O servidor de mundos do biguasim (`BACKEND_URL = https://10.228.0.40:8000/`, `packagemanager.py:23`) não
+  responde nem do notebook (timeout) nem do PC do lab ("No route to host"). Por isso o mundo é copiado.
+- Transferência para o PC do lab: pela transferência de arquivos do AnyDesk.
+
+### Tentativa com Docker: cancelada a pedido do usuário
+- Os arquivos ficaram em `~/leva/docker/`: base `nvidia/cuda:12.6.3-base-ubuntu24.04`, libs de Vulkan/X11, usuário
+  não-root, código e mundo como volumes.
+- 1º build: falhou no `evdev` (dependência do `pynput`), que compila do código-fonte e precisa de `gcc`,
+  `python3.12-dev` e `linux-libc-dev`.
+- 2º build: a imagem foi criada (13,3 GB), mas o disco do notebook encheu (6,7 GB livres, 99%).
+- Limpeza: `docker rmi biguagym:testes` + `docker builder prune --filter id=…` só nas entradas de cache criadas
+  pelo build de 2026-10-02, ~21 GB. O cache e as imagens dos outros projetos não foram tocados. Disco: 28 GB livres.
+  `~/leva/docker/` e `~/leva/patch_blueboat/` (redundante, o patch está no tar) foram apagados.
+
+### GitHub
+- Repositórios: `mgmateus/biguagym-v0.1.0` (público, escrita), `hydrone-furg/biguasim` (público, só leitura;
+  `b0c6685` e os 9 commits do ttszin só existem localmente), `hydrone-furg/biguagym` (público, maintain;
+  só o `32698e5` é local).
+- Criados os forks `ttszin/biguasim` e `ttszin/biguagym` (`gh repo fork`). **Ainda estão sem as branches de teste:**
+  o push delas e a troca da URL do submódulo para o fork foram bloqueados pelo controle de permissões do
+  Claude Code. Isso depende de decisão do usuário. O mundo também não foi enviado ao GitHub.
+- O `origin/sitl-test` do biguasim está em `66a1b931 v1.0.2` (2026-06-08). Não é a versão nova esperada.
+
+### `setup/instalar_pc_lab.sh` (novo)
+- Instala a partir de `~/leva`:
+  1. pré-requisitos;
+  2. submódulo no `32698e5` (do bundle);
+  3. `~/biguasim` no `53ad1f9d` (do bundle);
+  4. venv Python 3.12 (`python3.12` ou conda) com `requirements-venv.txt` + `pip install -e ~/biguasim --no-deps`;
+  5. extração do mundo com conferência de md5 e do manifest;
+  6. imports, CUDA e `smoke_test.py --list`.
+- Pode ser rodado de novo e não sobrescreve repositórios com alterações locais.
+- Decisão: é ferramenta de instalação, não altera ambiente nem agente, por isso não passou pelo fluxo de spec.
+- Teste no notebook (2026-10-03), com biguasim e venv em pastas temporárias, para não mexer em `~/biguasim` nem em
+  `~/venv-biguagym`; o mundo já instalado foi reaproveitado:
+  `env BIGUASIM=<tmp>/biguasim VENV=<tmp>/venv bash setup/instalar_pc_lab.sh`
+  - Resultado: `exit 0`. Submódulo `32698e5`, biguasim `53ad1f9d`, torch 2.7.1+cu126 com CUDA, mundo idêntico ao manifest,
+    54 ids.
+  - Smoke com essa instalação: `DjiMatriceLand-v0`, 50 passos, `status ok`, 19,62 steps/s, obs 19, ação 4,
+    `obs_in_space: true`. 0 processos do simulador no fim. Pastas temporárias apagadas.
+  - Não testado: a extração do `SkyDive.tar.zst`, porque não há espaço no notebook. O tar foi validado com
+    `zstd -t` e a listagem dele confere com o manifest (978 arquivos).
