@@ -89,9 +89,10 @@ else
     tar --zstd -xf "$LEVA/SkyDive.tar.zst" -C "$WORLDS"
 fi
 (cd "$WORLDS/SkyDive" && find config.json idColors.txt materials.csv palette.json Linux -type f \
-    -not -path "*/_P_backups/*" -not -path "*/_BASE_backups/*" -printf "%s %p\n" | sort -k2) \
+    -not -path "*/_P_backups/*" -not -path "*/_BASE_backups/*" -not -path "Linux/Biguasim/Saved/*" \
+    -printf "%s %p\n" | sort -k2) \
     | diff -q "$REPO/setup/skydive_manifest.txt" - >/dev/null \
-    && echo "mundo idêntico ao do notebook (978 arquivos)" \
+    && echo "mundo idêntico ao do notebook ($(wc -l < "$REPO/setup/skydive_manifest.txt") arquivos; Saved/ ignorada)" \
     || echo "AVISO: o mundo difere de setup/skydive_manifest.txt (confira com diff)"
 
 passo "6/6 Verificação"

@@ -1063,3 +1063,18 @@ shell da run, pid 17887, cuja linha de comando continha o padrão.)
 - Conferido com `git ls-remote`. Nada foi enviado aos repositórios dos autores (`hydrone-furg/*`).
 - O `.gitmodules` continua apontando para `hydrone-furg/biguagym`, e o `setup/instalar_pc_lab.sh` continua usando os
   bundles de `~/leva`. O mundo não está no GitHub.
+
+### Submódulo e instalador apontando para os forks (2026-10-03, autorizado: "pode trocar a url do submódulo e adaptar o script")
+- `.gitmodules`: `url = https://github.com/ttszin/biguagym.git` e `branch = testes-ambientes`. O ponteiro do submódulo passou de
+  `a05e14b` para `32698e5`.
+- `setup/instalar_pc_lab.sh`:
+  - passo 2: agora usa `git submodule sync` + `update --init` (do fork);
+  - passo 3: clona `https://github.com/ttszin/biguasim.git` (`testes-biguagym`). Se `~/biguasim` já existe, faz fetch da
+    branch do fork sem trocar o `origin`;
+  - os bundles não são mais necessários; de `~/leva` só é usado o `SkyDive.tar.zst`.
+- Teste com um clone novo do commit numa pasta temporária (biguasim e venv também temporários): `exit 0`, submódulo vindo de
+  `ttszin/biguagym` em `32698e5`, biguasim de `ttszin/biguasim` em `53ad1f9d`, torch com CUDA, 54 ids.
+- Problema encontrado no teste: o aviso "mundo difere do manifest" vinha de `Linux/Biguasim/Saved/`, onde o simulador grava
+  logs e relatórios de crash a cada execução (`HolodeckLog.txt`, `CrashReportClient.ini`).
+  - Correção: `setup/skydive_manifest.txt` agora exclui `Saved/` (562 arquivos) e o script ignora essa pasta na comparação.
+  - Teste repetido: "mundo idêntico (562 arquivos)". Pastas temporárias apagadas.
