@@ -1135,3 +1135,13 @@ veiculo hydrone pois ainda não temos o simulador". Vale como a autorização da
   - Fechar a tela não suspende mais. Para liberar antes: `kill 14242`.
   - O `fila_100k.sh` não foi alterado: editar um script bash em execução é arriscado. Num próximo início, rodar a fila
     dentro do `systemd-inhibit`.
+
+### Ritmo depois do aprendizado começar (2026-10-05, 18:47)
+- `DjiMatriceNav-v0_s0` no passo 30.903 (episódio 4526), 3 h 08 min depois do início (~10 min suspenso).
+- Fase aleatória (0–25k): ~3,5 passos/s. Desde o passo 25k (as atualizações do TD3 começaram):
+  **~1,4 passos/s** (30.913 → 31.042 em 90 s, 40 episódios, ~3,2 passos por episódio).
+  - Os episódios ficaram mais curtos, e o tempo é dominado pelo reset (~2 s por episódio).
+- Projeção do run: faltam ~69k passos a 1,4/s ≈ 13–14 h, mas o **timeout de 12 h vence às ~03:38**, por volta do passo
+  ~75k. O run seria encerrado sem a avaliação final, e o seed não ficaria marcado como concluído (`.ok`).
+- Se os outros ambientes forem parecidos: ~15–17 h por run × 30 runs ≈ 3 semanas.
+- Pendente: decisão do usuário (timeout, número de seeds ou custo do reset).
