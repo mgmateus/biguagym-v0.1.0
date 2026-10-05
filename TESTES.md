@@ -1078,3 +1078,46 @@ shell da run, pid 17887, cuja linha de comando continha o padrão.)
   logs e relatórios de crash a cada execução (`HolodeckLog.txt`, `CrashReportClient.ini`).
   - Correção: `setup/skydive_manifest.txt` agora exclui `Saved/` (562 arquivos) e o script ignora essa pasta na comparação.
   - Teste repetido: "mundo idêntico (562 arquivos)". Pastas temporárias apagadas.
+
+## Treinos de 100k passos, sem os ambientes do Hydrone (2026-10-05)
+Pedido do usuário: "coloque para rodar os 100k de steps de todos os 10 ambientes que conseguimos rodar, sem ser os do
+veiculo hydrone pois ainda não temos o simulador". Vale como a autorização da regra 2 para treinos > 5k passos.
+
+### Escolhas (feitas por mim; podem ser revistas)
+- **Máquina:** este notebook (RTX 3050 6 GB), a única a que tenho acesso. O plano era rodar no PC do lab.
+- **Ambientes (10):** os 7 da lista do artigo sem Hydrone (DjiMatriceNav-v0, DjiMatriceLand-v0,
+  DjiMatriceTrajectoryFollower-v0, BlueBoatNav-v0, BlueBoatTrajectoryFollower-v0, BlueROV2Nav-v0, BlueROV2Dock-v0) +
+  o plano B (BlueROV2TrajectoryFollower-v0, BlueBoatNav-v2, BlueBoatNav-v1).
+  - O **BlueBoatNav-v1 fica por último**: o bug do `np.resize` dos pixels (Etapa 6) ainda não foi corrigido, então esse
+    resultado não vale para o artigo até a spec `pipeline-pixels`.
+- **Agente e configuração:** TD3 com a config padrão (`learning_starts` 25000, `eval_freq` 100000, 5 episódios de
+  avaliação), 3 seeds (0, 1, 2). Ordem: seed 0 de todos os ambientes, depois seed 1, depois seed 2.
+- **Um processo `run.py` por seed** (`runs=s+1`; o seed vem do CSV da curva, ver `logger.seed_curves`). Motivo: o vazamento
+  do `close()` não foi corrigido (a spec `vazamento-simulador` está em rascunho). Cada processo acumula 3 simuladores:
+  treino, avaliação do passo 0 e avaliação final (~4 GB). Com `runs=3` num processo só, seriam 7, e os 6 GB estouram
+  (a reprodução da #19 chegou a 5805 MiB com 4 simuladores).
+- **Simulador:** `~/biguasim` foi mantido na `sitl-test` (é usado pelo venv do ArduPilot). Clonei a `testes-biguagym`
+  em `~/biguasim-treino` (`53ad1f9d`) e apontei só o `venv-biguagym` para ela
+  (`pip install -e ~/biguasim-treino --no-deps`). Para voltar: `pip install -e ~/biguasim --no-deps`.
+- **Checkout:** alinhada com o `origin/testes-ambientes` (`1fed5ad`; o `TESTES.md` local era idêntico ao início do
+  remoto). Submódulo no `32698e5`.
+
+### `treinos/fila_100k.sh` (novo)
+- Fila com retomada (marcador `.ok` por run; o seed s só roda se o s-1 terminou) e timeout por run.
+- Cada run tem `saida.log` próprio, e no fim são copiados o `crash.log`, o `fault.log` e o `run.log`, que o logger
+  sobrescreve (task #23).
+- No fim de cada run, encerra o que sobrou no grupo de processos do próprio run.
+- `monitor.csv` registra simuladores, VRAM e RAM a cada 60 s.
+- Saída em `treinos/100k/` (`estado.csv`, `curves/`, `logs/`, `runs/<amb>_s<seed>/`), fora do git.
+- Comando: `nohup setsid bash treinos/fila_100k.sh > treinos/100k/fila.log 2>&1 &`. Para parar:
+  `kill -TERM -$(cat treinos/100k/fila.pgid)` e o grupo em `runs/<run>/pgid`.
+
+### Primeira partida (15:33) e reinício (15:38)
+- 2 simuladores (treino + avaliação do passo 0), VRAM 3,5 GB, sem erros. A avaliação do passo 0 levou 16,5 s.
+- **Velocidade medida: ~3,8 passos/s** (406 → 636 passos em 60 s), não 20.
+  - Com ações aleatórias (até o passo 25k), os episódios do DjiMatriceNav duram ~8 passos, e cada reset do simulador é caro.
+  - Nesse ritmo, 100k passos levariam até ~7 h, e o timeout de 5 h encerraria o run.
+- Parei a fila (os dois grupos eram meus) aos 6 min, conferi 0 simuladores e VRAM em 144 MiB, subi o timeout para 12 h,
+  apaguei `treinos/100k` e reiniciei às 15:38.
+- **Estimativa de tempo:** entre ~1,5 h (se os episódios ficarem longos e o ritmo chegar a ~20 passos/s) e ~7 h por run.
+  São 30 runs: ~2 a ~9 dias no total. A primeira estimativa real sai quando o DjiMatriceNav-v0 seed 0 terminar.
