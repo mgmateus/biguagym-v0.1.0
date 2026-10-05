@@ -1145,3 +1145,20 @@ veiculo hydrone pois ainda não temos o simulador". Vale como a autorização da
   ~75k. O run seria encerrado sem a avaliação final, e o seed não ficaria marcado como concluído (`.ok`).
 - Se os outros ambientes forem parecidos: ~15–17 h por run × 30 runs ≈ 3 semanas.
 - Pendente: decisão do usuário (timeout, número de seeds ou custo do reset).
+
+### Opção 1: reinício com timeout de 48 h e só a seed 0 (2026-10-05, 18:54)
+Pedido do usuário: "pode fazer a opção 1".
+- Parei a fila, o run `DjiMatriceNav-v0_s0` (no passo 31.495) e o inibidor (PID 14242). Todos eram meus.
+  Conferido: 0 processos, VRAM em 144 MiB.
+- A tentativa anterior foi guardada em `treinos/100k_tentativa1/` (3,7 MB: logs, curva parcial, monitor), fora do git.
+- `treinos/fila_100k.sh`:
+  - `SEEDS` padrão 3 → **1** (1ª etapa: seed 0 dos 10 ambientes; depois, `SEEDS=3` retoma e pula o que tem `.ok`);
+  - `TIMEOUT` 12 h → **48 h**;
+  - o `fila.pgid` agora grava o pgid real do grupo (`ps -o pgid= $$`), porque com o `systemd-inhibit` por fora o líder do
+    grupo é o inibidor;
+  - o comentário de uso foi atualizado.
+- Novo início, já sob o inibidor:
+  `nohup setsid systemd-inhibit --what=sleep:idle:handle-lid-switch --who="biguagym fila_100k" --why="treinos 100k" --mode=block bash treinos/fila_100k.sh > treinos/100k/fila.log 2>&1 &`
+  - Conferido: pgid 27470, inibidor ativo, run com `timeout -k 60 172800`, 2 simuladores, VRAM 3457 MiB, sem traceback.
+  - Para parar: `kill -TERM -$(cat treinos/100k/fila.pgid)` e o grupo em `runs/<run>/pgid`.
+- Estimativa: ~17 h para o DjiMatriceNav; ~1 semana para os 10 ambientes se forem parecidos.

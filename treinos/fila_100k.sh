@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Fila de treinos de 100k passos (TD3, 3 seeds) nos ambientes do artigo, sem os do Hydrone.
+# Fila de treinos de 100k passos (TD3, SEEDS seeds) nos ambientes do artigo, sem os do Hydrone.
 #
 # - Um processo run.py por seed (runs=s+1; o seed vem do CSV da curva, ver logger.seed_curves).
 #   Motivo: o close() não encerra o simulador (spec vazamento-simulador), então cada processo acumula
@@ -10,7 +10,8 @@
 # - Cada run tem timeout, saída própria, cópia de crash.log/fault.log/run.log (que o logger sobrescreve)
 #   e, no fim, encerra o que sobrou no grupo de processos do próprio run.
 #
-# Uso: nohup setsid bash treinos/fila_100k.sh > treinos/100k/fila.log 2>&1 &
+# Uso: nohup setsid systemd-inhibit --what=sleep:idle:handle-lid-switch --why="treinos 100k" \
+#          bash treinos/fila_100k.sh > treinos/100k/fila.log 2>&1 &   (o inibidor impede suspender ao fechar a tela)
 #      parar: kill -TERM -<pgid da fila>   (pgid em treinos/100k/fila.pgid)
 set -uo pipefail
 
@@ -18,8 +19,8 @@ REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 PY=${PY:-$HOME/venv-biguagym/bin/python}
 OUT=$REPO/treinos/100k
 STEPS=${STEPS:-100000}
-SEEDS=${SEEDS:-3}
-TIMEOUT=${TIMEOUT:-43200}           # 12 h por run (medido ~3,8 passos/s no início do DjiMatriceNav: episódios curtos + reset caro)
+SEEDS=${SEEDS:-1}                    # 1ª etapa: só a seed 0; depois SEEDS=3 retoma pulando o que tem .ok
+TIMEOUT=${TIMEOUT:-172800}          # 48 h por run (DjiMatriceNav: ~1,4 passos/s após learning_starts → ~17 h)
 ENVS=(
     DjiMatriceNav-v0
     DjiMatriceLand-v0
@@ -36,7 +37,7 @@ SIM_RE='Binaries/Linux/Holodeck'   # processo do simulador (mesmo padrão de smo
 
 mkdir -p "$OUT/curves" "$OUT/logs" "$OUT/runs"
 cd "$REPO"
-echo $$ > "$OUT/fila.pgid"
+ps -o pgid= $$ | tr -d " " > "$OUT/fila.pgid"   # grupo (com systemd-inhibit por fora, o líder não é este bash)
 [ -f "$OUT/estado.csv" ] || echo "ambiente,seed,inicio,fim,duracao_min,exit,sims_ao_fim" > "$OUT/estado.csv"
 
 # Monitor: a cada 60 s, simuladores abertos, VRAM e RAM livre.
