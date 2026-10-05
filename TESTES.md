@@ -1121,3 +1121,17 @@ veiculo hydrone pois ainda não temos o simulador". Vale como a autorização da
   apaguei `treinos/100k` e reiniciei às 15:38.
 - **Estimativa de tempo:** entre ~1,5 h (se os episódios ficarem longos e o ritmo chegar a ~20 passos/s) e ~7 h por run.
   São 30 runs: ~2 a ~9 dias no total. A primeira estimativa real sai quando o DjiMatriceNav-v0 seed 0 terminar.
+
+### Tela fechada: suspensão (2026-10-05, 16:21)
+- O usuário fechou a tela e o notebook **suspendeu**: o `monitor.csv` não tem amostras entre 16:10:20 e 16:20:41, e o
+  journal mostra `Operation 'suspend' finished` às 16:20:35.
+- Depois da volta, a fila, o run (`DjiMatriceNav-v0_s0`, 42 min de processo) e os 2 simuladores continuaram vivos, e o
+  treino seguiu avançando (6648 → 6705 passos), sem traceback. Perderam-se ~10 min. Ritmo médio: ~3,4 passos/s
+  (6623 passos em ~32 min ativos).
+- Atenção: o `timeout` de 12 h conta o relógio de parede, inclusive o tempo suspenso.
+- Correção, sem reiniciar a fila:
+  `systemd-inhibit --what=sleep:idle:handle-lid-switch --mode=block` num processo à parte (PID 14242), que dura enquanto
+  o grupo da fila existir. Confirmado em `systemd-inhibit --list`.
+  - Fechar a tela não suspende mais. Para liberar antes: `kill 14242`.
+  - O `fila_100k.sh` não foi alterado: editar um script bash em execução é arriscado. Num próximo início, rodar a fila
+    dentro do `systemd-inhibit`.
