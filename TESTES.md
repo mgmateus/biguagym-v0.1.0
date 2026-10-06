@@ -1162,3 +1162,34 @@ Pedido do usuário: "pode fazer a opção 1".
   - Conferido: pgid 27470, inibidor ativo, run com `timeout -k 60 172800`, 2 simuladores, VRAM 3457 MiB, sem traceback.
   - Para parar: `kill -TERM -$(cat treinos/100k/fila.pgid)` e o grupo em `runs/<run>/pgid`.
 - Estimativa: ~17 h para o DjiMatriceNav; ~1 semana para os 10 ambientes se forem parecidos.
+
+### 1º run completo: DjiMatriceNav-v0, seed 0 (2026-10-06)
+- `estado.csv`: início 2026-10-05 18:54:03, fim 2026-10-06 11:33:53 (**999 min ≈ 16,7 h**), `exit 0`, 0 processos restantes.
+  `.ok` criado, e o `DjiMatriceLand-v0_s0` começou às 11:33:53. Sem suspensões (o monitor não tem lacunas).
+- Avaliação (5 episódios): passo 0 MR −2,51 → final MR −1,56 (BR −1,51). Modelos em `logs/td3-state/DjiMatriceNav-v0/run_0/models`.
+- RAM: o simulador de treino cresceu até ~4,8 GB RSS (~250 MB/h; o de avaliação ficou em 1,9 GB). A RAM livre caiu de
+  8,8 para 4,8 GB. A memória volta no fim de cada run, então o crescimento não se acumula entre ambientes. Fica a observar
+  nos runs mais longos.
+- **Curva (média por faixa de 10k passos, `curves/td3-state-DjiMatriceNav_v0.csv`):**
+
+| passos | episódios | R médio | R máx | passos/episódio |
+|---|---|---|---|---|
+| 0–10k | 1228 | −2,71 | 1,79 | 8,1 |
+| 10–20k | 1244 | −2,71 | −0,66 | 8,0 |
+| 20–30k | 2107 | −2,10 | −0,68 | 4,8 |
+| 30–40k | 3243 | −1,69 | −0,76 | 3,1 |
+| 40k–100k | ~3240 por faixa | −1,69 a −1,71 | −0,21 a −1,04 | 3,1 |
+
+- **Política degenerada: o agente aprendeu a encerrar o episódio em ~3 passos.** A "melhora" do MR é só o episódio
+  terminar mais cedo. Ficou estável do passo 30k até o 100k.
+- Causa provável (leitura de `biguagym/core/environments.py`, `HoverEnv._reward` e `_step`; NavEnv herda as duas):
+  - a recompensa por passo é `exp(-2·dist)` (≈0 longe do alvo, que fica a até ~17 m) + `3·Δdist` − inclinação (até −3)
+    − giro de guinada;
+  - não há bônus por continuar vivo nem penalidade ao terminar;
+  - o episódio termina com |roll| ou |pitch| > 15° ou fora da área (±10 m);
+  - como a soma é quase sempre negativa, o retorno ótimo para o TD3 é cair o mais rápido possível (3 passos, −1,7 contra
+    −2,7 da política aleatória).
+  - O LandEnv e o TrajectoryEnv também herdam o `HoverEnv`, então podem ter o mesmo problema.
+- Também explica a lentidão: com episódios de 3 passos, o tempo vai quase todo para o reset (~2 s).
+- Não alterei nada. A fila continua. Corrigir a recompensa é mudança no ambiente (submódulo dos autores): precisa de spec e
+  de decisão do usuário/autores.
