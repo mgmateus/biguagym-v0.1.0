@@ -38,3 +38,16 @@
 - Avisos: 758 `DeprecationWarning` do `np.cross` com vetores 2D em `TrajectoryEnv._frenet_errors` (código original).
   Sem efeito.
 - Commit do submódulo local; o push para o fork é a T8.
+
+## 2026-10-06 — T9: `env_kwargs` chega ao ambiente (harness)
+- `run.py` (`Experiment.train`): `gym.make(cfg.env.name, **OmegaConf.to_container(cfg.env.kwargs, resolve=True))`.
+- `workspace.py`: `import OmegaConf`; `self.eval_env_kwargs` em `__init__` (os mesmos kwargs do treino) e
+  `gym.make(self.eval_env, render_mode="rgb_array", **self.eval_env_kwargs)` em `_build_eval_env`.
+- Antes, todo `env_kwargs` era ignorado, inclusive os padrões do CUPRL em `_resolve_env` (rgb+depth, `include_state`,
+  100×100).
+- Novo `tests/test_env_kwargs.py` (monkeypatch do `gym.make`, sem simulador):
+  - treino recebe `{'reward_version': 'v0'}`;
+  - avaliação recebe `render_mode` + `{'reward_version': 'v0', 'frame_size': [100, 100]}`;
+  - sem `env_kwargs` → `{}`.
+- Verificação: `python -m pytest tests/ -q -p no:warnings` → **6 passed**. ✅
+- Efeito colateral esperado (risco do design): os v1 com CUPRL passam a receber depth+state em 100×100.
