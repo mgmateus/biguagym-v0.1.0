@@ -142,3 +142,17 @@
   - `python smoke_test.py --list` no worktree (código novo, sem simulador) → 54 ids registrados;
   - R7: o checkout da fila continua no `32698e5`, e o `DjiMatriceLand-v0_s0` segue avançando (passo 12.622).
 - Próximas: T11–T13 (⏱, com simulador), depois que a fila do notebook terminar.
+
+## 2026-10-06 — Preparação para o PC do laboratório (fora das tarefas; ferramenta de instalação)
+- Pedido do usuário: "quero colocar na fila para rodar no pc do laboratório, como posso fazer?" (RTX 4070 Ti, 32 GB).
+- `setup/instalar_pc_lab.sh`: o `SUB_COMMIT` deixou de ser fixo (`32698e5`) e passou a ser lido da branch clonada
+  (`git ls-tree HEAD biguagym`). Antes, o instalador recusaria a `spec/recompensas` (submódulo em `fcf4358`).
+- `treinos/cluster/LEIAME.md`: nova seção "Rodar no PC do laboratório":
+  - clone da `spec/recompensas` e instalador;
+  - verificação;
+  - fila com `WORKERS=2` dentro do `systemd-inhibit`;
+  - aviso sobre logout e `enable-linger`.
+- Teste: clone novo da `spec/recompensas` pelo GitHub numa pasta temporária, com biguasim e venv temporários →
+  `exit 0`, submódulo `fcf4358`, biguasim `53ad1f9d`, torch com CUDA, 54 ids, mundo idêntico;
+  `pytest tests/` nessa instalação → **35 passed**. Pasta temporária apagada.
+- Commit `129a9b7` (instalador + LEIAME), no GitHub.
