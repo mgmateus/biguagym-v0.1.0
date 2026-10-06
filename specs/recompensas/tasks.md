@@ -19,7 +19,7 @@ As tarefas T1–T10 não usam o simulador e podem ser feitas com a fila do noteb
   - Verificação: `pytest tests/test_recompensas.py -k trajetoria` → passa (parado ≤ 0, para trás ≤ 0, completo > ambos, ir e voltar não paga de novo)
 - [x] T7 — `v0` idêntico ao original: os casos da T2 com `reward_version="v0"` reproduzem `recompensa_v0.json` (R5)
   - Verificação: `pytest tests/test_recompensas.py` → todos passam
-- [ ] T8 — Commit no submódulo, push da branch `spec/recompensas` para o fork `ttszin/biguagym` e atualização do ponteiro do submódulo na branch `spec/recompensas` do repositório principal
+- [x] T8 — Commit no submódulo, push da branch `spec/recompensas` para o fork `ttszin/biguagym` e atualização do ponteiro do submódulo na branch `spec/recompensas` do repositório principal
   - Verificação: `git ls-remote https://github.com/ttszin/biguagym.git spec/recompensas` → mesmo hash do submódulo do worktree
 - [x] T9 — Harness: `run.py` e `workspace.py` passam `**cfg.env.kwargs` ao `gym.make` do treino e da avaliação (correção do `env_kwargs` ignorado)
   - Verificação: teste unitário com `gym.make` falso (monkeypatch) → os kwargs chegam às duas chamadas; `pytest tests/` → passa

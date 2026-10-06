@@ -130,3 +130,15 @@
   `tests/dados/recompensa_v0.json`, gerado na T2 com o código original (`32698e5`).
 - Recompensa com tolerância 1e-9; `terminated`/`truncated` exatos.
 - Verificação: `pytest tests/ -q -p no:warnings` → **35 passed** (suíte completa, depois das T4–T6). ✅
+
+## 2026-10-06 — T8: push no fork e ponteiro do submódulo
+- Submódulo: 4 commits sobre `32698e5` (`09b4fcf` T3, `c9eb818` T4, `cbd3f9f` T5, `fcf4358` T6). Diff total:
+  `core/environments.py`, +145/−58.
+- `git -C biguagym push git@github.com:ttszin/biguagym.git spec/recompensas`. O remoto do submódulo é HTTPS, sem
+  credencial; o push foi por SSH, como os anteriores no fork.
+- Verificação: `git ls-remote https://github.com/ttszin/biguagym.git spec/recompensas` = `fcf4358…` = HEAD do
+  submódulo = ponteiro na branch `spec/recompensas` do repositório principal. ✅
+- Checagens extras:
+  - `python smoke_test.py --list` no worktree (código novo, sem simulador) → 54 ids registrados;
+  - R7: o checkout da fila continua no `32698e5`, e o `DjiMatriceLand-v0_s0` segue avançando (passo 12.622).
+- Próximas: T11–T13 (⏱, com simulador), depois que a fila do notebook terminar.
