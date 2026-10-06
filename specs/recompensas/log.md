@@ -175,3 +175,11 @@
     `conda install -p $VENV pip`. Isso cobre o venv já criado sem pip, que o instalador reaproveita.
 - Teste: venv criado com `python3.12 -m venv --without-pip` → `No module named pip` (o mesmo erro); o trecho novo
   instalou o pip 24.0. O caminho do conda não foi testado aqui (não há conda no notebook).
+
+## 2026-10-06 — Instalação concluída no PC do laboratório
+- Saída enviada pelo usuário (passo 6/6): `torch 2.7.1+cu126 | cuda: True | NVIDIA GeForce RTX 4070 Ti`;
+  biguasim em `/home/nautec/biguasim/src/biguasim/__init__.py`; `ids registrados: 54 (esperado: 54)`;
+  "Instalação concluída".
+- O instalador confere que o biguasim está no `53ad1f9d` e o submódulo no `fcf4358` (recompensa v1); senão, ele para
+  com erro. Como passou, o PC do lab está com o código da `spec/recompensas`.
+- Próximo passo: `bash treinos/cluster/verificar_cluster.sh` no PC do lab e o `relatorio.txt` para definir `WORKERS`.
