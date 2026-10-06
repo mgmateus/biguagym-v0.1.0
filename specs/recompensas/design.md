@@ -1,4 +1,4 @@
-Status: rascunho (emenda de 2026-10-06 aguardando aprovação; o restante já foi aprovado)
+Status: aprovado
 
 # recompensas — Design
 
@@ -166,3 +166,5 @@ problema: o `reached_end` é calculado no próprio passo.
 
 **Verificação acrescentada:** nos testes do `v1`, o passo em que o veículo chega ao alvo tem `terminated=True`,
 `termination_reason="success"` e recompensa = shaping + bônus.
+
+Emenda aprovada pelo usuário em 2026-10-06: "aprovado, pode seguir com as T4 a T8".

@@ -38,3 +38,57 @@ def test_v0_identico_ao_original():
         for (r, t, tr), (re_, te, tre) in zip(obtido, esperado):
             assert (t, tr) == (te, tre), nome
             assert r == pytest.approx(re_, abs=1e-9), nome
+
+
+# --- v1: auxiliares ---------------------------------------------------------------------------------------------
+def _shaping(info):
+    return sum(v for k, v in info['reward_terms'].items() if k != 'terminal')
+
+
+def _v1(nome):
+    return executar_caso(nome, version='v1')
+
+
+# --- T4: Hover/Nav (R1, R2, R6) ---------------------------------------------------------------------------------
+@pytest.mark.parametrize('tarefa', ['hover', 'nav'])
+def test_hover_nav_sucesso_no_proprio_passo(tarefa):
+    passos = _v1(f'{tarefa}_sucesso')
+    r, term, trunc, info = passos[-1]
+    assert term and not trunc
+    assert info['termination_reason'] == 'success'
+    assert r == pytest.approx(_shaping(info) + 10.0)
+    assert info['reward_terms']['terminal'] == pytest.approx(10.0)
+    for r_, t_, _, i_ in passos[:-1]:          # antes do alvo: sem término e sem bônus
+        assert not t_ and i_['termination_reason'] is None and i_['reward_terms']['terminal'] == 0.0
+
+
+@pytest.mark.parametrize('tarefa', ['hover', 'nav'])
+def test_hover_nav_sucesso_bonus_fixo_com_shaping_negativo(tarefa):
+    r, term, _, info = _v1(f'{tarefa}_sucesso_inclinado')[-1]
+    assert term and info['termination_reason'] == 'success'
+    assert _shaping(info) < 0
+    assert r == pytest.approx(_shaping(info) + 10.0)
+
+
+@pytest.mark.parametrize('tarefa', ['hover', 'nav'])
+@pytest.mark.parametrize('falha,motivo', [('tilt', 'tilt'), ('fora', 'out_of_bounds')])
+def test_hover_nav_termino_por_falha(tarefa, falha, motivo):
+    r, term, _, info = _v1(f'{tarefa}_{falha}')[-1]
+    assert term and info['termination_reason'] == motivo
+    assert r == pytest.approx(_shaping(info) - 10.0)
+
+
+@pytest.mark.parametrize('tarefa', ['hover', 'nav'])
+def test_hover_nav_timeout_sem_penalidade(tarefa):
+    r, term, trunc, info = _v1(f'{tarefa}_timeout')[-1]
+    assert trunc and not term and info['termination_reason'] == 'timeout'
+    assert r == pytest.approx(_shaping(info))
+
+
+@pytest.mark.parametrize('tarefa', ['hover', 'nav'])
+def test_hover_nav_tombar_rende_menos_que_ficar_parado(tarefa):
+    g = 0.99
+    ret = lambda ps: sum(g ** k * p[0] for k, p in enumerate(ps))
+    tomba, parado = _v1(f'{tarefa}_tilt'), _v1(f'{tarefa}_parado')
+    assert ret(tomba) < ret(parado)
+    assert sum(p[0] for p in tomba) < sum(p[0] for p in parado)

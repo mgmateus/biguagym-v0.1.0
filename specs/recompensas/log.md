@@ -64,3 +64,22 @@
   está na lista, o que não acontece mais.
 - Verificação: a fila com `run.py` falso sobre os 72 runs (`WORKERS=6`, tempos encurtados numa cópia do script) →
   `exit 0`, 72 inícios, 72 `.ok`, 0 exits ≠ 0, 0 linhas "esperando"/"NÃO rodado"/"bloqueados". ✅
+
+## 2026-10-06 — Emenda aprovada; T4: Hover/Nav
+- Usuário: "aprovado, pode seguir com as T4 a T8" → `design.md` em `Status: aprovado` (com a emenda).
+- `HoverEnv` (o `NavEnv` herda):
+  - `_reward` guarda `_last_terms` (`norm`, `smooth`, `stable`, `spin`), sem mudar o valor devolvido;
+  - novas constantes `TERM_PENALTY = -10`, `SUCCESS_BONUS = 10`;
+  - novos `_termination_reason(success, failures, truncated)` e `_terminal_reward(reason)` (0 no `v0` e em
+    timeout/None);
+  - `_step`:
+    - `v0`: reproduz a ordem original (o término usa o `_on_target` antigo, e o bônus `3·|r|` vem atrasado);
+    - `v1`: `_reward()` primeiro, e o sucesso termina e recebe +10 no próprio passo (emenda); tilt/out_of_bounds −10;
+    - `info` com `termination_reason` e `reward_terms` (inclui `terminal`).
+- Verificação: `pytest tests/ -k "hover or nav or v0 or versao"` → **15 passed**. Inclui:
+  - sucesso no próprio passo com +10;
+  - +10 também com shaping negativo (alvo atingido inclinado);
+  - −10 por tilt e por out_of_bounds;
+  - timeout sem penalidade;
+  - tombar no passo 2 rende menos que 50 passos parado (com e sem γ = 0,99);
+  - os 31 casos `v0` idênticos à referência. ✅
