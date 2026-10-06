@@ -1330,3 +1330,28 @@ smokes com ações aleatórias e o run de 100k do DjiMatriceNav-v0. Nada foi alt
 - **Teste barato sem treino (falta autorização; usa GPU junto com a fila do notebook):** medir o retorno de políticas fixas.
   Por exemplo, no BlueBoatTrajectoryFollower-v0: ficar parado contra seguir o caminho com o `smoke_test.py --follow`, para
   confirmar o ponto 2.
+
+## Torpedo parado e spec `recompensas` (2026-10-06)
+Pedido do usuário: "espere esses treinos terminarem, mas se for possível ajuste a recompensa".
+- **Teste da trajetória com simulador:** adiado até a fila do notebook terminar, para não disputar a VRAM com ela
+  (2.333 MiB livres; o teste usa ~1,5–2 GB).
+- **Torpedo: o veículo não se move.** Em todos os smokes Torpedo (Nav-v0/v1/v2, Dock-v0/v1, TrajectoryFollower-v2),
+  `pos_final` = `pos_initial` = `[100.86, 100.03, -0.23]` depois de 200 passos aleatórios, com recompensa ~0
+  (`smoke_results/**/Torpedo*/summary.json`). A recompensa ~0 de antes é consequência disso, não o problema em si.
+  - Decisão minha: tirei os 6 Torpedo do `treinos/cluster/runs.csv` (18 runs; **82 → 64**), porque a fila do cluster ainda
+    não começou. Para desfazer: `git revert 6868796`.
+  - O LEIAME foi atualizado. A causa (controle `cmd_rudders_sterns_motor_speed` ou dinâmica do biguasim 1.0.0) fica
+    para investigar.
+- **Spec `recompensas`, fase 1:** `specs/recompensas/requirements.md` (`Status: rascunho`), na branch `spec/recompensas`
+  (worktree `.claude/worktrees/recompensas`, commit no GitHub).
+  - Escrito à mão com o template da skill, porque a `/spec-requisitos` só pode ser chamada pelo usuário.
+  - Feito fora do checkout principal para não afetar a fila do notebook, que importa o `biguagym` daqui.
+  - Requisitos:
+    - R1: penalidade fixa ao terminar por falha;
+    - R2: bônus de sucesso fixo;
+    - R3: na Trajectory, pagar o acompanhamento do caminho em proporção ao avanço;
+    - R4: completar o percurso tem de render mais que ficar parado;
+    - R5: a recompensa original continua disponível (`reward_version`);
+    - R6: componentes da recompensa e motivo do término no `info`;
+    - R7: não alterar o código usado pela fila em andamento.
+  - 4 perguntas em aberto (onde mudar, valores, forma da Trajectory, autores). Nenhum código foi alterado.
