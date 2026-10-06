@@ -1,4 +1,4 @@
-Status: rascunho
+Status: aprovado
 
 # recompensas — Requisitos
 
@@ -93,3 +93,10 @@ com suavidade, ou percorrer o caminho até o fim. A recompensa original deve con
    - outra opção é manter os termos e não terminar no fim (o episódio continua até truncar, com bônus por volta).
    - Qual prefere?
 4. **Os autores do biguagym** devem revisar antes, ou fazemos e mostramos depois?
+
+## Decisões (2026-10-06)
+Usuário: "aprovado, use as propostas e faça no fork".
+1. Mudar nas classes do submódulo, no fork `ttszin/biguagym`.
+2. Penalidade de término −10; bônus de sucesso +10 (Hover/Nav) e +20 (Land/Dock).
+3. Trajectory: pagar o acompanhamento em proporção ao avanço.
+4. Revisão dos autores: não respondida; assumo mostrar depois.
