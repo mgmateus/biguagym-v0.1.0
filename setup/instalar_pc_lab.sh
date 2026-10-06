@@ -21,7 +21,7 @@ WORLDS=${WORLDS:-$HOME/.local/share/biguasim/1.0.0/worlds}
 SIM_URL=https://github.com/ttszin/biguasim.git             # fork com os patches do biguasim 1.0.0
 
 # Commits esperados (os mesmos do notebook)
-SUB_COMMIT=32698e5fb72030c29fc66e4f3a10ea6f9358159c        # biguagym testes-ambientes (patch temporário)
+SUB_COMMIT=$(git -C "$REPO" ls-tree HEAD biguagym | awk '{print $3}')   # o que a branch clonada aponta (testes-ambientes: 32698e5; spec/recompensas: fcf4358)
 SIM_COMMIT=53ad1f9dfd5e22ebe6e55c02da5f660a311335c7        # biguasim testes-biguagym (P3)
 WORLD_MD5=bd371b063645adabe9ef38c13fdb5b6d                 # SkyDive.tar.zst
 

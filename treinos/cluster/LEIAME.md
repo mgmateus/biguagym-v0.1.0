@@ -87,3 +87,28 @@ cat treinos/cluster/saida/runs/*/pgid                # grupos dos runs em andame
 ```bash
 rsync -avz -e "ssh -J teteu@10.230.108.173" teteu@cluster2:biguagym-v0.1.0/treinos/cluster/saida/ ~/biguagym-v0.1.0/treinos/cluster/saida/
 ```
+
+## Rodar no PC do laboratório (no lugar do cluster2)
+A fila e a verificação funcionam em qualquer Linux com GPU NVIDIA. No PC do lab (RTX 4070 Ti, 12 GB, 32 GB de RAM):
+
+1. **Mundo:** `~/leva/SkyDive.tar.zst` (1,3 GB; por exemplo, pela transferência de arquivos do AnyDesk).
+2. **Código com a recompensa nova** (branch `spec/recompensas`, até o merge na `testes-ambientes`):
+   ```bash
+   git clone -b spec/recompensas https://github.com/mgmateus/biguagym-v0.1.0.git ~/biguagym-v0.1.0
+   cd ~/biguagym-v0.1.0 && bash setup/instalar_pc_lab.sh
+   grep -c reward_version biguagym/core/environments.py      # > 0: recompensa nova
+   ```
+   Se já existe um `~/biguagym-v0.1.0` antigo: `cd ~/biguagym-v0.1.0 && git fetch && git checkout spec/recompensas &&
+   git pull && bash setup/instalar_pc_lab.sh`.
+3. **Verificação (~30 min):** `bash treinos/cluster/verificar_cluster.sh`. Mande o `treinos/cluster/verificacao/relatorio.txt`
+   antes de iniciar a fila. Ele diz se cabem 2 ou 3 runs em paralelo.
+4. **Fila** (2 runs em paralelo; com bloqueio de suspensão, já que é um desktop com sessão gráfica):
+   ```bash
+   mkdir -p treinos/cluster/saida
+   WORKERS=2 nohup setsid systemd-inhibit --what=sleep:idle:handle-lid-switch --why="treinos 100k" \
+       bash treinos/cluster/fila_cluster.sh > treinos/cluster/saida/fila.log 2>&1 < /dev/null &
+   ```
+5. **Não encerre a sessão (logout):** isso mata a fila. Bloquear a tela pode. Para aguentar até um logout:
+   `loginctl enable-linger $USER`. Depois de reiniciar o PC, rode o passo 4 de novo: ele pula o que já tem `.ok`.
+6. **Acompanhar e parar:** as mesmas instruções da seção 6 acima. Para trazer os resultados: copie
+   `treinos/cluster/saida/`.
