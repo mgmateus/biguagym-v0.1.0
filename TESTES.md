@@ -1285,3 +1285,48 @@ Pedido do usuário: "tira essa fila que está rodando do notebook do que iremos 
     a completa chegou aos 23 s → s1 e s2 rodaram. Os workers saíram ao sobrar só o bloqueio por erro;
   - envio com `ssh`/`rsync` falsos: só o DjiMatriceNav-v0 foi enviado; os dois `PULADO` e o DjiMatriceLand (rodando)
     foram pulados.
+
+## Análise das funções de recompensa (2026-10-06)
+Pergunta do usuário: "ja é possível definirmos se a função de recompensa está boa nos ambientes?"
+Fontes: `biguagym/core/environments.py` (`HoverEnv`, `LandEnv`, `DockEnv`, `TrajectoryEnv`), a recompensa média por passo dos
+smokes com ações aleatórias e o run de 100k do DjiMatriceNav-v0. Nada foi alterado.
+
+| Família | Recompensa por passo (aleatória, smoke) | Episódio aleatório | Término com penalidade? |
+|---|---|---|---|
+| Hover/Nav aéreo (DjiMatrice) | −0,31 / −0,38 | 2–14 passos | não (inclinação > 15° ou fora da área termina sem custo) |
+| Land (DjiMatrice) | −0,66 | 5,3 | só o pouso duro (−5); tombar não tem custo |
+| Nav/Dock subaquático (BlueROV2) | −0,14 / −0,13 | 10–75 | não (Dock: docagem dura −5) |
+| Nav superfície (BlueBoat) | +0,07 | 200 (não termina) | — |
+| Torpedo Nav/Dock | 0,00 | 200 | — (recompensa ~0: suspeito, conferir se o veículo se move) |
+| Trajectory (BlueBoat/BlueROV2/DjiMatrice) | +2,34 / +2,18 / +1,95 | 200 / 40 / 6,7 | não; chegar ao fim **termina** o episódio |
+
+1. **Hover/Nav/Land/Dock: incentivo para terminar cedo.**
+   - Não há bônus por continuar vivo nem penalidade ao cair, e a recompensa por passo é negativa. Para o agente, encerrar
+     logo dá mais retorno.
+   - Confirmado no DjiMatriceNav-v0: estabilizou em ~3 passos por episódio, R ≈ −1,7.
+   - O ótimo global está certo: o termo `3·(d_ant − d)` soma `3·(d0 − d_final)`, até ~+50 chegando a ~17 m. O que falta
+     é o caminho até lá. O alvo tem raio de 0,15 m, o controle é direto nos motores e o limite de inclinação é 15°.
+   - No Land, tombar (sem custo) é melhor que pousar duro (−5): o agente prefere tombar.
+   - O bônus de sucesso é `3·|r|` (~3) e não um valor fixo. O `abs` transforma uma recompensa negativa em bônus.
+2. **Trajectory: incentivo para não terminar o percurso.**
+   - `r_cte` (até +2) e `r_align` (até +0,5) pagam ~2,5 por passo para quem fica parado sobre o caminho, mesmo sem avançar.
+   - O progresso inteiro vale só `W_PROG = 3`, mais `BONUS_END = 10`, e chegar ao fim **termina** o episódio, cortando os
+     ~2,5/passo restantes.
+   - Com γ = 0,99, ficar parado vale ~2,5/(1−0,99) ≈ 250, contra ~13 de terminar. O ótimo é ficar parado no começo.
+   - Isso não foi medido ainda; é uma conclusão pelo código.
+3. **BlueBoat Nav:** recompensa positiva e sem término por inclinação. Não tem o incentivo para terminar cedo, mas o sinal é
+   fraco longe do alvo (`exp(-2d)` ≈ 0).
+4. **Torpedo:** recompensa ~0,00 com 200 passos aleatórios. Indica que o veículo quase não se move ou que a recompensa
+   não muda. Precisa ser investigado.
+- **O que ainda não dá para afirmar:** se, corrigidos esses pontos, o agente aprende. Isso exige os runs. O DjiMatriceLand
+  em andamento ainda está na fase aleatória (~2,5k passos, R médio −5,1, 6,3 passos/ep).
+- **Proposta de spec (`recompensas`), a decidir com o usuário e os autores:**
+  - penalidade fixa ao terminar por queda ou por sair da área (ou bônus de vida);
+  - bônus de sucesso fixo, no lugar de `3·|r|`;
+  - Land: tombar pelo menos tão ruim quanto pousar duro;
+  - Trajectory: pagar pelo progresso e não pela permanência (por exemplo, `r_cte`/`r_align` multiplicados pelo avanço),
+    ou não perder valor ao chegar ao fim;
+  - investigar o Torpedo.
+- **Teste barato sem treino (falta autorização; usa GPU junto com a fila do notebook):** medir o retorno de políticas fixas.
+  Por exemplo, no BlueBoatTrajectoryFollower-v0: ficar parado contra seguir o caminho com o `smoke_test.py --follow`, para
+  confirmar o ponto 2.
