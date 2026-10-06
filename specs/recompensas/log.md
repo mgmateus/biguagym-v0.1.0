@@ -83,3 +83,22 @@
   - timeout sem penalidade;
   - tombar no passo 2 rende menos que 50 passos parado (com e sem γ = 0,99);
   - os 31 casos `v0` idênticos à referência. ✅
+
+## 2026-10-06 — T5: Land/Dock
+- `LandEnv`:
+  - `SUCCESS_BONUS = 20` (o `DockEnv` herda);
+  - `_reward` guarda `_last_terms` (com `impact` e `drift`);
+  - novo `_land_like_reward(failures, hard_key, truncated)`, usado por `LandEnv._step` e `DockEnv._step`:
+    - `v0`: ordem original (término com o `_on_target` anterior; `3·|r|` com o novo; dura → −5 fixo);
+    - `v1`: sucesso termina no próprio passo com +20; dura, tilt e out_of_bounds somam −10 ao shaping;
+  - `info` com `termination_reason` e `reward_terms`.
+- Ajuste durante a tarefa: no `v0`, o `termination_reason` "success" usa o `_on_target` **anterior** (o que de fato
+  termina o episódio no original), como no Hover. Assim, o motivo bate com o `terminated`.
+- `LandCoopPixelEnv._step` não foi alterado (fora de escopo). Ele herda só o `_last_terms` do `LandEnv._reward`, sem
+  efeito no valor. Para editar só o `LandEnv`, foi usada a 1ª ocorrência do bloco (antes de `class DockEnv`).
+- Verificação: `pytest tests/ -q -p no:warnings` → **30 passed**. Inclui:
+  - sucesso no próprio passo com +20;
+  - tilt, out_of_bounds e pouso/docagem dura → shaping − 10;
+  - tombar e pousar duro com o mesmo terminal (−10);
+  - tombar rende menos que ficar parado;
+  - `v0` idêntico. ✅

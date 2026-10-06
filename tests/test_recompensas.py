@@ -92,3 +92,36 @@ def test_hover_nav_tombar_rende_menos_que_ficar_parado(tarefa):
     tomba, parado = _v1(f'{tarefa}_tilt'), _v1(f'{tarefa}_parado')
     assert ret(tomba) < ret(parado)
     assert sum(p[0] for p in tomba) < sum(p[0] for p in parado)
+
+
+# --- T5: Land/Dock (R1, R2, R6) ---------------------------------------------------------------------------------
+@pytest.mark.parametrize('tarefa', ['land', 'dock'])
+def test_land_dock_sucesso_no_proprio_passo(tarefa):
+    passos = _v1(f'{tarefa}_sucesso')
+    r, term, trunc, info = passos[-1]
+    assert term and not trunc and info['termination_reason'] == 'success'
+    assert r == pytest.approx(_shaping(info) + 20.0)
+    assert all(not t for _, t, _, _ in passos[:-1])
+
+
+@pytest.mark.parametrize('tarefa,duro', [('land', 'hard_landing'), ('dock', 'hard_docking')])
+@pytest.mark.parametrize('falha', ['tilt', 'fora', 'duro'])
+def test_land_dock_toda_falha_vale_menos_10(tarefa, duro, falha):
+    motivo = {'tilt': 'tilt', 'fora': 'out_of_bounds', 'duro': duro}[falha]
+    r, term, _, info = _v1(f'{tarefa}_{falha}')[-1]
+    assert term and info['termination_reason'] == motivo
+    assert r == pytest.approx(_shaping(info) - 10.0)        # o pouso duro deixa de ser -5 fixo
+    assert 'impact' in info['reward_terms'] and 'drift' in info['reward_terms']
+
+
+@pytest.mark.parametrize('tarefa', ['land', 'dock'])
+def test_land_dock_tombar_nao_e_melhor_que_pouso_duro(tarefa):
+    tomba = _v1(f'{tarefa}_tilt')[-1]
+    duro = _v1(f'{tarefa}_duro')[-1]
+    assert tomba[3]['reward_terms']['terminal'] == duro[3]['reward_terms']['terminal'] == -10.0
+
+
+@pytest.mark.parametrize('tarefa', ['land', 'dock'])
+def test_land_dock_tombar_rende_menos_que_ficar_parado(tarefa):
+    tomba, parado = _v1(f'{tarefa}_tilt'), _v1(f'{tarefa}_parado')
+    assert sum(p[0] for p in tomba) < sum(p[0] for p in parado)

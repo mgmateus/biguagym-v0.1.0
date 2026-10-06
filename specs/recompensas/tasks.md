@@ -13,7 +13,7 @@ As tarefas T1–T10 não usam o simulador e podem ser feitas com a fila do noteb
   - Verificação: `grep -c "reward_version" biguagym/core/environments.py` cobre todos os `__init__`; `pytest tests/test_recompensas.py -k versao` → passa
 - [x] T4 — `HoverEnv._reward` guarda `_last_terms`; `HoverEnv._step` em `v1`: sucesso +10, tilt/out_of_bounds −10; `info` com `reward_terms` e `termination_reason` (R1, R2, R6)
   - Verificação: `pytest tests/test_recompensas.py -k "hover or nav"` → passa
-- [ ] T5 — `LandEnv` e `DockEnv` em `v1`: todas as falhas −10 (inclusive pouso/docagem dura, no lugar do −5); sucesso +20; `info` (R1, R2, R6)
+- [x] T5 — `LandEnv` e `DockEnv` em `v1`: todas as falhas −10 (inclusive pouso/docagem dura, no lugar do −5); sucesso +20; `info` (R1, R2, R6)
   - Verificação: `pytest tests/test_recompensas.py -k "land or dock"` → passa
 - [ ] T6 — `TrajectoryEnv` em `v1`: `_best_wp`, `r_track = (r_cte + r_align)·adv`, −10 por tilt/out_of_bounds; `info` (R1, R3, R4, R6)
   - Verificação: `pytest tests/test_recompensas.py -k trajetoria` → passa (parado ≤ 0, para trás ≤ 0, completo > ambos, ir e voltar não paga de novo)
