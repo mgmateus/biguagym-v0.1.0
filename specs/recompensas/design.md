@@ -1,4 +1,4 @@
-Status: aprovado
+Status: rascunho (emenda de 2026-10-06 aguardando aprovação; o restante já foi aprovado)
 
 # recompensas — Design
 
@@ -145,3 +145,24 @@ eval_env = gym.make(self.eval_env, render_mode="rgb_array", **self.eval_env_kwar
 ## Aprovação (2026-10-06)
 Usuário: "aprovado, pode aplicar a penalidade na trajetória também". A penalidade de término (−10) por inclinação ou
 saída da área vale também na Trajectory (extensão do R1).
+
+## Emenda (2026-10-06, durante a T2): o sucesso termina um passo atrasado
+**Achado:** em `HoverEnv._step`, `LandEnv._step` e `DockEnv._step`, o `terminated` é calculado **antes** de
+`self._reward()`, e é o `_reward()` que atualiza `self._on_target`. Consequências no código original:
+- ao atingir o alvo, o passo sai com `terminated=False`, e o episódio só termina no passo seguinte, onde quer que o
+  veículo esteja. Confirmado nos casos `*_sucesso` da referência `v0`;
+- no Hover/Nav, o bônus `3·|r|` também vai para o passo seguinte, porque a condição do `if` usa o `_on_target` antigo.
+
+**Mudança proposta (só no `v1`; o `v0` mantém o atraso, como exige o R5):**
+```python
+shaping = self._reward()                       # 1º: atualiza _on_target com o estado deste passo
+terminated = bool(tilt or out_of_bounds or self._on_target or hard_landing)
+reason = ...                                   # success / tilt / out_of_bounds / hard_landing / timeout
+reward = shaping + (SUCCESS_BONUS if reason == "success" else TERM_PENALTY if reason in falhas else 0.0)
+```
+O sucesso termina o episódio e recebe o bônus no próprio passo em que o alvo é atingido. Sem isso, o `+10`/`+20` do R2
+iria para o passo seguinte, e o `termination_reason` do R6 não bateria com o `terminated`. A Trajectory não tem o
+problema: o `reached_end` é calculado no próprio passo.
+
+**Verificação acrescentada:** nos testes do `v1`, o passo em que o veículo chega ao alvo tem `terminated=True`,
+`termination_reason="success"` e recompensa = shaping + bônus.
