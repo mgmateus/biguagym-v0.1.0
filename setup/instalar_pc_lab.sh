@@ -64,7 +64,7 @@ if [ ! -x "$VENV/bin/python" ]; then
     if command -v python3.12 >/dev/null; then
         python3.12 -m venv "$VENV"
     elif command -v conda >/dev/null; then
-        conda create -y -q -p "$VENV" python=3.12
+        conda create -y -q -p "$VENV" python=3.12 pip     # o conda novo não põe o pip junto com o python
     else
         falha "sem python3.12 nem conda (sudo apt install python3.12-venv python3.12-dev)"
     fi
@@ -72,6 +72,12 @@ fi
 PY=$VENV/bin/python
 "$PY" -c 'import sys; assert sys.version_info[:2] == (3, 12), sys.version' \
     || falha "$VENV não é Python 3.12; apague a pasta e rode de novo"
+if ! "$PY" -m pip --version >/dev/null 2>&1; then   # venv criado sem pip (ex.: conda create só com python)
+    echo "pip ausente em $VENV: instalando"
+    "$PY" -m ensurepip --upgrade >/dev/null 2>&1 \
+        || { command -v conda >/dev/null && conda install -y -q -p "$VENV" pip; } \
+        || falha "não consegui instalar o pip em $VENV; apague a pasta e rode de novo"
+fi
 "$PY" -m pip install -q -U pip
 "$PY" -m pip install -q -r "$REPO/requirements-venv.txt" \
     || falha "pip falhou. Se foi no evdev: sudo apt install build-essential python3.12-dev linux-libc-dev"

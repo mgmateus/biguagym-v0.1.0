@@ -164,3 +164,14 @@
   `treinos/cluster/verificar_cluster.sh`. Testado com terminal real (`script`): o `git log` imprime direto, sem o `less`.
 - Orientação ao usuário para a execução em andamento: apertar `q` em cada `(END)` (passos 2 e 3), ou parar com Ctrl+C,
   dar `git pull` e rodar de novo (o instalador pula o que já foi feito).
+
+## 2026-10-06 — Instalador: venv do conda sem pip (PC do laboratório)
+- Relato do usuário: depois do `conda create` (o PC do lab não tem `python3.12`), o passo 4 falhou com
+  `/home/nautec/venv-biguagym/bin/python: No module named pip`. As versões novas do conda não incluem o pip junto com
+  `python=3.12`.
+- Correção em `setup/instalar_pc_lab.sh`:
+  - `conda create ... python=3.12 pip`;
+  - antes de usar o pip, se `python -m pip` falhar: `python -m ensurepip --upgrade`, e se isso também falhar,
+    `conda install -p $VENV pip`. Isso cobre o venv já criado sem pip, que o instalador reaproveita.
+- Teste: venv criado com `python3.12 -m venv --without-pip` → `No module named pip` (o mesmo erro); o trecho novo
+  instalou o pip 24.0. O caminho do conda não foi testado aqui (não há conda no notebook).
