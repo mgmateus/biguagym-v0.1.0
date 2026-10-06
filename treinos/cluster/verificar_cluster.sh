@@ -7,6 +7,7 @@
 #   4. em qual GPU o Unreal abre os simuladores (decide se WORKERS > 1 com várias GPUs é seguro).
 # Tudo vai para treinos/cluster/verificacao/. Leve o relatorio.txt de volta (ou cole na conversa).
 set -uo pipefail
+export GIT_PAGER=cat PAGER=cat     # sem paginador (o git log podia parar no less)
 
 REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 PY=${PY:-$HOME/venv-biguagym/bin/python}

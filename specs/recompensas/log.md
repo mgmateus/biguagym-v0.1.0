@@ -156,3 +156,11 @@
   `exit 0`, submódulo `fcf4358`, biguasim `53ad1f9d`, torch com CUDA, 54 ids, mundo idêntico;
   `pytest tests/` nessa instalação → **35 passed**. Pasta temporária apagada.
 - Commit `129a9b7` (instalador + LEIAME), no GitHub.
+
+## 2026-10-06 — Instalador parava no paginador do git (PC do laboratório)
+- Relato do usuário: o instalador "aparece para digitar algo". A saída colada era o `git log --oneline -1` do passo 2
+  aberto no `less`, parado em `(END)`. No git desse PC, o paginador fica ligado mesmo para uma linha.
+- Correção: `export GIT_PAGER=cat PAGER=cat` no início do `setup/instalar_pc_lab.sh` e do
+  `treinos/cluster/verificar_cluster.sh`. Testado com terminal real (`script`): o `git log` imprime direto, sem o `less`.
+- Orientação ao usuário para a execução em andamento: apertar `q` em cada `(END)` (passos 2 e 3), ou parar com Ctrl+C,
+  dar `git pull` e rodar de novo (o instalador pula o que já foi feito).

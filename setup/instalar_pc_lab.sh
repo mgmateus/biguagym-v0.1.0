@@ -11,6 +11,7 @@
 # Uso:  bash setup/instalar_pc_lab.sh
 # Pode ser rodado de novo: o que já está feito é pulado.
 set -euo pipefail
+export GIT_PAGER=cat PAGER=cat     # sem paginador: em alguns PCs o `git log` abria o less e parava em (END)
 
 REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 LEVA=${LEVA:-$HOME/leva}
