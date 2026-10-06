@@ -9,7 +9,7 @@ As tarefas T1–T10 não usam o simulador e podem ser feitas com a fila do noteb
   - Verificação: `git branch --show-current` e `git -C biguagym branch --show-current` → `spec/recompensas`; `git -C ~/biguagym-v0.1.0/biguagym rev-parse HEAD` → `32698e5…` (checkout da fila intacto)
 - [x] T2 — Gerar a referência da recompensa original: script de casos fixos (Hover, Nav, Land, Dock, Trajectory; sucesso, tilt, out_of_bounds, pouso/docagem dura, passo normal) rodado no código atual → `tests/dados/recompensa_v0.json` (R5)
   - Verificação: `python tests/gerar_referencia_v0.py` → JSON com todos os casos e nenhum NaN; rodar de novo dá um arquivo idêntico
-- [ ] T3 — Parâmetro `reward_version` (`"v1"` padrão, `"v0"`) no `HoverEnv`, com `ValueError` para outro valor, repassado nos 13 construtores das subclasses (R5)
+- [x] T3 — Parâmetro `reward_version` (`"v1"` padrão, `"v0"`) no `HoverEnv`, com `ValueError` para outro valor, repassado nos 13 construtores das subclasses (R5)
   - Verificação: `grep -c "reward_version" biguagym/core/environments.py` cobre todos os `__init__`; `pytest tests/test_recompensas.py -k versao` → passa
 - [ ] T4 — `HoverEnv._reward` guarda `_last_terms`; `HoverEnv._step` em `v1`: sucesso +10, tilt/out_of_bounds −10; `info` com `reward_terms` e `termination_reason` (R1, R2, R6)
   - Verificação: `pytest tests/test_recompensas.py -k "hover or nav"` → passa

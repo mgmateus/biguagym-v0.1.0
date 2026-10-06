@@ -23,3 +23,18 @@
   - No Hover, o bônus `3·|r|` também cai no passo seguinte. A condição usa o `_on_target` antigo, e o passo seguinte
     termina e recebe o bônus mesmo que o veículo tenha saído do alvo.
   - O `v0` precisa reproduzir isso (R5). O design não previa essa correção no `v1`: ver "Emenda" no `design.md`.
+
+## 2026-10-06 — T3: parâmetro `reward_version`
+- `biguagym/core/environments.py`:
+  - `reward_version: str = "v1"` no fim da assinatura dos **13 construtores** (o `HoverEnv` e 12 subclasses; o design
+    dizia "13 subclasses", mas são 13 construtores no total) e repassado no `super().__init__(...)`;
+  - o `HoverEnv` valida o valor (`ValueError` se não for `v0`/`v1`) e o guarda em `self._reward_version`.
+  - A edição foi feita com um script restrito a cada construtor. O diff tem só o repasse e a validação.
+- Novos: `tests/test_recompensas.py` e `tests/conftest.py` (path de `tests/` e `biguagym/`).
+- Verificação: `python -m pytest tests/ -q` → **3 passed**:
+  - `test_versao_em_todos_os_construtores` (13 classes, padrão `v1`);
+  - `test_versao_invalida` (`ValueError`);
+  - `test_v0_identico_ao_original` (31 casos iguais à referência; o comportamento ainda não mudou). ✅
+- Avisos: 758 `DeprecationWarning` do `np.cross` com vetores 2D em `TrajectoryEnv._frenet_errors` (código original).
+  Sem efeito.
+- Commit do submódulo local; o push para o fork é a T8.
