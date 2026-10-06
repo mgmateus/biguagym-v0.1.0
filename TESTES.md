@@ -1355,3 +1355,14 @@ Pedido do usuário: "espere esses treinos terminarem, mas se for possível ajust
     - R6: componentes da recompensa e motivo do término no `info`;
     - R7: não alterar o código usado pela fila em andamento.
   - 4 perguntas em aberto (onde mudar, valores, forma da Trajectory, autores). Nenhum código foi alterado.
+
+### Spec `recompensas`: requisitos aprovados, design em rascunho (2026-10-06)
+- Usuário: "aprovado, use as propostas e faça no fork". O `requirements.md` foi para `Status: aprovado`, com as decisões
+  anotadas. O `design.md` (`Status: rascunho`) está na branch `spec/recompensas`.
+- **Bug do harness encontrado no design:** `run.py:155` (`gym.make(cfg.env.name)`) e `workspace.py:42`
+  (`gym.make(self.eval_env, render_mode=...)`) **não repassam `cfg.env.kwargs`**.
+  - Todo `env_kwargs` é ignorado, inclusive os padrões que o `_resolve_env` define para o CUPRL (rgb+depth,
+    `include_state`, 100×100).
+  - Consequência para o cluster: nos v1, o CUPRL receberia só rgb 84×84, sem depth nem state, e o `CuprlRunner` usa
+    `pose_key='state'` → provável falha. O piloto do `verificar_cluster.sh` deve mostrar isso.
+  - O design inclui a correção (passar `**cfg.env.kwargs` no treino e na avaliação).
