@@ -1,16 +1,20 @@
 # Treinos de 100k passos no cluster2
 
-64 runs: os 24 ambientes v0/v1/v2 que rodam no BiguaSim 1.0.0, sem Hydrone e sem Torpedo, × 3 seeds, menos os 8 seeds 0 da fila do
-notebook. A lista está em `runs.csv`.
+72 runs: os 24 ambientes v0/v1/v2 que rodam no BiguaSim 1.0.0, sem Hydrone e sem Torpedo, × 3 seeds. A lista está
+em `runs.csv`.
 
-**Divisão com o notebook:**
-- A fila do notebook (`treinos/100k`, TD3, seed 0) faz DjiMatriceNav-v0 (pronto), DjiMatriceLand-v0,
-  DjiMatriceTrajectoryFollower-v0, BlueBoatNav-v0, BlueBoatTrajectoryFollower-v0, BlueROV2Nav-v0, BlueROV2Dock-v0 e
-  BlueROV2TrajectoryFollower-v0.
-- O notebook pula BlueBoatNav-v1 e BlueBoatNav-v2 (marcador `PULADO`): o v1 precisa do CUPRL, e o v2 (sonar) não cabe no
-  timeout de 48 h. Esses dois rodam aqui, com todos os seeds.
-- No cluster, os seeds 1 e 2 dos 8 ambientes do notebook **esperam** a curva do seed 0 chegar completa em
-  `saida/curves` (passo 3). Enquanto isso, a fila segue com o resto.
+**Recompensa:** o cluster usa a recompensa nova (`reward_version="v1"`, padrão do fork depois da spec `recompensas`):
+penalidade de −10 ao terminar por falha, bônus fixo de sucesso (+10 Hover/Nav, +20 Land/Dock) e, na Trajectory, pagamento
+por waypoint novo.
+- A fila do notebook (`treinos/100k`, TD3, seed 0) roda com a recompensa **original** (`v0`, submódulo `32698e5`). Os
+  resultados dela são a linha de base e **não** servem de seed 0 para o cluster.
+- Por isso os 8 seeds 0 que estavam no notebook voltaram para cá (DjiMatriceNav-v0, DjiMatriceLand-v0,
+  DjiMatriceTrajectoryFollower-v0, BlueBoatNav-v0, BlueBoatTrajectoryFollower-v0, BlueROV2Nav-v0, BlueROV2Dock-v0,
+  BlueROV2TrajectoryFollower-v0).
+- O `enviar_do_notebook.sh` e a espera por curvas externas da `fila_cluster.sh` continuam no repositório, mas não se
+  aplicam a esta lista: nenhum run depende de outra máquina.
+- **Use o código da branch que tem a spec `recompensas`** (merge na `testes-ambientes` previsto para quando a fila do
+  notebook terminar). Confira antes de iniciar: `grep -c reward_version biguagym/core/environments.py` > 0.
 
 - **Agentes:** TD3 para v0/v2. CUPRL para v1, porque o TD3 do harness não aceita observação `Dict`. O CUPRL nunca rodou
   num ambiente real: o piloto da verificação é o primeiro teste.
@@ -19,8 +23,8 @@ notebook. A lista está em `runs.csv`.
   outros 6 Torpedo: o veículo não se move (posição final = inicial em 200 passos aleatórios, em todos os smokes).
 - **Ressalvas que valem para os resultados:**
   - os v1 ainda têm o bug do `np.resize` nos pixels (Etapa 6, spec `pipeline-pixels`);
-  - no `DjiMatriceNav-v0` o TD3 aprendeu a encerrar o episódio em ~3 passos, porque a recompensa do `HoverEnv` não tem
-    bônus de vida nem penalidade ao terminar. Os outros ambientes aéreos (Hover/Land/Trajectory) herdam essa recompensa.
+  - com a recompensa original, o TD3 aprendeu a encerrar o episódio em ~3 passos no `DjiMatriceNav-v0` (sem penalidade
+    ao terminar). É o que a recompensa `v1` corrige.
 
 ## 0. Acesso
 O cluster2 só é acessível pela rede da universidade (ou VPN), pelo host de salto:
@@ -44,13 +48,9 @@ O instalador puxa o submódulo de `ttszin/biguagym` e o biguasim de `ttszin/bigu
 mundo. Ele precisa de `git`, `gcc`, `zstd` e Python 3.12 (`python3.12` ou `conda`), sem sudo. Se faltar o Python 3.12,
 instale o Miniconda no home.
 
-## 3. Enviar os seeds 0 do notebook (do notebook, sempre que um terminar)
-```bash
-cd ~/biguagym-v0.1.0 && bash treinos/cluster/enviar_do_notebook.sh
-```
-O script envia só as curvas e os logs dos runs concluídos (`.ok`, curva completa). Ele nunca sobrescreve no cluster, onde
-a mesma curva recebe os seeds 1 e 2. Rode-o depois de cada seed 0 do notebook terminar (dá para ver em
-`treinos/100k/estado.csv`). Não copie curvas à mão: uma curva parcial ou uma cópia tardia corrompe a do cluster.
+## 3. (Não se aplica) Seeds 0 do notebook
+Com a recompensa nova, o cluster roda todos os seeds. O `enviar_do_notebook.sh` só serviria para uma lista que dependa
+dos seeds 0 do notebook com a recompensa original. **Não misture as duas recompensas na mesma curva.**
 
 ## 4. Verificar (no cluster2, ~20–40 min)
 ```bash

@@ -23,7 +23,7 @@ As tarefas T1–T10 não usam o simulador e podem ser feitas com a fila do noteb
   - Verificação: `git ls-remote https://github.com/ttszin/biguagym.git spec/recompensas` → mesmo hash do submódulo do worktree
 - [x] T9 — Harness: `run.py` e `workspace.py` passam `**cfg.env.kwargs` ao `gym.make` do treino e da avaliação (correção do `env_kwargs` ignorado)
   - Verificação: teste unitário com `gym.make` falso (monkeypatch) → os kwargs chegam às duas chamadas; `pytest tests/` → passa
-- [ ] T10 — Cluster: os 8 seeds 0 do notebook voltam para o `treinos/cluster/runs.csv` (64 → 72); LEIAME explica que o cluster usa a recompensa v1 e que o `enviar_do_notebook.sh` não se aplica a ela
+- [x] T10 — Cluster: os 8 seeds 0 do notebook voltam para o `treinos/cluster/runs.csv` (64 → 72); LEIAME explica que o cluster usa a recompensa v1 e que o `enviar_do_notebook.sh` não se aplica a ela
   - Verificação: `tail -n +2 treinos/cluster/runs.csv | wc -l` → 72; fila com `run.py` falso → nenhum run espera curva externa
 - [ ] T11 — ⏱ (depois da fila do notebook) Smoke de todos os ids que rodam, com a recompensa nova: `python smoke_test.py --all --steps 200 --frame-every 0` (sem Hydrone, BlueROVHeavy e Torpedo) (R6, risco dos construtores)
   - Verificação: `smoke_results/resumo.csv` → os mesmos ids `ok` de antes; `info` com `reward_terms` e `termination_reason`; 0 processos do simulador no fim

@@ -51,3 +51,16 @@
   - sem `env_kwargs` → `{}`.
 - Verificação: `python -m pytest tests/ -q -p no:warnings` → **6 passed**. ✅
 - Efeito colateral esperado (risco do design): os v1 com CUPRL passam a receber depth+state em 100×100.
+
+## 2026-10-06 — T10: cluster com a recompensa nova
+- `treinos/cluster/runs.csv`: os 8 seeds 0 do notebook voltaram para o bloco do seed 0 (**64 → 72**: 24 ambientes ×
+  3 seeds, 24 por seed, sem duplicatas). A fila do notebook roda com a recompensa original (`v0`) e vira linha de base.
+- `treinos/cluster/LEIAME.md`:
+  - nova seção "Recompensa" (o cluster usa `v1`; o notebook é `v0`; os 8 seeds 0 voltaram; confira o
+    `reward_version` no checkout antes de iniciar);
+  - o passo 3 virou "(Não se aplica)";
+  - a ressalva sobre a recompensa foi atualizada.
+- `fila_cluster.sh` e `enviar_do_notebook.sh` sem mudança: a espera por curvas externas só age quando o seed anterior não
+  está na lista, o que não acontece mais.
+- Verificação: a fila com `run.py` falso sobre os 72 runs (`WORKERS=6`, tempos encurtados numa cópia do script) →
+  `exit 0`, 72 inícios, 72 `.ok`, 0 exits ≠ 0, 0 linhas "esperando"/"NÃO rodado"/"bloqueados". ✅
