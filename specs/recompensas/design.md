@@ -1,4 +1,4 @@
-Status: rascunho
+Status: aprovado
 
 # recompensas — Design
 
@@ -141,3 +141,7 @@ eval_env = gym.make(self.eval_env, render_mode="rgb_array", **self.eval_env_kwar
 | R1–R4 com simulador | depois da fila do notebook: retorno de políticas fixas (BlueBoatTrajectoryFollower-v0 parado contra `--follow`; DjiMatriceHover-v0 motores em hover contra máximo) com `v0` e `v1` → no `v1`, seguir > parado e hover > tombar |
 | R7 | durante o trabalho: `git -C ~/biguagym-v0.1.0/biguagym rev-parse HEAD` = `32698e5…` e a fila do notebook continua avançando |
 | correção `env_kwargs` | `python run.py env=DjiMatriceNav-v0 +env_kwargs.reward_version=v0 num_train_steps=300 ...` (piloto < 5k passos, depois da fila) e checar no log/`info` que a versão chegou ao ambiente de treino e ao de avaliação |
+
+## Aprovação (2026-10-06)
+Usuário: "aprovado, pode aplicar a penalidade na trajetória também". A penalidade de término (−10) por inclinação ou
+saída da área vale também na Trajectory (extensão do R1).
