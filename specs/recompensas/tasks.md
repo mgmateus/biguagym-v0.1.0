@@ -5,9 +5,9 @@ Status: aprovado
 As tarefas T1–T10 não usam o simulador e podem ser feitas com a fila do notebook rodando: todo o trabalho fica no worktree
 `.claude/worktrees/recompensas` (R7). As T11–T13 usam o simulador e esperam a fila do notebook terminar.
 
-- [ ] T1 — Branch `spec/recompensas` (repositório principal, a partir de `testes-ambientes`) e, no submódulo do worktree, a branch `spec/recompensas` a partir de `32698e5` (`testes-ambientes` do fork)
+- [x] T1 — Branch `spec/recompensas` (repositório principal, a partir de `testes-ambientes`) e, no submódulo do worktree, a branch `spec/recompensas` a partir de `32698e5` (`testes-ambientes` do fork)
   - Verificação: `git branch --show-current` e `git -C biguagym branch --show-current` → `spec/recompensas`; `git -C ~/biguagym-v0.1.0/biguagym rev-parse HEAD` → `32698e5…` (checkout da fila intacto)
-- [ ] T2 — Gerar a referência da recompensa original: script de casos fixos (Hover, Nav, Land, Dock, Trajectory; sucesso, tilt, out_of_bounds, pouso/docagem dura, passo normal) rodado no código atual → `tests/dados/recompensa_v0.json` (R5)
+- [x] T2 — Gerar a referência da recompensa original: script de casos fixos (Hover, Nav, Land, Dock, Trajectory; sucesso, tilt, out_of_bounds, pouso/docagem dura, passo normal) rodado no código atual → `tests/dados/recompensa_v0.json` (R5)
   - Verificação: `python tests/gerar_referencia_v0.py` → JSON com todos os casos e nenhum NaN; rodar de novo dá um arquivo idêntico
 - [ ] T3 — Parâmetro `reward_version` (`"v1"` padrão, `"v0"`) no `HoverEnv`, com `ValueError` para outro valor, repassado nos 13 construtores das subclasses (R5)
   - Verificação: `grep -c "reward_version" biguagym/core/environments.py` cobre todos os `__init__`; `pytest tests/test_recompensas.py -k versao` → passa
