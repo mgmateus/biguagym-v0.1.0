@@ -1,6 +1,6 @@
 # Treinos de 100k passos no cluster2
 
-82 runs: os 30 ambientes v0/v1/v2 que rodam no BiguaSim 1.0.0, sem Hydrone, × 3 seeds, menos os 8 seeds 0 da fila do
+64 runs: os 24 ambientes v0/v1/v2 que rodam no BiguaSim 1.0.0, sem Hydrone e sem Torpedo, × 3 seeds, menos os 8 seeds 0 da fila do
 notebook. A lista está em `runs.csv`.
 
 **Divisão com o notebook:**
@@ -15,7 +15,8 @@ notebook. A lista está em `runs.csv`.
 - **Agentes:** TD3 para v0/v2. CUPRL para v1, porque o TD3 do harness não aceita observação `Dict`. O CUPRL nunca rodou
   num ambiente real: o piloto da verificação é o primeiro teste.
 - **Ficam de fora:** os 8 `BlueROVHeavy*` (o Unreal cai: o binário do mundo não conhece o agente),
-  `TorpedoTrajectoryFollower-v0/-v1` (`TypeError` no `clip()`) e `DjiMatriceLand-v2` (API ausente no biguasim 1.0.0).
+  `TorpedoTrajectoryFollower-v0/-v1` (`TypeError` no `clip()`), `DjiMatriceLand-v2` (API ausente no biguasim 1.0.0) e os
+  outros 6 Torpedo: o veículo não se move (posição final = inicial em 200 passos aleatórios, em todos os smokes).
 - **Ressalvas que valem para os resultados:**
   - os v1 ainda têm o bug do `np.resize` nos pixels (Etapa 6, spec `pipeline-pixels`);
   - no `DjiMatriceNav-v0` o TD3 aprendeu a encerrar o episódio em ~3 passos, porque a recompensa do `HoverEnv` não tem
