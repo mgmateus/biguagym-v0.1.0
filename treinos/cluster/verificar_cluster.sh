@@ -22,7 +22,10 @@ sims() { pgrep -c -f 'Binaries/Linux/Holodeck' || true; }
 
 sec "1. Máquina ($(hostname), $(date '+%F %T'))"
 nvidia-smi --query-gpu=index,name,memory.total,memory.used,utilization.gpu --format=csv
-nvidia-smi --query-compute-apps=pid,used_memory --format=csv,noheader | head
+echo "processos na GPU (dono, tempo, comando):"
+for pid in $(nvidia-smi --query-compute-apps=pid --format=csv,noheader); do
+    ps -o user=,etime=,rss=,cmd= -p "$pid" 2>/dev/null | cut -c1-160
+done
 echo "CPU: $(nproc) | RAM: $(free -g | awk '/^Mem:/{print $2" GB total, "$7" GB livre"}') | disco: $(df -h "$REPO" | awk 'NR==2{print $4" livre"}')"
 echo "DISPLAY='${DISPLAY:-}' | vulkan: $(ls /usr/share/vulkan/icd.d/ /etc/vulkan/icd.d/ 2>/dev/null | tr '\n' ' ')"
 echo "simuladores já abertos: $(sims)"
@@ -43,11 +46,16 @@ except Exception as ex:
 EOF
 done
 echo "simuladores abertos depois do smoke: $(sims)"
+HLOG=$HOME/.local/share/biguasim/1.0.0/worlds/SkyDive/Linux/Biguasim/Saved/Logs/HolodeckLog.txt
+echo "--- log do Unreal ($HLOG, $(stat -c '%y' "$HLOG" 2>/dev/null | cut -c1-19)): erros, GPU/Vulkan e fim ---"
+grep -a -i -E "error|fatal|vulkan|rhi|adapter|gpu|crash|signal" "$HLOG" 2>/dev/null | grep -v -i "trace" | head -25
+echo "..."
+tail -n 15 "$HLOG" 2>/dev/null
 
 sec "3. Pilotos de treino (2000 passos) + 4. GPU usada pelo Unreal"
 piloto() {  # $1=ambiente $2=agente $3..=overrides
     local e=$1 a=$2; shift 2
-    local d=$V/piloto_${a}_$e; mkdir -p "$d"
+    local d=$V/piloto_${a}_$e; mkdir -p "$d/curves" "$d/logs"   # o seed_curves não cria a pasta da curva
     ( while true; do
         echo "$(date +%T),$(sims),$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | tr '\n' ' ')"
         sleep 15; done ) > "$d/vram.csv" &

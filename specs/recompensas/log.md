@@ -183,3 +183,23 @@
 - O instalador confere que o biguasim está no `53ad1f9d` e o submódulo no `fcf4358` (recompensa v1); senão, ele para
   com erro. Como passou, o PC do lab está com o código da `spec/recompensas`.
 - Próximo passo: `bash treinos/cluster/verificar_cluster.sh` no PC do lab e o `relatorio.txt` para definir `WORKERS`.
+
+## 2026-10-06 — 1º relatório da verificação no PC do laboratório
+- Máquina: RTX 4070 Ti, 12.282 MiB, **já com 2.330 MiB usados e 96% de uso** por 4 processos que não são nossos
+  (PIDs 15453, 15454, 27729, 27804; ~514–542 MiB cada). 16 CPUs, 30 GB de RAM com **só 4 GB livres**, 248 GB de disco.
+  `DISPLAY=:0`, ICDs do Vulkan: nvidia, intel, lvp (llvmpipe), radeon, virtio.
+- **Smoke: os 3 falharam** com `BiguaSimException: Timed out waiting for binary to load`. O binário não sinalizou a
+  carga em 30 s (`loading_semaphore.acquire(30)`, `environments.py:1000`). No notebook a carga leva 6,9–9,5 s (mediana
+  7,5 s em 40 smokes), então não parece só lentidão. Hipóteses:
+  - o Unreal escolhe outro dispositivo Vulkan (lvp/intel);
+  - falta de RAM (4 GB livres);
+  - disputa da GPU com os processos já abertos;
+  - o binário cai ao abrir.
+  - A saída do simulador vai para `/dev/null` (`verbose=False`); o diagnóstico precisa do `HolodeckLog.txt`.
+- **Pilotos: falharam por bug do `verificar_cluster.sh`**: `OSError: Cannot save file into a non-existent directory`
+  (`.../curves`). O `seed_curves` não cria a pasta quando o `curves_path` é passado; a `fila_cluster.sh` já a criava.
+- Correções no `verificar_cluster.sh`:
+  - `mkdir -p "$d/curves" "$d/logs"` antes de cada piloto;
+  - o relatório agora inclui o dono, o tempo e o comando de cada processo na GPU, as linhas de erro/GPU/Vulkan do
+    `HolodeckLog.txt` e as últimas 15 linhas dele.
+  - Testado: o filtro, no log do notebook, mostra a linha da GPU escolhida pelo Unreal.
