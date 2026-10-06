@@ -1,7 +1,16 @@
 # Treinos de 100k passos no cluster2
 
-89 runs: os 30 ambientes v0/v1/v2 que rodam no BiguaSim 1.0.0, sem Hydrone, × 3 seeds, menos o
-`DjiMatriceNav-v0` seed 0, que já foi feito no notebook. A lista está em `runs.csv`.
+82 runs: os 30 ambientes v0/v1/v2 que rodam no BiguaSim 1.0.0, sem Hydrone, × 3 seeds, menos os 8 seeds 0 da fila do
+notebook. A lista está em `runs.csv`.
+
+**Divisão com o notebook:**
+- A fila do notebook (`treinos/100k`, TD3, seed 0) faz DjiMatriceNav-v0 (pronto), DjiMatriceLand-v0,
+  DjiMatriceTrajectoryFollower-v0, BlueBoatNav-v0, BlueBoatTrajectoryFollower-v0, BlueROV2Nav-v0, BlueROV2Dock-v0 e
+  BlueROV2TrajectoryFollower-v0.
+- O notebook pula BlueBoatNav-v1 e BlueBoatNav-v2 (marcador `PULADO`): o v1 precisa do CUPRL, e o v2 (sonar) não cabe no
+  timeout de 48 h. Esses dois rodam aqui, com todos os seeds.
+- No cluster, os seeds 1 e 2 dos 8 ambientes do notebook **esperam** a curva do seed 0 chegar completa em
+  `saida/curves` (passo 3). Enquanto isso, a fila segue com o resto.
 
 - **Agentes:** TD3 para v0/v2. CUPRL para v1, porque o TD3 do harness não aceita observação `Dict`. O CUPRL nunca rodou
   num ambiente real: o piloto da verificação é o primeiro teste.
@@ -34,14 +43,13 @@ O instalador puxa o submódulo de `ttszin/biguagym` e o biguasim de `ttszin/bigu
 mundo. Ele precisa de `git`, `gcc`, `zstd` e Python 3.12 (`python3.12` ou `conda`), sem sudo. Se faltar o Python 3.12,
 instale o Miniconda no home.
 
-## 3. Trazer o DjiMatriceNav-v0 seed 0 (do notebook)
-Sem a curva do seed 0, a fila recusa o seed 1 desse ambiente, para não rodar dois seeds no mesmo processo.
+## 3. Enviar os seeds 0 do notebook (do notebook, sempre que um terminar)
 ```bash
-cd ~/biguagym-v0.1.0/treinos
-ssh -J teteu@10.230.108.173 teteu@cluster2 mkdir -p biguagym-v0.1.0/treinos/cluster/saida/curves biguagym-v0.1.0/treinos/cluster/saida/logs/td3-state
-scp -J teteu@10.230.108.173 100k/curves/td3-state-DjiMatriceNav_v0.csv teteu@cluster2:biguagym-v0.1.0/treinos/cluster/saida/curves/
-scp -r -J teteu@10.230.108.173 100k/logs/td3-state/DjiMatriceNav-v0 teteu@cluster2:biguagym-v0.1.0/treinos/cluster/saida/logs/td3-state/
+cd ~/biguagym-v0.1.0 && bash treinos/cluster/enviar_do_notebook.sh
 ```
+O script envia só as curvas e os logs dos runs concluídos (`.ok`, curva completa). Ele nunca sobrescreve no cluster, onde
+a mesma curva recebe os seeds 1 e 2. Rode-o depois de cada seed 0 do notebook terminar (dá para ver em
+`treinos/100k/estado.csv`). Não copie curvas à mão: uma curva parcial ou uma cópia tardia corrompe a do cluster.
 
 ## 4. Verificar (no cluster2, ~20–40 min)
 ```bash

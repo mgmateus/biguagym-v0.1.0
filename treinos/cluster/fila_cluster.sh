@@ -72,6 +72,15 @@ print(last_seed if last_frame + 1 < steps else last_seed + 1)
 EOF
 }
 
+# A curva tem o seed $3 completo como última linha? (frame + 1 >= STEPS, como em logger.seed_curves)
+curva_externa_pronta() {  # $1=ambiente $2=agente $3=seed
+    local obs=state
+    case $1 in *-v1) obs=pixel ;; *-v2) obs=range ;; esac
+    local c="$OUT/curves/${2//-/_}-$obs-${1//-/_}.csv"
+    [ -f "$c" ] || return 1
+    tail -1 "$c" | awk -F, -v s="$3" -v n="$STEPS" '{ exit !($5 == s && $6 + 1 >= n) }'
+}
+
 # Escolhe o próximo run livre (com o lock já tomado). Imprime "ambiente,agente,seed" ou nada.
 proximo() {
     tail -n +2 "$RUNS" | while IFS=, read -r env agent s; do
@@ -80,7 +89,13 @@ proximo() {
         ls "$OUT/runs/${env}"_s*/.rodando >/dev/null 2>&1 && continue          # mesmo ambiente em andamento
         if [ "$s" -gt 0 ]; then
             prev="${env},${agent},$((s - 1))"
-            if grep -qx "$prev" "$RUNS" && [ ! -e "$OUT/runs/${env}_s$((s - 1))/.ok" ]; then continue; fi
+            if grep -qx "$prev" "$RUNS"; then
+                [ -e "$OUT/runs/${env}_s$((s - 1))/.ok" ] || continue
+            else
+                # Seed anterior feito em outra máquina (fila do notebook): espera a curva dele chegar completa
+                # em $OUT/curves (copiada com o rsync do LEIAME).
+                curva_externa_pronta "$env" "$agent" $((s - 1)) || continue
+            fi
         fi
         echo "$env,$agent,$s"; break
     done
@@ -99,7 +114,7 @@ EOF
     chmod +x "$wd/bin/nvidia-smi"
     while true; do
         local linha
-        linha=$(flock "$LOCK" bash -c "$(declare -f proximo); OUT='$OUT' RUNS='$RUNS'; r=\$(proximo); \
+        linha=$(flock "$LOCK" bash -c "$(declare -f proximo curva_externa_pronta); OUT='$OUT' RUNS='$RUNS' STEPS='$STEPS'; r=\$(proximo); \
             [ -n \"\$r\" ] && { IFS=, read -r e a s <<< \"\$r\"; mkdir -p \"\$OUT/runs/\${e}_s\$s\"; touch \"\$OUT/runs/\${e}_s\$s/.rodando\"; echo \"\$r\"; }")
         if [ -z "$linha" ]; then
             # Nada livre agora: termina se não há mais nada pendente; senão espera outro worker liberar.
@@ -107,7 +122,17 @@ EOF
                 d=$OUT/runs/${e}_s$s; [ -e "$d/.ok" ] || [ -e "$d/.erro" ] || echo x; done | wc -l)
             rod=$(ls "$OUT"/runs/*/.rodando 2>/dev/null | wc -l)
             [ "$pend" -eq 0 ] && break
-            [ "$rod" -eq 0 ] && { echo "$(date +%T) w$w: $pend pendentes bloqueados por seeds anteriores com erro"; break; }
+            if [ "$rod" -eq 0 ]; then
+                # Nada rodando: ou falta a curva de um seed feito no notebook (espera), ou só sobrou bloqueio por erro (sai).
+                ext=$(tail -n +2 "$RUNS" | while IFS=, read -r e a s; do
+                    d=$OUT/runs/${e}_s$s; [ -e "$d/.ok" ] || [ -e "$d/.erro" ] && continue
+                    [ "$s" -gt 0 ] && ! grep -qx "$e,$a,$((s - 1))" "$RUNS" && echo x; done | wc -l)
+                if [ "$ext" -eq 0 ]; then
+                    echo "$(date +%T) w$w: $pend pendentes bloqueados por seeds anteriores com erro"; break
+                fi
+                [ $(( $(date +%s) / 60 % 60 )) -eq 0 ] && \
+                    echo "$(date +%T) w$w: esperando curvas do notebook em $OUT/curves ($ext runs)"
+            fi
             sleep 60; continue
         fi
         IFS=, read -r env agent s <<< "$linha"

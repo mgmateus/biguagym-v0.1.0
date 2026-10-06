@@ -14,15 +14,8 @@ DjiMatriceNav-v1,cuprl,0
 DjiMatriceTrajectoryFollower-v1,cuprl,0
 TorpedoDock-v1,cuprl,0
 TorpedoNav-v1,cuprl,0
-BlueBoatNav-v0,td3,0
-BlueBoatTrajectoryFollower-v0,td3,0
-BlueROV2Dock-v0,td3,0
-BlueROV2Nav-v0,td3,0
-BlueROV2TrajectoryFollower-v0,td3,0
 DjiMatriceHover-v0,td3,0
-DjiMatriceLand-v0,td3,0
 DjiMatriceNav-v2,td3,0
-DjiMatriceTrajectoryFollower-v0,td3,0
 DjiMatriceTrajectoryFollower-v2,td3,0
 TorpedoDock-v0,td3,0
 TorpedoNav-v0,td3,0

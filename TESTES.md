@@ -1260,3 +1260,28 @@ não temos".
 ### Fila local
 - A fila do notebook (`treinos/100k`) continua: `DjiMatriceLand-v0_s0` desde 11:33, a seguir os outros 8 da seed 0.
   O cluster vai repetir esses runs. Pendente: o usuário decidir se para a fila local quando o cluster começar.
+
+### Fila do notebook fora da lista do cluster (2026-10-06)
+Pedido do usuário: "tira essa fila que está rodando do notebook do que iremos rodar no cluster".
+- **`treinos/cluster/runs.csv`: 89 → 82 runs.** Saíram os seeds 0 que o notebook vai fazer: DjiMatriceLand-v0,
+  DjiMatriceTrajectoryFollower-v0, BlueBoatNav-v0, BlueBoatTrajectoryFollower-v0, BlueROV2Nav-v0, BlueROV2Dock-v0 e
+  BlueROV2TrajectoryFollower-v0. O DjiMatriceNav-v0 s0 já tinha saído.
+- **BlueBoatNav-v1 e BlueBoatNav-v2 (seed 0) ficaram no cluster e saíram da fila do notebook.** Decisão minha:
+  - na fila do notebook o v1 usaria TD3, que não aceita observação `Dict` e falharia (no cluster usa CUPRL);
+  - o v2 (sonar, ~0,58 passos/s) não cabe no timeout de 48 h.
+  - Sem reiniciar a fila do notebook: criei `treinos/100k/runs/BlueBoatNav-v{1,2}_s0/.ok`, o marcador que a
+    `fila_100k.sh` usa para pular, junto com um arquivo `PULADO` que explica que o run não foi feito.
+    Para desfazer: apagar essas duas pastas antes de a fila chegar nelas.
+- **`fila_cluster.sh`:** os seeds 1 e 2 dos ambientes cujo seed 0 é do notebook agora **esperam** a curva chegar completa
+  em `saida/curves` (`curva_externa_pronta`, mesmo critério do `seed_curves`), em vez de virar `.erro`.
+  - Se nada estiver rodando e só faltarem essas curvas, os workers ficam esperando (com aviso a cada hora).
+  - Se só sobrarem bloqueios por erro, eles saem.
+- **Novo `treinos/cluster/enviar_do_notebook.sh`** (roda no notebook, na rede da universidade): envia ao cluster2 a curva e
+  os logs dos seeds 0 com `.ok`, sem `PULADO` e com a curva completa. Usa `rsync --ignore-existing`, porque no cluster a
+  mesma curva recebe os seeds 1 e 2 e uma cópia tardia a sobrescreveria.
+- **LEIAME:** o passo 3 agora é esse script; foi acrescentada a seção "Divisão com o notebook".
+- **Testes (sem simulador):**
+  - fila falsa: um `EXT-v0` com s1/s2 e o s0 "do notebook". A curva parcial chegou aos 15 s → o s1 continuou esperando;
+    a completa chegou aos 23 s → s1 e s2 rodaram. Os workers saíram ao sobrar só o bloqueio por erro;
+  - envio com `ssh`/`rsync` falsos: só o DjiMatriceNav-v0 foi enviado; os dois `PULADO` e o DjiMatriceLand (rodando)
+    foram pulados.
