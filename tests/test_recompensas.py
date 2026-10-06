@@ -8,6 +8,7 @@ import pytest
 
 import core.environments as E
 from recompensas_util import casos, executar_caso
+from core.environments import TrajectoryEnv
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 CLASSES = [c for _, c in inspect.getmembers(E, inspect.isclass)
@@ -125,3 +126,46 @@ def test_land_dock_tombar_nao_e_melhor_que_pouso_duro(tarefa):
 def test_land_dock_tombar_rende_menos_que_ficar_parado(tarefa):
     tomba, parado = _v1(f'{tarefa}_tilt'), _v1(f'{tarefa}_parado')
     assert sum(p[0] for p in tomba) < sum(p[0] for p in parado)
+
+
+# --- T6: Trajectory (R1, R3, R4, R6) ----------------------------------------------------------------------------
+def test_trajetoria_parado_rende_no_maximo_zero():
+    passos = _v1('traj_parado')
+    assert sum(p[0] for p in passos) <= 0.0
+    assert all(p[3]['reward_terms']['track'] == 0.0 for p in passos)
+
+
+def test_trajetoria_voltar_e_repetir_nao_paga_de_novo():
+    passos = _v1('traj_vai_volta')                   # avança até o wp 10, volta até o 1, avança de novo até o 10
+    track = [p[3]['reward_terms']['track'] for p in passos]
+    assert sum(track[:10]) > 0                       # 1ª ida paga
+    assert all(t == 0.0 for t in track[10:])         # volta e 2ª ida: o acompanhamento não paga de novo
+    # Sobra só o r_prog original (W_PROG·Δprogresso a partir do _prev_progress, que cai na volta): ~0,01 por
+    # waypoint, contra ~2,5 do track na 1ª passagem. Ir e voltar não compensa.
+    for p in passos[10:]:
+        assert p[0] <= p[3]['reward_terms']['prog'] + 1e-12
+    assert sum(p[0] for p in passos[10:]) < 0.05 * sum(p[0] for p in passos[:10])
+
+
+def test_trajetoria_completa_rende_mais_que_parado_e_que_ir_e_voltar():
+    completo = _v1('traj_avanca')
+    r, term, _, info = completo[-1]
+    assert term and info['termination_reason'] == 'success'
+    assert info['reward_terms']['terminal'] == pytest.approx(TrajectoryEnv.BONUS_END)
+    total = sum(p[0] for p in completo)
+    assert total > 0
+    assert total > sum(p[0] for p in _v1('traj_parado'))
+    assert total > sum(p[0] for p in _v1('traj_vai_volta'))
+    # e o v0 premiava mais quem ficava parado 600 passos do que quem completava (diagnóstico)
+    v0_parado_600 = 600 * executar_caso('traj_parado', version='v0')[0][0]
+    v0_completo = sum(p[0] for p in executar_caso('traj_avanca', version='v0'))
+    assert v0_parado_600 > v0_completo
+
+
+@pytest.mark.parametrize('falha,motivo', [('tilt', 'tilt'), ('fora', 'out_of_bounds')])
+def test_trajetoria_queda_vale_menos_10(falha, motivo):
+    r, term, _, info = _v1(f'traj_{falha}')[-1]
+    assert term and info['termination_reason'] == motivo
+    assert info['reward_terms']['terminal'] == pytest.approx(-10.0)   # (track já inclui cte·align: não somar)
+    v0 = executar_caso(f'traj_{falha}', version='v0')[-1][0]
+    assert r < v0

@@ -102,3 +102,31 @@
   - tombar e pousar duro com o mesmo terminal (−10);
   - tombar rende menos que ficar parado;
   - `v0` idêntico. ✅
+
+## 2026-10-06 — T6: Trajectory
+- `TrajectoryEnv`:
+  - `_reward`:
+    - `v0` = `r_cte + r_align` todo passo (original);
+    - `v1` = `(r_cte + r_align)·adv`, com `adv = max(_wp_idx − _best_wp, 0)` e `_best_wp` = máximo atingido;
+    - guarda `_last_terms` (`cte`, `align`, `track`, `prog`, `stable`, `smooth`);
+  - `_reset` zera `_best_wp`. O `_reset` do mixin de pixels chama `super()._reset()`, então vale para os v1;
+  - `_step`: `BONUS_END` mantido (+10, nas duas versões); em `v1`, tilt/out_of_bounds somam −10;
+    `termination_reason` ∈ {success, tilt, out_of_bounds, strayed, timeout, None}; `reward_terms` com `terminal`.
+- Testes (2 ajustes nos próprios testes, sem mudar o código):
+  - na queda, o auxiliar `_shaping` somava `cte` + `align` + `track` (dupla contagem) → o teste agora confere
+    `terminal == −10` e que a recompensa é menor que no `v0`;
+  - em ir e voltar, o `track` fica 0 depois da 1ª passagem, como no design. Mas o `r_prog` original
+    (`W_PROG·Δprogresso`, que conta a partir do `_prev_progress`) volta a pagar ~0,01 por waypoint na 2ª ida. O design
+    não muda esse termo, e ele é ~250× menor que o `track` da 1ª passagem: ir e voltar não compensa. O teste confere
+    exatamente isso (ganho da volta + 2ª ida < 5% da 1ª ida).
+- Verificação: `pytest tests/ -q -p no:warnings` → **35 passed**. Inclui:
+  - parado: soma ≤ 0 e `track` = 0;
+  - completo: termina com `success` e +10 de `BONUS_END`, soma > 0 e maior que parado e que ir e voltar;
+  - no `v0`, ficar parado 600 passos > completar (confirma o diagnóstico);
+  - queda e saída da área −10. ✅
+
+## 2026-10-06 — T7: `v0` idêntico ao original
+- `test_v0_identico_ao_original` compara os 31 casos (637 passos) com `reward_version="v0"` contra
+  `tests/dados/recompensa_v0.json`, gerado na T2 com o código original (`32698e5`).
+- Recompensa com tolerância 1e-9; `terminated`/`truncated` exatos.
+- Verificação: `pytest tests/ -q -p no:warnings` → **35 passed** (suíte completa, depois das T4–T6). ✅

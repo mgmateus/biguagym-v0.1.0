@@ -15,9 +15,9 @@ As tarefas T1–T10 não usam o simulador e podem ser feitas com a fila do noteb
   - Verificação: `pytest tests/test_recompensas.py -k "hover or nav"` → passa
 - [x] T5 — `LandEnv` e `DockEnv` em `v1`: todas as falhas −10 (inclusive pouso/docagem dura, no lugar do −5); sucesso +20; `info` (R1, R2, R6)
   - Verificação: `pytest tests/test_recompensas.py -k "land or dock"` → passa
-- [ ] T6 — `TrajectoryEnv` em `v1`: `_best_wp`, `r_track = (r_cte + r_align)·adv`, −10 por tilt/out_of_bounds; `info` (R1, R3, R4, R6)
+- [x] T6 — `TrajectoryEnv` em `v1`: `_best_wp`, `r_track = (r_cte + r_align)·adv`, −10 por tilt/out_of_bounds; `info` (R1, R3, R4, R6)
   - Verificação: `pytest tests/test_recompensas.py -k trajetoria` → passa (parado ≤ 0, para trás ≤ 0, completo > ambos, ir e voltar não paga de novo)
-- [ ] T7 — `v0` idêntico ao original: os casos da T2 com `reward_version="v0"` reproduzem `recompensa_v0.json` (R5)
+- [x] T7 — `v0` idêntico ao original: os casos da T2 com `reward_version="v0"` reproduzem `recompensa_v0.json` (R5)
   - Verificação: `pytest tests/test_recompensas.py` → todos passam
 - [ ] T8 — Commit no submódulo, push da branch `spec/recompensas` para o fork `ttszin/biguagym` e atualização do ponteiro do submódulo na branch `spec/recompensas` do repositório principal
   - Verificação: `git ls-remote https://github.com/ttszin/biguagym.git spec/recompensas` → mesmo hash do submódulo do worktree
