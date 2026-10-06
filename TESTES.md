@@ -1193,3 +1193,70 @@ Pedido do usuário: "pode fazer a opção 1".
 - Também explica a lentidão: com episódios de 3 passos, o tempo vai quase todo para o reset (~2 s).
 - Não alterei nada. A fila continua. Corrigir a recompensa é mudança no ambiente (submódulo dos autores): precisa de spec e
   de decisão do usuário/autores.
+
+## Preparação das runs para o cluster2 (2026-10-06)
+Pedido do usuário: "prepare todas as outras runs de v0,v1 e v2 para rodar no cluster2 sem ser as do hydrone pois ainda
+não temos".
+
+### Acesso
+- Pelo histórico do shell, o cluster2 é acessado com `ssh -J teteu@10.230.108.173 teteu@cluster2`, com jobs lançados por
+  `nohup` (não achei SLURM).
+- **Daqui não chego lá:** o host de salto não responde (`Connection timed out`; o notebook está na rede doméstica
+  192.168.0.x). Por isso tudo foi preparado localmente, sem testar no cluster2.
+
+### Lista de runs (`treinos/cluster/runs.csv`, 89 runs)
+- Dos 54 ids, 41 não são Hydrone. Desses, 30 são executáveis. Saem:
+  - os 8 `BlueROVHeavy*`: crash do Unreal, o binário não conhece o agente (seção BlueROVHeavy acima);
+  - `TorpedoTrajectoryFollower-v0/-v1`: `TypeError` no `clip()`;
+  - `DjiMatriceLand-v2`: `move_agent` ausente no biguasim 1.0.0.
+- 30 × 3 seeds = 90, menos o `DjiMatriceNav-v0` seed 0, que já foi feito no notebook = **89**.
+- Ordem: por seed. Dentro de cada seed, os v2 lentos vêm primeiro (BlueBoat/BlueROV2 Nav e TrajectoryFollower; sonar a
+  0,58–3,6 passos/s no smoke), depois os v1, depois os v0/v2 restantes.
+- **Agentes:** TD3 para v0/v2. **CUPRL para v1.**
+  - O TD3 não aceita observação `Dict`: `runner._box_shape` usa `space.shape`, que é `None` num `Dict`.
+  - O CUPRL é o agente de pixels do harness, mas o próprio código diz "should be validated on a real pixel env". O piloto
+    da verificação é o primeiro teste.
+
+### Problemas do harness para várias GPUs (contornados no lançador, sem mudar código)
+- `utils.gpu()` (`utils.py:27`) e o `biguasim.util.gpu()` escolhem a GPU com **menos** VRAM livre
+  (`sorted(...)[0]` sobre a % livre) e usam o índice do `nvidia-smi`, que ignora o `CUDA_VISIBLE_DEVICES`.
+  - Contorno: cada worker recebe no `PATH` um `nvidia-smi` falso (`nvidia-smi -i <gpu> "$@"`). Com ele, o `gpu()` devolve
+    "0", que corresponde à GPU do `CUDA_VISIBLE_DEVICES`.
+  - Vale virar spec: o `gpu()` deveria escolher a de mais VRAM livre e respeitar o `CUDA_VISIBLE_DEVICES`.
+- O Unreal é lançado sem parâmetro de GPU (`environments.py:960-995`, só `-RenderOffScreen`): com várias GPUs, os
+  simuladores podem ir todos para a GPU padrão. A verificação mede isso.
+- `crash.log` e `fault.log` são gravados no diretório atual (`logger.py:56-61`). Contorno: cada worker roda o
+  `run.py` do seu próprio diretório (`saida/workers/w<N>`).
+
+### Arquivos novos
+- `treinos/cluster/fila_cluster.sh`: fila paralela (`WORKERS`, `GPUS`, `TIMEOUT` padrão 120 h).
+  - Um run por seed (vazamento do `close()`), e nunca dois seeds do mesmo ambiente ao mesmo tempo.
+  - O seed s espera o s-1 ter `.ok`.
+  - Antes de cada run, confere o seed que o `run.py` vai escolher (mesma lógica do `seed_curves`); se não bater, marca
+    `.erro` e não roda.
+  - Por run: `saida.log`, cópia de crash/fault/run.log, limpeza do grupo de processos, linha no `estado.csv`.
+  - `monitor.csv` com a VRAM por GPU.
+- `treinos/cluster/verificar_cluster.sh`:
+  - hardware;
+  - smoke de DjiMatriceNav-v0, DjiMatriceNav-v1 e BlueBoatTrajectoryFollower-v2;
+  - pilotos de 2000 passos (TD3 DjiMatriceNav-v2, CUPRL DjiMatriceNav-v1) presos à última GPU, com a VRAM por GPU, para
+    ver se o Unreal respeita a GPU;
+  - gera `verificacao/relatorio.txt`.
+- `treinos/cluster/LEIAME.md`: o passo a passo (acesso, cópia do mundo, instalação com `setup/instalar_pc_lab.sh`, cópia da
+  curva do DjiMatriceNav-v0 s0, verificação, início, acompanhamento, retorno dos resultados).
+- `treinos/.gitignore`: tira do git as saídas (`100k/`, `100k_*/`, `cluster/saida/`, `cluster/verificacao/`).
+
+### Teste da fila (local, com `run.py` falso; a GPU está ocupada pelo treino local)
+- 10 runs fictícios, `WORKERS=3`, `run.py` que escreve a curva como o logger e sai com 0 ou 1. Resultados:
+  - os seeds 1 só começaram depois do respectivo seed 0;
+  - dois seeds do mesmo ambiente nunca rodaram juntos;
+  - `FALHA-v0_s0` com exit 1 recebeu `.erro`, e o s1 ficou bloqueado (os workers saíram avisando);
+  - `JA-v0_s1` (s0 fora da lista, curva com o seed 0 completo) rodou;
+  - `SEMCURVA-v0_s1` foi recusado: "o run.py escolheria o seed 0";
+  - cada worker rodou no seu diretório, com `CUDA_VISIBLE_DEVICES=0`, e o `nvidia-smi` falso mostrando só a GPU 0.
+- Não testado: o simulador real, mais de uma GPU (o notebook tem uma), o CUPRL e rodar sem tela no cluster. Isso fica
+  para o `verificar_cluster.sh`.
+
+### Fila local
+- A fila do notebook (`treinos/100k`) continua: `DjiMatriceLand-v0_s0` desde 11:33, a seguir os outros 8 da seed 0.
+  O cluster vai repetir esses runs. Pendente: o usuário decidir se para a fila local quando o cluster começar.
