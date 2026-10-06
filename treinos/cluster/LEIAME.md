@@ -112,3 +112,24 @@ A fila e a verificação funcionam em qualquer Linux com GPU NVIDIA. No PC do la
    `loginctl enable-linger $USER`. Depois de reiniciar o PC, rode o passo 4 de novo: ele pula o que já tem `.ok`.
 6. **Acompanhar e parar:** as mesmas instruções da seção 6 acima. Para trazer os resultados: copie
    `treinos/cluster/saida/`.
+
+### PC do laboratório compartilhado com os treinos do TCC (decisão de 2026-10-06: esperar o TCC terminar)
+Em vez dos passos 3 e 4 acima, inicie uma vez:
+```bash
+cd ~/biguagym-v0.1.0 && git pull
+nohup setsid systemd-inhibit --what=sleep:idle:handle-lid-switch --why="treinos 100k" \
+    bash treinos/cluster/esperar_e_rodar.sh > /dev/null 2>&1 < /dev/null &
+```
+O `esperar_e_rodar.sh`:
+1. espera a GPU ficar sem processos CUDA e com RAM disponível ≥ 20 GB por 15 min seguidos (uma nova seed do TCC zera
+   a contagem);
+2. roda o `verificar_cluster.sh`;
+3. decide:
+   - se o smoke de v0/v2 ou o piloto TD3 falhar, **não inicia** a fila e deixa o motivo no log;
+   - se o CUPRL/v1 falhar, inicia sem os v1 (`runs_sem_v1.csv`, 45 runs);
+4. inicia a `fila_cluster.sh` com `WORKERS` = min(3, VRAM livre/5 GB, RAM/11 GB).
+
+- Acompanhar: `tail -f treinos/cluster/saida/espera.log`.
+- Cancelar antes de começar: `kill -TERM -$(cat treinos/cluster/saida/espera.pgid)`.
+- Para não matar os treinos do TCC por falta de RAM, **não** rode o `verificar_cluster.sh` à mão enquanto o TCC estiver
+  rodando.

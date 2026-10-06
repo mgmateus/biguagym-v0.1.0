@@ -203,3 +203,20 @@
   - o relatório agora inclui o dono, o tempo e o comando de cada processo na GPU, as linhas de erro/GPU/Vulkan do
     `HolodeckLog.txt` e as últimas 15 linhas dele.
   - Testado: o filtro, no log do notebook, mostra a linha da GPU escolhida pelo Unreal.
+
+## 2026-10-06 — PC do laboratório compartilhado com o TCC: `esperar_e_rodar.sh`
+- Usuário: os processos na GPU são os treinos do TCC dele. Escolheu a opção 1: "vamos fazer a opção 1, coloque na fila
+  os treinos" (esperar o TCC terminar e usar a máquina inteira).
+- Novo `treinos/cluster/esperar_e_rodar.sh`:
+  1. espera nenhum processo CUDA e `MemAvailable` ≥ 20 GB por 15 min seguidos;
+  2. roda o `verificar_cluster.sh`;
+  3. decide: smoke v0/v2 ou piloto TD3 com erro → não inicia; CUPRL/v1 com erro → `runs_sem_v1.csv`;
+     `WORKERS` = min(3, VRAM livre/5000, RAM/11000), no mínimo 1;
+  4. inicia a `fila_cluster.sh`.
+  - Log em `saida/espera.log`; `espera.pgid` para cancelar.
+- Teste com `nvidia-smi`, verificação e fila falsos (sem simulador):
+  - cenário A (GPU ocupada → livre → processo novo por 1 s → livre): o processo novo zerou a contagem; com o CUPRL
+    falhando, a fila foi iniciada com `runs_sem_v1.csv` (45 runs = 72 − 27 v1, 0 linhas `cuprl`) e `WORKERS=1` (RAM do
+    notebook 7,9 GB);
+  - cenário B (smoke v0 com erro): a fila não foi iniciada, `exit 1`, linhas do relatório no log. ✅
+- LEIAME: nova subseção "PC do laboratório compartilhado com os treinos do TCC".
