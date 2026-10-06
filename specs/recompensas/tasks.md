@@ -1,4 +1,4 @@
-Status: rascunho
+Status: aprovado
 
 # recompensas — Tarefas
 
