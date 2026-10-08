@@ -1366,3 +1366,26 @@ Pedido do usuário: "espere esses treinos terminarem, mas se for possível ajust
   - Consequência para o cluster: nos v1, o CUPRL receberia só rgb 84×84, sem depth nem state, e o `CuprlRunner` usa
     `pose_key='state'` → provável falha. O piloto do `verificar_cluster.sh` deve mostrar isso.
   - O design inclui a correção (passar `**cfg.env.kwargs` no treino e na avaliação).
+
+## Taiga atualizado (2026-10-07)
+Pedido do usuário: "pode aplicar todas, cria o sprint 2". Token novo salvo em `~/.config/taiga/token` (600; expira
+2026-10-07 22:28), nunca impresso.
+- **Sprint 2 criado:** id `534682`, 2026-10-08 → 2026-10-21.
+- **Status e comentários:**
+  - **#19** → Closed, com o resumo da reprodução do vazamento;
+  - **#34** → Ready for test (corrigido na recompensa v1, `fcf4358`);
+  - **#112**: comentário (Torpedo parado nos 6 ambientes; fora das filas);
+  - **#44**: comentário com os tempos medidos e a estimativa no PC do lab;
+  - **#49, #81, #62, #46, #59, #47** → In progress, com comentário (seed 0 no notebook com a recompensa original = linha de
+    base; 3 seeds v1 na fila do PC do lab).
+- **Tasks novas (Sprint 2):**
+  - #114 (US #33) recompensas v1 → In progress;
+  - #115 (US #33) `env_kwargs` ignorado → Ready for test;
+  - #116 (US #25) validar o CUPRL nos v1 → New;
+  - #117 (US #41) fila de 100k no PC do lab → In progress;
+  - #118 (US #41) o simulador não carrega no PC do lab → New.
+- **Sprint das tasks:** a 1ª tentativa de mover tasks de sprint direto não teve efeito (no Taiga, a task segue a sprint
+  da user story). Então as **user stories #9, #18, #25, #33, #41, #45, #58, #71 e #80** foram movidas para o Sprint 2.
+  As tasks delas foram junto, inclusive as já fechadas.
+  - Resultado: 65 tasks no Sprint 2, 6 no Sprint 1 (US #2, toda fechada) e 22 sem sprint (US que não estão em sprint).
+- Conferido relendo o quadro: todos os PATCH deram 200, e os POST, 201.
