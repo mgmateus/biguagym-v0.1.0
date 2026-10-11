@@ -262,3 +262,22 @@
   - `+env_kwargs.reward_version=v0 agent.learning_starts=100 num_eval_episodes=1` → `exit 0`, com as avaliações do
     passo 0 e final. O repasse à avaliação está coberto pelo teste unitário `test_avaliacao_recebe_env_kwargs`.
   - 0 processos do simulador depois. ✅
+
+## 2026-10-11 — T13: critérios de aceitação e merge
+`python -m pytest tests/ -q -p no:warnings` → **38 passed** (35 da recompensa + 3 do `env_kwargs`).
+
+| Requisito | Verificação | Resultado |
+|---|---|---|
+| R1 | testes `*_termino_por_falha`, `*_toda_falha_vale_menos_10`, `*_tombar_rende_menos_que_ficar_parado`, `trajetoria_queda_vale_menos_10`; T12 hover × tomba | ✅ toda falha = shaping − 10; tombar < parado (unitário e com simulador: 0,01 × −10,36) |
+| R2 | testes `*_sucesso_no_proprio_passo`, `*_bonus_fixo_com_shaping_negativo` | ✅ +10 (Hover/Nav) e +20 (Land/Dock), no próprio passo, independente do sinal do shaping |
+| R3 | `trajetoria_parado_rende_no_maximo_zero`, `trajetoria_voltar_e_repetir_nao_paga_de_novo`; T12 parado | ✅ parado: 0,00 em 600 passos com simulador (v0: 1454) |
+| R4 | `trajetoria_completa_rende_mais_que_parado_e_que_ir_e_voltar`; T12 segue × parado | ✅ completo > parado e > ir e voltar; com simulador 341 × 0 |
+| R5 | `test_v0_identico_ao_original` (31 casos, 637 passos, 1e-9), `test_versao_invalida`, pilotos do `run.py` | ✅ |
+| R6 | testes conferem `reward_terms`/`termination_reason`; T11 (24/24 ok) e T12 com simulador | ✅ |
+| R7 | durante T1–T10, o checkout da fila ficou em `32698e5` e a fila do notebook terminou (2026-10-08) antes do merge | ✅ |
+| `env_kwargs` | `tests/test_env_kwargs.py` + pilotos (valor inválido → `ValueError`; `v0` → `exit 0`) | ✅ |
+
+Ressalvas registradas (não bloqueiam):
+- o `r_prog` original ainda repaga ~0,01 por waypoint numa segunda passagem (T6);
+- `LandCoopPixelEnv` não foi alterado;
+- os v1 (pixels) continuam com o bug do `np.resize`, e o CUPRL não foi validado.

@@ -29,5 +29,5 @@ As tarefas T1–T10 não usam o simulador e podem ser feitas com a fila do noteb
   - Verificação: `smoke_results/resumo.csv` → os mesmos ids `ok` de antes; `info` com `reward_terms` e `termination_reason`; 0 processos do simulador no fim
 - [x] T12 — ⏱ (depois da fila do notebook) Políticas fixas com o simulador, `v0` contra `v1`: BlueBoatTrajectoryFollower-v0 parado × `--follow`; DjiMatriceHover-v0 motores em hover × máximo; piloto `run.py ... +env_kwargs.reward_version=v0 num_train_steps=300` (R1–R4, correção do `env_kwargs`)
   - Verificação: no `v1`, seguir > parado e hover > tombar; no `v0`, o oposto na trajetória (confirma o diagnóstico); o log do piloto mostra `v0` nos ambientes de treino e de avaliação
-- [ ] T13 — ⏱ Verificar todos os critérios de aceitação do requirements.md e, com a fila do notebook terminada, fazer o merge de `spec/recompensas` na `testes-ambientes` (R7)
+- [x] T13 — ⏱ Verificar todos os critérios de aceitação do requirements.md e, com a fila do notebook terminada, fazer o merge de `spec/recompensas` na `testes-ambientes` (R7)
   - Verificação: tabela de critérios preenchida no `log.md`; `git -C biguagym rev-parse HEAD` no checkout principal → commit novo do fork
