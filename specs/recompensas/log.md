@@ -1,0 +1,283 @@
+# recompensas — Log de execução
+
+## 2026-10-06 — T1: branches
+- Usuário: "aprovado, faça da T1 à T10 de uma vez" → `tasks.md` em `Status: aprovado`.
+- `git submodule update --init` no worktree (submódulo do fork `ttszin/biguagym` em `32698e5`) e
+  `git -C biguagym checkout -b spec/recompensas`.
+- Verificação: `git branch --show-current` = `spec/recompensas`; `git -C biguagym branch --show-current` =
+  `spec/recompensas`; checkout da fila (`~/biguagym-v0.1.0/biguagym`) continua em `32698e5`. ✅
+
+## 2026-10-06 — T2: referência da recompensa original
+- Novos: `tests/recompensas_util.py` (ambiente sem simulador via `object.__new__` + `FakeSim`; 31 casos fixos de
+  Hover/Nav/Land/Dock/Trajectory) e `tests/gerar_referencia_v0.py`, que grava `tests/dados/recompensa_v0.json`.
+- Rodado no código original (`32698e5`): `cd tests && python gerar_referencia_v0.py` → "31 casos, 637 passos", sem NaN.
+  Duas execuções deram o mesmo arquivo. ✅
+- Correção no próprio teste: na primeira versão, o caso da Trajectory usava os limites ±10 m do Hover e terminava "fora
+  da área" no passo 51. Agora os limites vêm da trajetória (margem de 5 m, como no `TrajectoryEnv.__init__`).
+- Números do v0 que confirmam o diagnóstico da Trajectory: `traj_parado` +2,5 por passo (125 em 50 passos);
+  `traj_avanca` (percurso completo) 755 em 297 passos. Ficar parado os 600 passos renderia ~1500.
+- **Achado (bug do código original):** em `HoverEnv._step`, `LandEnv._step` e `DockEnv._step`, o `terminated` é
+  calculado antes de `self._reward()`, que é quem atualiza `_on_target`.
+  - Por isso o sucesso só termina o episódio **um passo depois** de atingir o alvo: nos casos `*_sucesso`, o passo no
+    alvo sai com `terminated=False`.
+  - No Hover, o bônus `3·|r|` também cai no passo seguinte. A condição usa o `_on_target` antigo, e o passo seguinte
+    termina e recebe o bônus mesmo que o veículo tenha saído do alvo.
+  - O `v0` precisa reproduzir isso (R5). O design não previa essa correção no `v1`: ver "Emenda" no `design.md`.
+
+## 2026-10-06 — T3: parâmetro `reward_version`
+- `biguagym/core/environments.py`:
+  - `reward_version: str = "v1"` no fim da assinatura dos **13 construtores** (o `HoverEnv` e 12 subclasses; o design
+    dizia "13 subclasses", mas são 13 construtores no total) e repassado no `super().__init__(...)`;
+  - o `HoverEnv` valida o valor (`ValueError` se não for `v0`/`v1`) e o guarda em `self._reward_version`.
+  - A edição foi feita com um script restrito a cada construtor. O diff tem só o repasse e a validação.
+- Novos: `tests/test_recompensas.py` e `tests/conftest.py` (path de `tests/` e `biguagym/`).
+- Verificação: `python -m pytest tests/ -q` → **3 passed**:
+  - `test_versao_em_todos_os_construtores` (13 classes, padrão `v1`);
+  - `test_versao_invalida` (`ValueError`);
+  - `test_v0_identico_ao_original` (31 casos iguais à referência; o comportamento ainda não mudou). ✅
+- Avisos: 758 `DeprecationWarning` do `np.cross` com vetores 2D em `TrajectoryEnv._frenet_errors` (código original).
+  Sem efeito.
+- Commit do submódulo local; o push para o fork é a T8.
+
+## 2026-10-06 — T9: `env_kwargs` chega ao ambiente (harness)
+- `run.py` (`Experiment.train`): `gym.make(cfg.env.name, **OmegaConf.to_container(cfg.env.kwargs, resolve=True))`.
+- `workspace.py`: `import OmegaConf`; `self.eval_env_kwargs` em `__init__` (os mesmos kwargs do treino) e
+  `gym.make(self.eval_env, render_mode="rgb_array", **self.eval_env_kwargs)` em `_build_eval_env`.
+- Antes, todo `env_kwargs` era ignorado, inclusive os padrões do CUPRL em `_resolve_env` (rgb+depth, `include_state`,
+  100×100).
+- Novo `tests/test_env_kwargs.py` (monkeypatch do `gym.make`, sem simulador):
+  - treino recebe `{'reward_version': 'v0'}`;
+  - avaliação recebe `render_mode` + `{'reward_version': 'v0', 'frame_size': [100, 100]}`;
+  - sem `env_kwargs` → `{}`.
+- Verificação: `python -m pytest tests/ -q -p no:warnings` → **6 passed**. ✅
+- Efeito colateral esperado (risco do design): os v1 com CUPRL passam a receber depth+state em 100×100.
+
+## 2026-10-06 — T10: cluster com a recompensa nova
+- `treinos/cluster/runs.csv`: os 8 seeds 0 do notebook voltaram para o bloco do seed 0 (**64 → 72**: 24 ambientes ×
+  3 seeds, 24 por seed, sem duplicatas). A fila do notebook roda com a recompensa original (`v0`) e vira linha de base.
+- `treinos/cluster/LEIAME.md`:
+  - nova seção "Recompensa" (o cluster usa `v1`; o notebook é `v0`; os 8 seeds 0 voltaram; confira o
+    `reward_version` no checkout antes de iniciar);
+  - o passo 3 virou "(Não se aplica)";
+  - a ressalva sobre a recompensa foi atualizada.
+- `fila_cluster.sh` e `enviar_do_notebook.sh` sem mudança: a espera por curvas externas só age quando o seed anterior não
+  está na lista, o que não acontece mais.
+- Verificação: a fila com `run.py` falso sobre os 72 runs (`WORKERS=6`, tempos encurtados numa cópia do script) →
+  `exit 0`, 72 inícios, 72 `.ok`, 0 exits ≠ 0, 0 linhas "esperando"/"NÃO rodado"/"bloqueados". ✅
+
+## 2026-10-06 — Emenda aprovada; T4: Hover/Nav
+- Usuário: "aprovado, pode seguir com as T4 a T8" → `design.md` em `Status: aprovado` (com a emenda).
+- `HoverEnv` (o `NavEnv` herda):
+  - `_reward` guarda `_last_terms` (`norm`, `smooth`, `stable`, `spin`), sem mudar o valor devolvido;
+  - novas constantes `TERM_PENALTY = -10`, `SUCCESS_BONUS = 10`;
+  - novos `_termination_reason(success, failures, truncated)` e `_terminal_reward(reason)` (0 no `v0` e em
+    timeout/None);
+  - `_step`:
+    - `v0`: reproduz a ordem original (o término usa o `_on_target` antigo, e o bônus `3·|r|` vem atrasado);
+    - `v1`: `_reward()` primeiro, e o sucesso termina e recebe +10 no próprio passo (emenda); tilt/out_of_bounds −10;
+    - `info` com `termination_reason` e `reward_terms` (inclui `terminal`).
+- Verificação: `pytest tests/ -k "hover or nav or v0 or versao"` → **15 passed**. Inclui:
+  - sucesso no próprio passo com +10;
+  - +10 também com shaping negativo (alvo atingido inclinado);
+  - −10 por tilt e por out_of_bounds;
+  - timeout sem penalidade;
+  - tombar no passo 2 rende menos que 50 passos parado (com e sem γ = 0,99);
+  - os 31 casos `v0` idênticos à referência. ✅
+
+## 2026-10-06 — T5: Land/Dock
+- `LandEnv`:
+  - `SUCCESS_BONUS = 20` (o `DockEnv` herda);
+  - `_reward` guarda `_last_terms` (com `impact` e `drift`);
+  - novo `_land_like_reward(failures, hard_key, truncated)`, usado por `LandEnv._step` e `DockEnv._step`:
+    - `v0`: ordem original (término com o `_on_target` anterior; `3·|r|` com o novo; dura → −5 fixo);
+    - `v1`: sucesso termina no próprio passo com +20; dura, tilt e out_of_bounds somam −10 ao shaping;
+  - `info` com `termination_reason` e `reward_terms`.
+- Ajuste durante a tarefa: no `v0`, o `termination_reason` "success" usa o `_on_target` **anterior** (o que de fato
+  termina o episódio no original), como no Hover. Assim, o motivo bate com o `terminated`.
+- `LandCoopPixelEnv._step` não foi alterado (fora de escopo). Ele herda só o `_last_terms` do `LandEnv._reward`, sem
+  efeito no valor. Para editar só o `LandEnv`, foi usada a 1ª ocorrência do bloco (antes de `class DockEnv`).
+- Verificação: `pytest tests/ -q -p no:warnings` → **30 passed**. Inclui:
+  - sucesso no próprio passo com +20;
+  - tilt, out_of_bounds e pouso/docagem dura → shaping − 10;
+  - tombar e pousar duro com o mesmo terminal (−10);
+  - tombar rende menos que ficar parado;
+  - `v0` idêntico. ✅
+
+## 2026-10-06 — T6: Trajectory
+- `TrajectoryEnv`:
+  - `_reward`:
+    - `v0` = `r_cte + r_align` todo passo (original);
+    - `v1` = `(r_cte + r_align)·adv`, com `adv = max(_wp_idx − _best_wp, 0)` e `_best_wp` = máximo atingido;
+    - guarda `_last_terms` (`cte`, `align`, `track`, `prog`, `stable`, `smooth`);
+  - `_reset` zera `_best_wp`. O `_reset` do mixin de pixels chama `super()._reset()`, então vale para os v1;
+  - `_step`: `BONUS_END` mantido (+10, nas duas versões); em `v1`, tilt/out_of_bounds somam −10;
+    `termination_reason` ∈ {success, tilt, out_of_bounds, strayed, timeout, None}; `reward_terms` com `terminal`.
+- Testes (2 ajustes nos próprios testes, sem mudar o código):
+  - na queda, o auxiliar `_shaping` somava `cte` + `align` + `track` (dupla contagem) → o teste agora confere
+    `terminal == −10` e que a recompensa é menor que no `v0`;
+  - em ir e voltar, o `track` fica 0 depois da 1ª passagem, como no design. Mas o `r_prog` original
+    (`W_PROG·Δprogresso`, que conta a partir do `_prev_progress`) volta a pagar ~0,01 por waypoint na 2ª ida. O design
+    não muda esse termo, e ele é ~250× menor que o `track` da 1ª passagem: ir e voltar não compensa. O teste confere
+    exatamente isso (ganho da volta + 2ª ida < 5% da 1ª ida).
+- Verificação: `pytest tests/ -q -p no:warnings` → **35 passed**. Inclui:
+  - parado: soma ≤ 0 e `track` = 0;
+  - completo: termina com `success` e +10 de `BONUS_END`, soma > 0 e maior que parado e que ir e voltar;
+  - no `v0`, ficar parado 600 passos > completar (confirma o diagnóstico);
+  - queda e saída da área −10. ✅
+
+## 2026-10-06 — T7: `v0` idêntico ao original
+- `test_v0_identico_ao_original` compara os 31 casos (637 passos) com `reward_version="v0"` contra
+  `tests/dados/recompensa_v0.json`, gerado na T2 com o código original (`32698e5`).
+- Recompensa com tolerância 1e-9; `terminated`/`truncated` exatos.
+- Verificação: `pytest tests/ -q -p no:warnings` → **35 passed** (suíte completa, depois das T4–T6). ✅
+
+## 2026-10-06 — T8: push no fork e ponteiro do submódulo
+- Submódulo: 4 commits sobre `32698e5` (`09b4fcf` T3, `c9eb818` T4, `cbd3f9f` T5, `fcf4358` T6). Diff total:
+  `core/environments.py`, +145/−58.
+- `git -C biguagym push git@github.com:ttszin/biguagym.git spec/recompensas`. O remoto do submódulo é HTTPS, sem
+  credencial; o push foi por SSH, como os anteriores no fork.
+- Verificação: `git ls-remote https://github.com/ttszin/biguagym.git spec/recompensas` = `fcf4358…` = HEAD do
+  submódulo = ponteiro na branch `spec/recompensas` do repositório principal. ✅
+- Checagens extras:
+  - `python smoke_test.py --list` no worktree (código novo, sem simulador) → 54 ids registrados;
+  - R7: o checkout da fila continua no `32698e5`, e o `DjiMatriceLand-v0_s0` segue avançando (passo 12.622).
+- Próximas: T11–T13 (⏱, com simulador), depois que a fila do notebook terminar.
+
+## 2026-10-06 — Preparação para o PC do laboratório (fora das tarefas; ferramenta de instalação)
+- Pedido do usuário: "quero colocar na fila para rodar no pc do laboratório, como posso fazer?" (RTX 4070 Ti, 32 GB).
+- `setup/instalar_pc_lab.sh`: o `SUB_COMMIT` deixou de ser fixo (`32698e5`) e passou a ser lido da branch clonada
+  (`git ls-tree HEAD biguagym`). Antes, o instalador recusaria a `spec/recompensas` (submódulo em `fcf4358`).
+- `treinos/cluster/LEIAME.md`: nova seção "Rodar no PC do laboratório":
+  - clone da `spec/recompensas` e instalador;
+  - verificação;
+  - fila com `WORKERS=2` dentro do `systemd-inhibit`;
+  - aviso sobre logout e `enable-linger`.
+- Teste: clone novo da `spec/recompensas` pelo GitHub numa pasta temporária, com biguasim e venv temporários →
+  `exit 0`, submódulo `fcf4358`, biguasim `53ad1f9d`, torch com CUDA, 54 ids, mundo idêntico;
+  `pytest tests/` nessa instalação → **35 passed**. Pasta temporária apagada.
+- Commit `129a9b7` (instalador + LEIAME), no GitHub.
+
+## 2026-10-06 — Instalador parava no paginador do git (PC do laboratório)
+- Relato do usuário: o instalador "aparece para digitar algo". A saída colada era o `git log --oneline -1` do passo 2
+  aberto no `less`, parado em `(END)`. No git desse PC, o paginador fica ligado mesmo para uma linha.
+- Correção: `export GIT_PAGER=cat PAGER=cat` no início do `setup/instalar_pc_lab.sh` e do
+  `treinos/cluster/verificar_cluster.sh`. Testado com terminal real (`script`): o `git log` imprime direto, sem o `less`.
+- Orientação ao usuário para a execução em andamento: apertar `q` em cada `(END)` (passos 2 e 3), ou parar com Ctrl+C,
+  dar `git pull` e rodar de novo (o instalador pula o que já foi feito).
+
+## 2026-10-06 — Instalador: venv do conda sem pip (PC do laboratório)
+- Relato do usuário: depois do `conda create` (o PC do lab não tem `python3.12`), o passo 4 falhou com
+  `/home/nautec/venv-biguagym/bin/python: No module named pip`. As versões novas do conda não incluem o pip junto com
+  `python=3.12`.
+- Correção em `setup/instalar_pc_lab.sh`:
+  - `conda create ... python=3.12 pip`;
+  - antes de usar o pip, se `python -m pip` falhar: `python -m ensurepip --upgrade`, e se isso também falhar,
+    `conda install -p $VENV pip`. Isso cobre o venv já criado sem pip, que o instalador reaproveita.
+- Teste: venv criado com `python3.12 -m venv --without-pip` → `No module named pip` (o mesmo erro); o trecho novo
+  instalou o pip 24.0. O caminho do conda não foi testado aqui (não há conda no notebook).
+
+## 2026-10-06 — Instalação concluída no PC do laboratório
+- Saída enviada pelo usuário (passo 6/6): `torch 2.7.1+cu126 | cuda: True | NVIDIA GeForce RTX 4070 Ti`;
+  biguasim em `/home/nautec/biguasim/src/biguasim/__init__.py`; `ids registrados: 54 (esperado: 54)`;
+  "Instalação concluída".
+- O instalador confere que o biguasim está no `53ad1f9d` e o submódulo no `fcf4358` (recompensa v1); senão, ele para
+  com erro. Como passou, o PC do lab está com o código da `spec/recompensas`.
+- Próximo passo: `bash treinos/cluster/verificar_cluster.sh` no PC do lab e o `relatorio.txt` para definir `WORKERS`.
+
+## 2026-10-06 — 1º relatório da verificação no PC do laboratório
+- Máquina: RTX 4070 Ti, 12.282 MiB, **já com 2.330 MiB usados e 96% de uso** por 4 processos que não são nossos
+  (PIDs 15453, 15454, 27729, 27804; ~514–542 MiB cada). 16 CPUs, 30 GB de RAM com **só 4 GB livres**, 248 GB de disco.
+  `DISPLAY=:0`, ICDs do Vulkan: nvidia, intel, lvp (llvmpipe), radeon, virtio.
+- **Smoke: os 3 falharam** com `BiguaSimException: Timed out waiting for binary to load`. O binário não sinalizou a
+  carga em 30 s (`loading_semaphore.acquire(30)`, `environments.py:1000`). No notebook a carga leva 6,9–9,5 s (mediana
+  7,5 s em 40 smokes), então não parece só lentidão. Hipóteses:
+  - o Unreal escolhe outro dispositivo Vulkan (lvp/intel);
+  - falta de RAM (4 GB livres);
+  - disputa da GPU com os processos já abertos;
+  - o binário cai ao abrir.
+  - A saída do simulador vai para `/dev/null` (`verbose=False`); o diagnóstico precisa do `HolodeckLog.txt`.
+- **Pilotos: falharam por bug do `verificar_cluster.sh`**: `OSError: Cannot save file into a non-existent directory`
+  (`.../curves`). O `seed_curves` não cria a pasta quando o `curves_path` é passado; a `fila_cluster.sh` já a criava.
+- Correções no `verificar_cluster.sh`:
+  - `mkdir -p "$d/curves" "$d/logs"` antes de cada piloto;
+  - o relatório agora inclui o dono, o tempo e o comando de cada processo na GPU, as linhas de erro/GPU/Vulkan do
+    `HolodeckLog.txt` e as últimas 15 linhas dele.
+  - Testado: o filtro, no log do notebook, mostra a linha da GPU escolhida pelo Unreal.
+
+## 2026-10-06 — PC do laboratório compartilhado com o TCC: `esperar_e_rodar.sh`
+- Usuário: os processos na GPU são os treinos do TCC dele. Escolheu a opção 1: "vamos fazer a opção 1, coloque na fila
+  os treinos" (esperar o TCC terminar e usar a máquina inteira).
+- Novo `treinos/cluster/esperar_e_rodar.sh`:
+  1. espera nenhum processo CUDA e `MemAvailable` ≥ 20 GB por 15 min seguidos;
+  2. roda o `verificar_cluster.sh`;
+  3. decide: smoke v0/v2 ou piloto TD3 com erro → não inicia; CUPRL/v1 com erro → `runs_sem_v1.csv`;
+     `WORKERS` = min(3, VRAM livre/5000, RAM/11000), no mínimo 1;
+  4. inicia a `fila_cluster.sh`.
+  - Log em `saida/espera.log`; `espera.pgid` para cancelar.
+- Teste com `nvidia-smi`, verificação e fila falsos (sem simulador):
+  - cenário A (GPU ocupada → livre → processo novo por 1 s → livre): o processo novo zerou a contagem; com o CUPRL
+    falhando, a fila foi iniciada com `runs_sem_v1.csv` (45 runs = 72 − 27 v1, 0 linhas `cuprl`) e `WORKERS=1` (RAM do
+    notebook 7,9 GB);
+  - cenário B (smoke v0 com erro): a fila não foi iniciada, `exit 1`, linhas do relatório no log. ✅
+- LEIAME: nova subseção "PC do laboratório compartilhado com os treinos do TCC".
+
+## 2026-10-11 — T11: smoke com a recompensa v1 (⏱ autorizado: "pode rodar as T11 a T13 e depois refazer o BlueROV2Dock")
+- A fila do notebook terminou em 2026-10-08 e a GPU estava livre. O notebook estava na bateria (30%); só comecei
+  depois de ligado na tomada (09:10). O laço confere a tomada antes de cada ambiente e roda sob `systemd-inhibit`.
+- Comando (do worktree, código da spec, submódulo `fcf4358`), para os 24 ambientes do `treinos/cluster/runs.csv`:
+  `python smoke_test.py --env <id> --steps 200 --frame-every 0 --out smoke_results/t11_v1`
+  (um por vez, em vez de `--all`, para não abrir Hydrone/BlueROVHeavy/Torpedo).
+- Resultado: **24/24 `status ok`**, `exit 0`, 0 processos do simulador depois de cada um (09:10–09:36).
+  - Dimensões iguais às de antes: v0 obs 19/39; v1 `rgb:9x84x84`; v2 129/149 (BlueBoat), 119/139 (BlueROV2),
+    29/49 (Dji); ação 2/6/4.
+  - v0/v1 a 17–20 passos/s. **Sonar (v2 de BlueBoat/BlueROV2): 4,1–4,4 passos/s**, contra 0,58–0,72 em 2026-09-28.
+    Com isso, um run de sonar cai de ~48 h para ~6,5 h. A causa da diferença não foi investigada.
+- O repasse do `reward_version` nos 13 construtores não quebrou nenhum ambiente. ✅
+
+## 2026-10-11 — T12: políticas fixas com o simulador, v0 × v1
+- Novo `tests/sim_politicas_fixas.py`: um processo por caso; `gym.make(id, control_abstraction=..., reward_version=...)`;
+  grava `smoke_results/t12_politicas_fixas.json`.
+- Resultados (`python tests/sim_politicas_fixas.py`):
+
+| Ambiente | Política | v0 | v1 | Observação |
+|---|---|---|---|---|
+| BlueBoatTrajectoryFollower-v0 | parado (`cmd_pos_yaw`, alvo = posição inicial) | **1454,05** | **0,00** | 600 passos, progresso 0 |
+| BlueBoatTrajectoryFollower-v0 | segue (alvo ~1,5 m à frente no caminho) | **1487,50** | **340,55** | 600 passos, progresso 0,69, 7 m |
+| DjiMatriceHover-v0 | hover (`cmd_pos_yaw`, alvo = posição inicial) | 0,01 | 0,01 | 400 passos |
+| DjiMatriceHover-v0 | tomba (`cmd_motor_speeds`, metade dos rotores no máximo) | −0,35 | **−10,36** | termina em 2 passos |
+
+  - **Trajectory:** no v0, parado ≈ seguir (1454 × 1487; quem completasse perderia o resto do episódio). No v1, seguir
+    (341) ≫ parado (0). ✅ R3/R4.
+  - **Hover:** no v1, hover (0,01) ≫ tombar (−10,36); no v0 a diferença era de 0,36. ✅ R1.
+  - `info` com `reward_terms` e `termination_reason` em todos os casos, com o simulador real. ✅ R6.
+  - Observação: o "tomba" terminou por `out_of_bounds` com 1 cm de deslocamento (os limites do Hover ficam junto à
+    posição inicial). Não foi investigado; fora do escopo.
+- Motivos de término com ações aleatórias (400 passos, v1), possível agora com o `termination_reason`:
+  - DjiMatriceNav-v0: **53/53 por `tilt`**, 7,5 passos por episódio (posição quase não muda; roll/pitch passam de 15°);
+  - BlueROV2Nav-v0: 6 `tilt` + 5 `out_of_bounds`, 34 passos por episódio. O veículo nasce em z = −0,2 com o limite
+    superior da área em z = −0,1 (10 cm de folga). Achado para investigar; fora do escopo desta spec.
+- Pilotos do `env_kwargs` no `run.py` real (DjiMatriceNav-v0, TD3, 300 passos, do worktree):
+  - `+env_kwargs.reward_version=xx` → `exit 1`, `ValueError: reward_version inválido: 'xx'` (o kwarg chega ao ambiente
+    de treino);
+  - `+env_kwargs.reward_version=v0 agent.learning_starts=100 num_eval_episodes=1` → `exit 0`, com as avaliações do
+    passo 0 e final. O repasse à avaliação está coberto pelo teste unitário `test_avaliacao_recebe_env_kwargs`.
+  - 0 processos do simulador depois. ✅
+
+## 2026-10-11 — T13: critérios de aceitação e merge
+`python -m pytest tests/ -q -p no:warnings` → **35 passed** (32 da recompensa + 3 do `env_kwargs`).
+
+| Requisito | Verificação | Resultado |
+|---|---|---|
+| R1 | testes `*_termino_por_falha`, `*_toda_falha_vale_menos_10`, `*_tombar_rende_menos_que_ficar_parado`, `trajetoria_queda_vale_menos_10`; T12 hover × tomba | ✅ toda falha = shaping − 10; tombar < parado (unitário e com simulador: 0,01 × −10,36) |
+| R2 | testes `*_sucesso_no_proprio_passo`, `*_bonus_fixo_com_shaping_negativo` | ✅ +10 (Hover/Nav) e +20 (Land/Dock), no próprio passo, independente do sinal do shaping |
+| R3 | `trajetoria_parado_rende_no_maximo_zero`, `trajetoria_voltar_e_repetir_nao_paga_de_novo`; T12 parado | ✅ parado: 0,00 em 600 passos com simulador (v0: 1454) |
+| R4 | `trajetoria_completa_rende_mais_que_parado_e_que_ir_e_voltar`; T12 segue × parado | ✅ completo > parado e > ir e voltar; com simulador 341 × 0 |
+| R5 | `test_v0_identico_ao_original` (31 casos, 637 passos, 1e-9), `test_versao_invalida`, pilotos do `run.py` | ✅ |
+| R6 | testes conferem `reward_terms`/`termination_reason`; T11 (24/24 ok) e T12 com simulador | ✅ |
+| R7 | durante T1–T10, o checkout da fila ficou em `32698e5` e a fila do notebook terminou (2026-10-08) antes do merge | ✅ |
+| `env_kwargs` | `tests/test_env_kwargs.py` + pilotos (valor inválido → `ValueError`; `v0` → `exit 0`) | ✅ |
+
+Ressalvas registradas (não bloqueiam):
+- o `r_prog` original ainda repaga ~0,01 por waypoint numa segunda passagem (T6);
+- `LandCoopPixelEnv` não foi alterado;
+- os v1 (pixels) continuam com o bug do `np.resize`, e o CUPRL não foi validado.

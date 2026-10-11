@@ -152,7 +152,8 @@ class Experiment:
     def train(self, cfg):
  
         for idx in range(self.seed, cfg.runs):
-            env = gym.make(cfg.env.name)
+            # env_kwargs (ex.: reward_version, pixel_channels do CUPRL) chegam ao ambiente; antes eram ignorados.
+            env = gym.make(cfg.env.name, **OmegaConf.to_container(cfg.env.kwargs, resolve=True))
             env.reset(seed=idx)
             env.action_space.seed(idx)
 

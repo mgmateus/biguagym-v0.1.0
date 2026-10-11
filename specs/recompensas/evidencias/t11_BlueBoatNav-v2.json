@@ -1,0 +1,169 @@
+{
+  "env": "BlueBoatNav-v2",
+  "status": "ok",
+  "steps_requested": 200,
+  "seed": 0,
+  "date": "2026-10-11 09:11:17",
+  "vram_before_mb": 143,
+  "sim_procs_before": 0,
+  "show_viewer": false,
+  "control": null,
+  "program": null,
+  "no_reset": false,
+  "follow": null,
+  "lookahead": null,
+  "make_s": 8.18,
+  "sim_pid": 32255,
+  "vram_after_make_mb": 1878,
+  "env_class": "NavRangeEnv",
+  "agent_type": "BlueBoat",
+  "max_episode_steps": 400,
+  "observation_space": {
+    "type": "Box",
+    "shape": [
+      129
+    ],
+    "dtype": "float32",
+    "low": [
+      -Infinity
+    ],
+    "high": [
+      Infinity
+    ]
+  },
+  "action_space": {
+    "type": "Box",
+    "shape": [
+      2
+    ],
+    "dtype": "float32",
+    "low": [
+      -295.75
+    ],
+    "high": [
+      288.0799865722656
+    ]
+  },
+  "obs_dim": "129",
+  "act_dim": "2",
+  "observation_type": [
+    "DynamicsSensor"
+  ],
+  "sensors_config": [
+    {
+      "name": "DynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "RPYDynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "CameraView",
+      "type": "RGBCamera",
+      "res": [
+        1280,
+        720
+      ]
+    },
+    {
+      "name": "ProfilingSonar",
+      "type": "ProfilingSonar"
+    },
+    {
+      "name": "RangeFinderSensor",
+      "type": "RangeFinderSensor"
+    }
+  ],
+  "ticks_per_sec": 20,
+  "frames_per_sec": 20,
+  "reset_s": 3.04,
+  "sensors_state": {
+    "DynamicsSensor": {
+      "shape": [
+        19
+      ],
+      "dtype": "float32"
+    },
+    "RPYDynamicsSensor": {
+      "shape": [
+        18
+      ],
+      "dtype": "float32"
+    },
+    "CameraView": {
+      "shape": [
+        720,
+        1280,
+        4
+      ],
+      "dtype": "uint8"
+    },
+    "ProfilingSonar": {
+      "raw": [
+        10,
+        10
+      ]
+    },
+    "RangeFinderSensor": {
+      "shape": [
+        10
+      ],
+      "dtype": "float32"
+    }
+  },
+  "pos_initial": [
+    100.0,
+    100.0,
+    0.0
+  ],
+  "target": [
+    105.479,
+    98.778,
+    -0.056
+  ],
+  "steps_done": 200,
+  "steps_per_s": 4.22,
+  "steps_per_s_wall": 4.21,
+  "step_ms_mean": 237.18,
+  "step_ms_p95": 608.95,
+  "step_ms_max": 945.96,
+  "hours_per_100k": 6.59,
+  "episodes": 1,
+  "terminated": 0,
+  "truncated": 0,
+  "episode_lengths": [
+    200
+  ],
+  "obs_nan_steps": 0,
+  "obs_inf_steps": 0,
+  "reward_nan": 0,
+  "reward_inf": 0,
+  "reward_min": -0.14674869315833183,
+  "reward_max": 0.21513809949856022,
+  "reward_mean": 0.0462084164526123,
+  "obs_in_space": true,
+  "obs_not_in_space_steps": 0,
+  "obs_not_in_space_first": null,
+  "pos_final": [
+    104.719,
+    99.689,
+    -0.113
+  ],
+  "last_info": {
+    "reached_goals": 0,
+    "termination_reason": null,
+    "reward_terms": {
+      "norm": 0.09284026730149275,
+      "smooth": 0.033685217258500044,
+      "stable": -0.0,
+      "spin": -0.10200985670089723,
+      "terminal": 0.0
+    }
+  },
+  "vram_end_mb": 1546,
+  "sim_alive_after_env_close": true,
+  "sim_alive_after_on_exit": false,
+  "sim_procs_after": 0,
+  "vram_after_close_mb": 310
+}

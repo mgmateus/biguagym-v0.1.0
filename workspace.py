@@ -4,6 +4,7 @@ import time
 import torch
 import gymnasium as gym
 import numpy as np
+from omegaconf import OmegaConf
 
 from src.agents.runner import make_runner
 
@@ -24,6 +25,7 @@ class Workspace:
         self.num_train_steps = cfg.num_train_steps
         self.eval_freq = cfg.eval_freq
         self.eval_env = cfg.env.name
+        self.eval_env_kwargs = OmegaConf.to_container(cfg.env.kwargs, resolve=True)  # mesmos kwargs do treino
         self.seed = cfg.seed
         self.logger = logger
         self.env = env
@@ -39,7 +41,7 @@ class Workspace:
         self.agent = self._build_agent(cfg)
 
     def _build_eval_env(self):
-        eval_env = gym.make(self.eval_env, render_mode="rgb_array")
+        eval_env = gym.make(self.eval_env, render_mode="rgb_array", **self.eval_env_kwargs)
         eval_env.reset(seed=self.seed)
         eval_env.action_space.seed(self.seed)
 

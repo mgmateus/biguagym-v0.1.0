@@ -1,0 +1,151 @@
+{
+  "env": "BlueBoatTrajectoryFollower-v0",
+  "status": "ok",
+  "steps_requested": 200,
+  "seed": 0,
+  "date": "2026-10-11 09:12:19",
+  "vram_before_mb": 143,
+  "sim_procs_before": 0,
+  "show_viewer": false,
+  "control": null,
+  "program": null,
+  "no_reset": false,
+  "follow": null,
+  "lookahead": null,
+  "make_s": 7.43,
+  "sim_pid": 32600,
+  "vram_after_make_mb": 1868,
+  "env_class": "TrajectoryEnv",
+  "agent_type": "BlueBoat",
+  "max_episode_steps": 600,
+  "observation_space": {
+    "type": "Box",
+    "shape": [
+      39
+    ],
+    "dtype": "float32",
+    "low": [
+      -Infinity
+    ],
+    "high": [
+      Infinity
+    ]
+  },
+  "action_space": {
+    "type": "Box",
+    "shape": [
+      2
+    ],
+    "dtype": "float32",
+    "low": [
+      -295.75
+    ],
+    "high": [
+      288.0799865722656
+    ]
+  },
+  "obs_dim": "39",
+  "act_dim": "2",
+  "observation_type": [
+    "DynamicsSensor"
+  ],
+  "sensors_config": [
+    {
+      "name": "DynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "RPYDynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "CameraView",
+      "type": "RGBCamera",
+      "res": [
+        1280,
+        720
+      ]
+    }
+  ],
+  "ticks_per_sec": 20,
+  "frames_per_sec": 20,
+  "reset_s": 2.06,
+  "sensors_state": {
+    "DynamicsSensor": {
+      "shape": [
+        19
+      ],
+      "dtype": "float32"
+    },
+    "RPYDynamicsSensor": {
+      "shape": [
+        18
+      ],
+      "dtype": "float32"
+    },
+    "CameraView": {
+      "shape": [
+        720,
+        1280,
+        4
+      ],
+      "dtype": "uint8"
+    }
+  },
+  "pos_initial": [
+    100.0,
+    100.0,
+    0.0
+  ],
+  "target": null,
+  "steps_done": 200,
+  "steps_per_s": 20.04,
+  "steps_per_s_wall": 20.0,
+  "step_ms_mean": 49.89,
+  "step_ms_p95": 54.02,
+  "step_ms_max": 91.7,
+  "hours_per_100k": 1.39,
+  "episodes": 1,
+  "terminated": 0,
+  "truncated": 0,
+  "episode_lengths": [
+    200
+  ],
+  "obs_nan_steps": 0,
+  "obs_inf_steps": 0,
+  "reward_nan": 0,
+  "reward_inf": 0,
+  "reward_min": -0.05941019654273987,
+  "reward_max": 4.787636156089737,
+  "reward_mean": 1.0068468595817288,
+  "obs_in_space": true,
+  "obs_not_in_space_steps": 0,
+  "obs_not_in_space_first": null,
+  "pos_final": [
+    104.719,
+    99.689,
+    -0.113
+  ],
+  "last_info": {
+    "waypoint_index": 98,
+    "progress": 0.49246231155778897,
+    "cross_track_error": 0.42806587736781143,
+    "reached_end": false,
+    "reached_goals": 0,
+    "termination_reason": null,
+    "reward_terms": {
+      "cte": 2.0,
+      "align": 0.3721391842648183,
+      "track": 0.0,
+      "prog": 0.0,
+      "stable": -0.0,
+      "smooth": -0.05100492835044861,
+      "terminal": 0.0
+    }
+  },
+  "vram_end_mb": 1546,
+  "sim_alive_after_env_close": true,
+  "sim_alive_after_on_exit": false,
+  "sim_procs_after": 0,
+  "vram_after_close_mb": 310
+}

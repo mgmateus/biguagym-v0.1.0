@@ -1,16 +1,20 @@
 # Treinos de 100k passos no cluster2
 
-64 runs: os 24 ambientes v0/v1/v2 que rodam no BiguaSim 1.0.0, sem Hydrone e sem Torpedo, × 3 seeds, menos os 8 seeds 0 da fila do
-notebook. A lista está em `runs.csv`.
+72 runs: os 24 ambientes v0/v1/v2 que rodam no BiguaSim 1.0.0, sem Hydrone e sem Torpedo, × 3 seeds. A lista está
+em `runs.csv`.
 
-**Divisão com o notebook:**
-- A fila do notebook (`treinos/100k`, TD3, seed 0) faz DjiMatriceNav-v0 (pronto), DjiMatriceLand-v0,
-  DjiMatriceTrajectoryFollower-v0, BlueBoatNav-v0, BlueBoatTrajectoryFollower-v0, BlueROV2Nav-v0, BlueROV2Dock-v0 e
-  BlueROV2TrajectoryFollower-v0.
-- O notebook pula BlueBoatNav-v1 e BlueBoatNav-v2 (marcador `PULADO`): o v1 precisa do CUPRL, e o v2 (sonar) não cabe no
-  timeout de 48 h. Esses dois rodam aqui, com todos os seeds.
-- No cluster, os seeds 1 e 2 dos 8 ambientes do notebook **esperam** a curva do seed 0 chegar completa em
-  `saida/curves` (passo 3). Enquanto isso, a fila segue com o resto.
+**Recompensa:** o cluster usa a recompensa nova (`reward_version="v1"`, padrão do fork depois da spec `recompensas`):
+penalidade de −10 ao terminar por falha, bônus fixo de sucesso (+10 Hover/Nav, +20 Land/Dock) e, na Trajectory, pagamento
+por waypoint novo.
+- A fila do notebook (`treinos/100k`, TD3, seed 0) roda com a recompensa **original** (`v0`, submódulo `32698e5`). Os
+  resultados dela são a linha de base e **não** servem de seed 0 para o cluster.
+- Por isso os 8 seeds 0 que estavam no notebook voltaram para cá (DjiMatriceNav-v0, DjiMatriceLand-v0,
+  DjiMatriceTrajectoryFollower-v0, BlueBoatNav-v0, BlueBoatTrajectoryFollower-v0, BlueROV2Nav-v0, BlueROV2Dock-v0,
+  BlueROV2TrajectoryFollower-v0).
+- O `enviar_do_notebook.sh` e a espera por curvas externas da `fila_cluster.sh` continuam no repositório, mas não se
+  aplicam a esta lista: nenhum run depende de outra máquina.
+- **Use o código da branch que tem a spec `recompensas`** (merge na `testes-ambientes` previsto para quando a fila do
+  notebook terminar). Confira antes de iniciar: `grep -c reward_version biguagym/core/environments.py` > 0.
 
 - **Agentes:** TD3 para v0/v2. CUPRL para v1, porque o TD3 do harness não aceita observação `Dict`. O CUPRL nunca rodou
   num ambiente real: o piloto da verificação é o primeiro teste.
@@ -19,8 +23,8 @@ notebook. A lista está em `runs.csv`.
   outros 6 Torpedo: o veículo não se move (posição final = inicial em 200 passos aleatórios, em todos os smokes).
 - **Ressalvas que valem para os resultados:**
   - os v1 ainda têm o bug do `np.resize` nos pixels (Etapa 6, spec `pipeline-pixels`);
-  - no `DjiMatriceNav-v0` o TD3 aprendeu a encerrar o episódio em ~3 passos, porque a recompensa do `HoverEnv` não tem
-    bônus de vida nem penalidade ao terminar. Os outros ambientes aéreos (Hover/Land/Trajectory) herdam essa recompensa.
+  - com a recompensa original, o TD3 aprendeu a encerrar o episódio em ~3 passos no `DjiMatriceNav-v0` (sem penalidade
+    ao terminar). É o que a recompensa `v1` corrige.
 
 ## 0. Acesso
 O cluster2 só é acessível pela rede da universidade (ou VPN), pelo host de salto:
@@ -44,13 +48,9 @@ O instalador puxa o submódulo de `ttszin/biguagym` e o biguasim de `ttszin/bigu
 mundo. Ele precisa de `git`, `gcc`, `zstd` e Python 3.12 (`python3.12` ou `conda`), sem sudo. Se faltar o Python 3.12,
 instale o Miniconda no home.
 
-## 3. Enviar os seeds 0 do notebook (do notebook, sempre que um terminar)
-```bash
-cd ~/biguagym-v0.1.0 && bash treinos/cluster/enviar_do_notebook.sh
-```
-O script envia só as curvas e os logs dos runs concluídos (`.ok`, curva completa). Ele nunca sobrescreve no cluster, onde
-a mesma curva recebe os seeds 1 e 2. Rode-o depois de cada seed 0 do notebook terminar (dá para ver em
-`treinos/100k/estado.csv`). Não copie curvas à mão: uma curva parcial ou uma cópia tardia corrompe a do cluster.
+## 3. (Não se aplica) Seeds 0 do notebook
+Com a recompensa nova, o cluster roda todos os seeds. O `enviar_do_notebook.sh` só serviria para uma lista que dependa
+dos seeds 0 do notebook com a recompensa original. **Não misture as duas recompensas na mesma curva.**
 
 ## 4. Verificar (no cluster2, ~20–40 min)
 ```bash
@@ -87,3 +87,49 @@ cat treinos/cluster/saida/runs/*/pgid                # grupos dos runs em andame
 ```bash
 rsync -avz -e "ssh -J teteu@10.230.108.173" teteu@cluster2:biguagym-v0.1.0/treinos/cluster/saida/ ~/biguagym-v0.1.0/treinos/cluster/saida/
 ```
+
+## Rodar no PC do laboratório (no lugar do cluster2)
+A fila e a verificação funcionam em qualquer Linux com GPU NVIDIA. No PC do lab (RTX 4070 Ti, 12 GB, 32 GB de RAM):
+
+1. **Mundo:** `~/leva/SkyDive.tar.zst` (1,3 GB; por exemplo, pela transferência de arquivos do AnyDesk).
+2. **Código com a recompensa nova** (branch `spec/recompensas`, até o merge na `testes-ambientes`):
+   ```bash
+   git clone -b spec/recompensas https://github.com/mgmateus/biguagym-v0.1.0.git ~/biguagym-v0.1.0
+   cd ~/biguagym-v0.1.0 && bash setup/instalar_pc_lab.sh
+   grep -c reward_version biguagym/core/environments.py      # > 0: recompensa nova
+   ```
+   Se já existe um `~/biguagym-v0.1.0` antigo: `cd ~/biguagym-v0.1.0 && git fetch && git checkout spec/recompensas &&
+   git pull && bash setup/instalar_pc_lab.sh`.
+3. **Verificação (~30 min):** `bash treinos/cluster/verificar_cluster.sh`. Mande o `treinos/cluster/verificacao/relatorio.txt`
+   antes de iniciar a fila. Ele diz se cabem 2 ou 3 runs em paralelo.
+4. **Fila** (2 runs em paralelo; com bloqueio de suspensão, já que é um desktop com sessão gráfica):
+   ```bash
+   mkdir -p treinos/cluster/saida
+   WORKERS=2 nohup setsid systemd-inhibit --what=sleep:idle:handle-lid-switch --why="treinos 100k" \
+       bash treinos/cluster/fila_cluster.sh > treinos/cluster/saida/fila.log 2>&1 < /dev/null &
+   ```
+5. **Não encerre a sessão (logout):** isso mata a fila. Bloquear a tela pode. Para aguentar até um logout:
+   `loginctl enable-linger $USER`. Depois de reiniciar o PC, rode o passo 4 de novo: ele pula o que já tem `.ok`.
+6. **Acompanhar e parar:** as mesmas instruções da seção 6 acima. Para trazer os resultados: copie
+   `treinos/cluster/saida/`.
+
+### PC do laboratório compartilhado com os treinos do TCC (decisão de 2026-10-06: esperar o TCC terminar)
+Em vez dos passos 3 e 4 acima, inicie uma vez:
+```bash
+cd ~/biguagym-v0.1.0 && git pull
+nohup setsid systemd-inhibit --what=sleep:idle:handle-lid-switch --why="treinos 100k" \
+    bash treinos/cluster/esperar_e_rodar.sh > /dev/null 2>&1 < /dev/null &
+```
+O `esperar_e_rodar.sh`:
+1. espera a GPU ficar sem processos CUDA e com RAM disponível ≥ 20 GB por 15 min seguidos (uma nova seed do TCC zera
+   a contagem);
+2. roda o `verificar_cluster.sh`;
+3. decide:
+   - se o smoke de v0/v2 ou o piloto TD3 falhar, **não inicia** a fila e deixa o motivo no log;
+   - se o CUPRL/v1 falhar, inicia sem os v1 (`runs_sem_v1.csv`, 45 runs);
+4. inicia a `fila_cluster.sh` com `WORKERS` = min(3, VRAM livre/5 GB, RAM/11 GB).
+
+- Acompanhar: `tail -f treinos/cluster/saida/espera.log`.
+- Cancelar antes de começar: `kill -TERM -$(cat treinos/cluster/saida/espera.pgid)`.
+- Para não matar os treinos do TCC por falta de RAM, **não** rode o `verificar_cluster.sh` à mão enquanto o TCC estiver
+  rodando.
