@@ -25,9 +25,9 @@ As tarefas T1–T10 não usam o simulador e podem ser feitas com a fila do noteb
   - Verificação: teste unitário com `gym.make` falso (monkeypatch) → os kwargs chegam às duas chamadas; `pytest tests/` → passa
 - [x] T10 — Cluster: os 8 seeds 0 do notebook voltam para o `treinos/cluster/runs.csv` (64 → 72); LEIAME explica que o cluster usa a recompensa v1 e que o `enviar_do_notebook.sh` não se aplica a ela
   - Verificação: `tail -n +2 treinos/cluster/runs.csv | wc -l` → 72; fila com `run.py` falso → nenhum run espera curva externa
-- [ ] T11 — ⏱ (depois da fila do notebook) Smoke de todos os ids que rodam, com a recompensa nova: `python smoke_test.py --all --steps 200 --frame-every 0` (sem Hydrone, BlueROVHeavy e Torpedo) (R6, risco dos construtores)
+- [x] T11 — ⏱ (depois da fila do notebook) Smoke de todos os ids que rodam, com a recompensa nova: `python smoke_test.py --all --steps 200 --frame-every 0` (sem Hydrone, BlueROVHeavy e Torpedo) (R6, risco dos construtores)
   - Verificação: `smoke_results/resumo.csv` → os mesmos ids `ok` de antes; `info` com `reward_terms` e `termination_reason`; 0 processos do simulador no fim
-- [ ] T12 — ⏱ (depois da fila do notebook) Políticas fixas com o simulador, `v0` contra `v1`: BlueBoatTrajectoryFollower-v0 parado × `--follow`; DjiMatriceHover-v0 motores em hover × máximo; piloto `run.py ... +env_kwargs.reward_version=v0 num_train_steps=300` (R1–R4, correção do `env_kwargs`)
+- [x] T12 — ⏱ (depois da fila do notebook) Políticas fixas com o simulador, `v0` contra `v1`: BlueBoatTrajectoryFollower-v0 parado × `--follow`; DjiMatriceHover-v0 motores em hover × máximo; piloto `run.py ... +env_kwargs.reward_version=v0 num_train_steps=300` (R1–R4, correção do `env_kwargs`)
   - Verificação: no `v1`, seguir > parado e hover > tombar; no `v0`, o oposto na trajetória (confirma o diagnóstico); o log do piloto mostra `v0` nos ambientes de treino e de avaliação
 - [ ] T13 — ⏱ Verificar todos os critérios de aceitação do requirements.md e, com a fila do notebook terminada, fazer o merge de `spec/recompensas` na `testes-ambientes` (R7)
   - Verificação: tabela de critérios preenchida no `log.md`; `git -C biguagym rev-parse HEAD` no checkout principal → commit novo do fork

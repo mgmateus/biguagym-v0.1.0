@@ -1,0 +1,188 @@
+{
+  "env": "DjiMatriceNav-v2",
+  "status": "ok",
+  "steps_requested": 200,
+  "seed": 0,
+  "date": "2026-10-11 09:30:24",
+  "vram_before_mb": 143,
+  "sim_procs_before": 0,
+  "show_viewer": false,
+  "control": null,
+  "program": null,
+  "no_reset": false,
+  "follow": null,
+  "lookahead": null,
+  "make_s": 7.06,
+  "sim_pid": 40079,
+  "vram_after_make_mb": 1884,
+  "env_class": "NavRangeEnv",
+  "agent_type": "DjiMatrice",
+  "max_episode_steps": 400,
+  "observation_space": {
+    "type": "Box",
+    "shape": [
+      29
+    ],
+    "dtype": "float32",
+    "low": [
+      -Infinity
+    ],
+    "high": [
+      Infinity
+    ]
+  },
+  "action_space": {
+    "type": "Box",
+    "shape": [
+      4
+    ],
+    "dtype": "float32",
+    "low": [
+      0.0
+    ],
+    "high": [
+      592.4000244140625
+    ]
+  },
+  "obs_dim": "29",
+  "act_dim": "4",
+  "observation_type": [
+    "DynamicsSensor"
+  ],
+  "sensors_config": [
+    {
+      "name": "DynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "RPYDynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "CameraView",
+      "type": "RGBCamera",
+      "res": [
+        1280,
+        720
+      ]
+    },
+    {
+      "name": "RangeFinderSensor",
+      "type": "RangeFinderSensor"
+    }
+  ],
+  "ticks_per_sec": 20,
+  "frames_per_sec": 20,
+  "reset_s": 2.1,
+  "sensors_state": {
+    "DynamicsSensor": {
+      "shape": [
+        19
+      ],
+      "dtype": "float32"
+    },
+    "RPYDynamicsSensor": {
+      "shape": [
+        18
+      ],
+      "dtype": "float32"
+    },
+    "CameraView": {
+      "shape": [
+        720,
+        1280,
+        4
+      ],
+      "dtype": "uint8"
+    },
+    "RangeFinderSensor": {
+      "shape": [
+        10
+      ],
+      "dtype": "float32"
+    }
+  },
+  "pos_initial": [
+    100.0,
+    100.0,
+    5.0
+  ],
+  "target": [
+    105.479,
+    98.778,
+    12.879
+  ],
+  "steps_done": 200,
+  "steps_per_s": 19.83,
+  "steps_per_s_wall": 2.77,
+  "step_ms_mean": 50.43,
+  "step_ms_p95": 54.83,
+  "step_ms_max": 98.8,
+  "hours_per_100k": 10.04,
+  "episodes": 30,
+  "terminated": 29,
+  "truncated": 0,
+  "episode_lengths": [
+    5,
+    3,
+    4,
+    13,
+    3,
+    5,
+    7,
+    4,
+    5,
+    4,
+    6,
+    12,
+    7,
+    8,
+    5,
+    11,
+    9,
+    6,
+    6,
+    5,
+    10,
+    9,
+    8,
+    5,
+    9,
+    4,
+    6,
+    4,
+    15,
+    2
+  ],
+  "obs_nan_steps": 0,
+  "obs_inf_steps": 0,
+  "reward_nan": 0,
+  "reward_inf": 0,
+  "reward_min": -12.13435446183238,
+  "reward_max": 0.001056660558845362,
+  "reward_mean": -1.826491885613336,
+  "obs_in_space": true,
+  "obs_not_in_space_steps": 0,
+  "obs_not_in_space_first": null,
+  "pos_final": [
+    100.001,
+    100.004,
+    4.996
+  ],
+  "last_info": {
+    "reached_goals": 0,
+    "termination_reason": null,
+    "reward_terms": {
+      "norm": 4.824825432615416e-07,
+      "smooth": -0.016436110479500776,
+      "stable": -0.05558223646328196,
+      "spin": -0.0028030494228005413,
+      "terminal": 0.0
+    }
+  },
+  "vram_end_mb": 1892,
+  "sim_alive_after_env_close": true,
+  "sim_alive_after_on_exit": false,
+  "sim_procs_after": 0,
+  "vram_after_close_mb": 310
+}

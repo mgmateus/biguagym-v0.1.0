@@ -1,0 +1,178 @@
+[
+ {
+  "env": "BlueBoatTrajectoryFollower-v0",
+  "politica": "parado",
+  "versao": "v0",
+  "controle": "cmd_pos_yaw",
+  "passos": 600,
+  "retorno": 1454.045,
+  "terminated": false,
+  "truncated": true,
+  "motivo": "timeout",
+  "tem_reward_terms": true,
+  "progresso": 0.0,
+  "deslocamento_m": 0.04,
+  "termos": {
+   "cte": 1200.0,
+   "align": 254.05,
+   "track": 1454.05,
+   "prog": 0.0,
+   "stable": 0.0,
+   "smooth": 0.0,
+   "terminal": 0.0
+  }
+ },
+ {
+  "env": "BlueBoatTrajectoryFollower-v0",
+  "politica": "parado",
+  "versao": "v1",
+  "controle": "cmd_pos_yaw",
+  "passos": 600,
+  "retorno": 0.0,
+  "terminated": false,
+  "truncated": true,
+  "motivo": "timeout",
+  "tem_reward_terms": true,
+  "progresso": 0.0,
+  "deslocamento_m": 0.04,
+  "termos": {
+   "cte": 1200.0,
+   "align": 254.05,
+   "track": 0.0,
+   "prog": 0.0,
+   "stable": 0.0,
+   "smooth": 0.0,
+   "terminal": 0.0
+  }
+ },
+ {
+  "env": "BlueBoatTrajectoryFollower-v0",
+  "politica": "segue",
+  "versao": "v0",
+  "controle": "cmd_pos_yaw",
+  "passos": 600,
+  "retorno": 1487.496,
+  "terminated": false,
+  "truncated": true,
+  "motivo": "timeout",
+  "tem_reward_terms": true,
+  "progresso": 0.693,
+  "deslocamento_m": 7.03,
+  "termos": {
+   "cte": 1194.01,
+   "align": 295.5,
+   "track": 1489.51,
+   "prog": 2.08,
+   "stable": 0.0,
+   "smooth": -4.09,
+   "terminal": 0.0
+  }
+ },
+ {
+  "env": "BlueBoatTrajectoryFollower-v0",
+  "politica": "segue",
+  "versao": "v1",
+  "controle": "cmd_pos_yaw",
+  "passos": 600,
+  "retorno": 340.549,
+  "terminated": false,
+  "truncated": true,
+  "motivo": "timeout",
+  "tem_reward_terms": true,
+  "progresso": 0.693,
+  "deslocamento_m": 7.03,
+  "termos": {
+   "cte": 1194.01,
+   "align": 295.5,
+   "track": 342.56,
+   "prog": 2.08,
+   "stable": 0.0,
+   "smooth": -4.09,
+   "terminal": 0.0
+  }
+ },
+ {
+  "env": "DjiMatriceHover-v0",
+  "politica": "hover",
+  "versao": "v0",
+  "controle": "cmd_pos_yaw",
+  "passos": 400,
+  "retorno": 0.005,
+  "terminated": false,
+  "truncated": true,
+  "motivo": "timeout",
+  "tem_reward_terms": true,
+  "progresso": null,
+  "deslocamento_m": 0.0,
+  "termos": {
+   "norm": 0.0,
+   "smooth": 0.0,
+   "stable": 0.0,
+   "spin": 0.0,
+   "terminal": 0.0
+  }
+ },
+ {
+  "env": "DjiMatriceHover-v0",
+  "politica": "hover",
+  "versao": "v1",
+  "controle": "cmd_pos_yaw",
+  "passos": 400,
+  "retorno": 0.005,
+  "terminated": false,
+  "truncated": true,
+  "motivo": "timeout",
+  "tem_reward_terms": true,
+  "progresso": null,
+  "deslocamento_m": 0.0,
+  "termos": {
+   "norm": 0.0,
+   "smooth": 0.0,
+   "stable": 0.0,
+   "spin": 0.0,
+   "terminal": 0.0
+  }
+ },
+ {
+  "env": "DjiMatriceHover-v0",
+  "politica": "tomba",
+  "versao": "v0",
+  "controle": "cmd_motor_speeds",
+  "passos": 2,
+  "retorno": -0.355,
+  "terminated": true,
+  "truncated": false,
+  "motivo": "out_of_bounds",
+  "tem_reward_terms": true,
+  "progresso": null,
+  "deslocamento_m": 0.01,
+  "termos": {
+   "norm": 0.0,
+   "smooth": -0.03,
+   "stable": -0.32,
+   "spin": -0.0,
+   "terminal": 0.0
+  }
+ },
+ {
+  "env": "DjiMatriceHover-v0",
+  "politica": "tomba",
+  "versao": "v1",
+  "controle": "cmd_motor_speeds",
+  "passos": 2,
+  "retorno": -10.355,
+  "terminated": true,
+  "truncated": false,
+  "motivo": "out_of_bounds",
+  "tem_reward_terms": true,
+  "progresso": null,
+  "deslocamento_m": 0.01,
+  "termos": {
+   "norm": 0.0,
+   "smooth": -0.03,
+   "stable": -0.32,
+   "spin": -0.0,
+   "terminal": -10.0
+  }
+ }
+]

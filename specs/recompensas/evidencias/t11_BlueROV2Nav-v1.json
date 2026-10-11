@@ -1,0 +1,195 @@
+{
+  "env": "BlueROV2Nav-v1",
+  "status": "ok",
+  "steps_requested": 200,
+  "seed": 0,
+  "date": "2026-10-11 09:16:21",
+  "vram_before_mb": 143,
+  "sim_procs_before": 0,
+  "show_viewer": false,
+  "control": null,
+  "program": null,
+  "no_reset": false,
+  "follow": null,
+  "lookahead": null,
+  "make_s": 7.51,
+  "sim_pid": 34604,
+  "vram_after_make_mb": 1876,
+  "env_class": "NavPixelEnv",
+  "agent_type": "BlueROV2",
+  "max_episode_steps": 400,
+  "observation_space": {
+    "rgb": {
+      "type": "Box",
+      "shape": [
+        9,
+        84,
+        84
+      ],
+      "dtype": "uint8",
+      "low": [
+        0
+      ],
+      "high": [
+        255
+      ]
+    }
+  },
+  "action_space": {
+    "type": "Box",
+    "shape": [
+      6
+    ],
+    "dtype": "float32",
+    "low": [
+      -278.8999938964844
+    ],
+    "high": [
+      278.8999938964844
+    ]
+  },
+  "obs_dim": "rgb:9x84x84",
+  "act_dim": "6",
+  "observation_type": [
+    "DynamicsSensor"
+  ],
+  "sensors_config": [
+    {
+      "name": "DynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "RPYDynamicsSensor",
+      "type": "DynamicsSensor"
+    },
+    {
+      "name": "DenoiseIMUSensor",
+      "type": "IMUSensor"
+    },
+    {
+      "name": "NoiseIMUSensor",
+      "type": "IMUSensor"
+    },
+    {
+      "name": "CameraView",
+      "type": "ViewportCapture",
+      "res": [
+        1280,
+        720
+      ]
+    },
+    {
+      "name": "RGBCamera",
+      "type": "RGBCamera",
+      "res": [
+        1280,
+        720
+      ]
+    }
+  ],
+  "ticks_per_sec": 20,
+  "frames_per_sec": 20,
+  "reset_s": 2.36,
+  "sensors_state": {
+    "DynamicsSensor": {
+      "shape": [
+        19
+      ],
+      "dtype": "float32"
+    },
+    "RPYDynamicsSensor": {
+      "shape": [
+        18
+      ],
+      "dtype": "float32"
+    },
+    "DenoiseIMUSensor": {
+      "shape": [
+        2,
+        3
+      ],
+      "dtype": "float32"
+    },
+    "NoiseIMUSensor": {
+      "shape": [
+        4,
+        3
+      ],
+      "dtype": "float32"
+    },
+    "CameraView": {
+      "shape": [
+        720,
+        1280,
+        4
+      ],
+      "dtype": "uint8"
+    },
+    "RGBCamera": {
+      "shape": [
+        720,
+        1280,
+        4
+      ],
+      "dtype": "uint8"
+    }
+  },
+  "pos_initial": [
+    100.0,
+    100.0,
+    -0.2
+  ],
+  "target": [
+    105.479,
+    98.778,
+    -2.914
+  ],
+  "steps_done": 200,
+  "steps_per_s": 17.28,
+  "steps_per_s_wall": 9.57,
+  "step_ms_mean": 57.85,
+  "step_ms_p95": 68.26,
+  "step_ms_max": 161.31,
+  "hours_per_100k": 2.9,
+  "episodes": 5,
+  "terminated": 4,
+  "truncated": 0,
+  "episode_lengths": [
+    69,
+    29,
+    17,
+    75,
+    10
+  ],
+  "obs_nan_steps": 0,
+  "obs_inf_steps": 0,
+  "reward_nan": 0,
+  "reward_inf": 0,
+  "reward_min": -10.7059238952984,
+  "reward_max": 0.03233192693732394,
+  "reward_mean": -0.3403638662662047,
+  "obs_in_space": true,
+  "obs_not_in_space_steps": 0,
+  "obs_not_in_space_first": null,
+  "pos_final": [
+    99.973,
+    99.976,
+    -0.166
+  ],
+  "last_info": {
+    "reached_goals": 0,
+    "termination_reason": null,
+    "reward_terms": {
+      "norm": 4.175950498295349e-12,
+      "smooth": -0.008650148308420924,
+      "stable": -0.010884903583540481,
+      "spin": -0.02639797031879425,
+      "terminal": 0.0
+    }
+  },
+  "vram_end_mb": 1884,
+  "sim_alive_after_env_close": true,
+  "sim_alive_after_on_exit": false,
+  "sim_procs_after": 0,
+  "vram_after_close_mb": 310
+}

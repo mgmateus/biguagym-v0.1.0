@@ -220,3 +220,45 @@
     notebook 7,9 GB);
   - cenário B (smoke v0 com erro): a fila não foi iniciada, `exit 1`, linhas do relatório no log. ✅
 - LEIAME: nova subseção "PC do laboratório compartilhado com os treinos do TCC".
+
+## 2026-10-11 — T11: smoke com a recompensa v1 (⏱ autorizado: "pode rodar as T11 a T13 e depois refazer o BlueROV2Dock")
+- A fila do notebook terminou em 2026-10-08 e a GPU estava livre. O notebook estava na bateria (30%); só comecei
+  depois de ligado na tomada (09:10). O laço confere a tomada antes de cada ambiente e roda sob `systemd-inhibit`.
+- Comando (do worktree, código da spec, submódulo `fcf4358`), para os 24 ambientes do `treinos/cluster/runs.csv`:
+  `python smoke_test.py --env <id> --steps 200 --frame-every 0 --out smoke_results/t11_v1`
+  (um por vez, em vez de `--all`, para não abrir Hydrone/BlueROVHeavy/Torpedo).
+- Resultado: **24/24 `status ok`**, `exit 0`, 0 processos do simulador depois de cada um (09:10–09:36).
+  - Dimensões iguais às de antes: v0 obs 19/39; v1 `rgb:9x84x84`; v2 129/149 (BlueBoat), 119/139 (BlueROV2),
+    29/49 (Dji); ação 2/6/4.
+  - v0/v1 a 17–20 passos/s. **Sonar (v2 de BlueBoat/BlueROV2): 4,1–4,4 passos/s**, contra 0,58–0,72 em 2026-09-28.
+    Com isso, um run de sonar cai de ~48 h para ~6,5 h. A causa da diferença não foi investigada.
+- O repasse do `reward_version` nos 13 construtores não quebrou nenhum ambiente. ✅
+
+## 2026-10-11 — T12: políticas fixas com o simulador, v0 × v1
+- Novo `tests/sim_politicas_fixas.py`: um processo por caso; `gym.make(id, control_abstraction=..., reward_version=...)`;
+  grava `smoke_results/t12_politicas_fixas.json`.
+- Resultados (`python tests/sim_politicas_fixas.py`):
+
+| Ambiente | Política | v0 | v1 | Observação |
+|---|---|---|---|---|
+| BlueBoatTrajectoryFollower-v0 | parado (`cmd_pos_yaw`, alvo = posição inicial) | **1454,05** | **0,00** | 600 passos, progresso 0 |
+| BlueBoatTrajectoryFollower-v0 | segue (alvo ~1,5 m à frente no caminho) | **1487,50** | **340,55** | 600 passos, progresso 0,69, 7 m |
+| DjiMatriceHover-v0 | hover (`cmd_pos_yaw`, alvo = posição inicial) | 0,01 | 0,01 | 400 passos |
+| DjiMatriceHover-v0 | tomba (`cmd_motor_speeds`, metade dos rotores no máximo) | −0,35 | **−10,36** | termina em 2 passos |
+
+  - **Trajectory:** no v0, parado ≈ seguir (1454 × 1487; quem completasse perderia o resto do episódio). No v1, seguir
+    (341) ≫ parado (0). ✅ R3/R4.
+  - **Hover:** no v1, hover (0,01) ≫ tombar (−10,36); no v0 a diferença era de 0,36. ✅ R1.
+  - `info` com `reward_terms` e `termination_reason` em todos os casos, com o simulador real. ✅ R6.
+  - Observação: o "tomba" terminou por `out_of_bounds` com 1 cm de deslocamento (os limites do Hover ficam junto à
+    posição inicial). Não foi investigado; fora do escopo.
+- Motivos de término com ações aleatórias (400 passos, v1), possível agora com o `termination_reason`:
+  - DjiMatriceNav-v0: **53/53 por `tilt`**, 7,5 passos por episódio (posição quase não muda; roll/pitch passam de 15°);
+  - BlueROV2Nav-v0: 6 `tilt` + 5 `out_of_bounds`, 34 passos por episódio. O veículo nasce em z = −0,2 com o limite
+    superior da área em z = −0,1 (10 cm de folga). Achado para investigar; fora do escopo desta spec.
+- Pilotos do `env_kwargs` no `run.py` real (DjiMatriceNav-v0, TD3, 300 passos, do worktree):
+  - `+env_kwargs.reward_version=xx` → `exit 1`, `ValueError: reward_version inválido: 'xx'` (o kwarg chega ao ambiente
+    de treino);
+  - `+env_kwargs.reward_version=v0 agent.learning_starts=100 num_eval_episodes=1` → `exit 0`, com as avaliações do
+    passo 0 e final. O repasse à avaliação está coberto pelo teste unitário `test_avaliacao_recebe_env_kwargs`.
+  - 0 processos do simulador depois. ✅
