@@ -1389,3 +1389,40 @@ Pedido do usuário: "pode aplicar todas, cria o sprint 2". Token novo salvo em `
   As tasks delas foram junto, inclusive as já fechadas.
   - Resultado: 65 tasks no Sprint 2, 6 no Sprint 1 (US #2, toda fechada) e 22 sem sprint (US que não estão em sprint).
 - Conferido relendo o quadro: todos os PATCH deram 200, e os POST, 201.
+
+## Fim da fila do notebook: linha de base com a recompensa original (conferido em 2026-10-11)
+- `treinos/100k/fila.log`: "fila concluída" em 2026-10-08 21:44. O notebook foi reiniciado em 2026-10-10. Hoje: 0
+  simuladores, 0 `run.py`, VRAM em 141 MiB.
+- **7 de 8 runs concluídos (`exit 0`), TD3, seed 0, 100k passos, recompensa v0** (`treinos/100k/estado.csv`):
+
+| Ambiente | Duração | Avaliação (MR) início → fim | R treino (0–25k → 75–100k) | Passos/episódio (início → fim) |
+|---|---|---|---|---|
+| DjiMatriceNav-v0 | 16,7 h | −2,51 → −1,56 | −2,70 → −1,70 | 8,1 → 3,1 |
+| DjiMatriceLand-v0 | 24,0 h | −0,45 → −0,56 | −4,58 → −0,84 | 6,1 → 2,1 |
+| DjiMatriceTrajectoryFollower-v0 | 5,3 h | 5,94 → 28,24 | 15,88 → 27,52 | 8,1 → 22,0 |
+| BlueBoatNav-v0 | 1,6 h | −219 → −242 | −27 → −231 | 400 → 400 |
+| BlueBoatTrajectoryFollower-v0 | 1,6 h | 155 → 1468 | 794 → 1448 | 505 → 591 |
+| BlueROV2Nav-v0 | 5,3 h | −2,41 → −3,31 | −5,10 → −3,10 | 36,4 → 12,0 |
+| BlueROV2TrajectoryFollower-v0 | 5,3 h | 26,99 → 27,13 | 81,68 → 27,12 | 36,4 → 12,0 |
+
+- Leitura (a confirmar olhando os vídeos de avaliação):
+  - **DjiMatriceNav/Land:** os episódios encolhem para 3 e 2 passos. Terminar cedo compensa, como no diagnóstico.
+  - **BlueBoatTrajectoryFollower:** 1468 ≈ 2,5 × 591 passos, perto do teto de 1500 = 2,5 × 600. É o valor de **ficar
+    sobre o caminho o episódio inteiro sem completar**, o que confirma o diagnóstico da Trajectory.
+  - **BlueBoatNav piorou** (−27 → −231, sempre 400 passos): a política aprendida acumula mais penalidade que a aleatória.
+    A investigar (giro? saturação dos motores?).
+  - **BlueROV2Nav e BlueROV2TrajectoryFollower** têm estatísticas de episódio praticamente idênticas (6935 e 6936
+    episódios; 36,4 → 12,0 passos). O término parece vir da dinâmica do veículo (inclinação > 15° ou saída da área em
+    ~12 passos), não da tarefa. A investigar.
+- **BlueROV2Dock-v0 falhou (`exit 1`) no passo 41.983**, depois de 903 min de relógio.
+  - Traceback: `workspace.train` → `env.reset()` → `biguasim/environments.py:535 reset` → `tick` →
+    `biguasimclient.acquire` → `posix_ipc.BusyError: Semaphore is busy`.
+  - Causa: **o notebook suspendeu às 07:44:55 de 2026-10-08** (`systemd-logind: The system will suspend now!`) e só
+    voltou às 16:25:27. O `monitor.csv` tem uma lacuna de 521 min. O run caiu 10 s depois de acordar: o simulador não
+    respondeu ao tick.
+  - A suspensão passou pelo `systemd-inhibit`. Às 07:31 o sistema estava **fora da tomada** (`ConditionACPower=true`
+    não atendida), e às 07:40 o powerdevil teve ações barradas ("Unsatisfied policies"). É coerente com a ação de
+    **bateria crítica**, que ignora inibidores. O journal não tem a linha explícita de bateria.
+  - Não é bug do treino. O BlueROV2TrajectoryFollower rodou normalmente em seguida.
+- Pendentes: refazer o BlueROV2Dock-v0 seed 0 (v0) com o notebook na tomada; T11–T13 da spec `recompensas` (a GPU
+  do notebook está livre); conferir o `espera.log` no PC do lab.
