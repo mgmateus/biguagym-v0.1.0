@@ -264,7 +264,7 @@
   - 0 processos do simulador depois. ✅
 
 ## 2026-10-11 — T13: critérios de aceitação e merge
-`python -m pytest tests/ -q -p no:warnings` → **38 passed** (35 da recompensa + 3 do `env_kwargs`).
+`python -m pytest tests/ -q -p no:warnings` → **35 passed** (32 da recompensa + 3 do `env_kwargs`).
 
 | Requisito | Verificação | Resultado |
 |---|---|---|
