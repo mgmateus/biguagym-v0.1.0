@@ -21,6 +21,7 @@ OUT=$REPO/treinos/100k
 STEPS=${STEPS:-100000}
 SEEDS=${SEEDS:-1}                    # 1ª etapa: só a seed 0; depois SEEDS=3 retoma pulando o que tem .ok
 TIMEOUT=${TIMEOUT:-172800}          # 48 h por run (DjiMatriceNav: ~1,4 passos/s após learning_starts → ~17 h)
+EXTRA=${EXTRA:-}                     # argumentos extras do run.py (ex.: EXTRA="+env_kwargs.reward_version=v0" para a linha de base)
 ENVS=(
     DjiMatriceNav-v0
     DjiMatriceLand-v0
@@ -71,7 +72,7 @@ for ((s = 0; s < SEEDS; s++)); do
         setsid --wait bash -c 'echo $$ > "$1"; shift; exec "$@"' _ "$dir/pgid" \
             timeout -k 60 "$TIMEOUT" "$PY" run.py hydra/launcher=basic env="$env" agent=td3 \
             num_train_steps="$STEPS" runs=$((s + 1)) \
-            curves_path="$OUT/curves" logs_path="$OUT/logs" \
+            curves_path="$OUT/curves" logs_path="$OUT/logs" $EXTRA \
             > "$dir/saida.log" 2>&1
         rc=$?
         pg=$(cat "$dir/pgid")

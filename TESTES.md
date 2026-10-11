@@ -1426,3 +1426,32 @@ Pedido do usuário: "pode aplicar todas, cria o sprint 2". Token novo salvo em `
   - Não é bug do treino. O BlueROV2TrajectoryFollower rodou normalmente em seguida.
 - Pendentes: refazer o BlueROV2Dock-v0 seed 0 (v0) com o notebook na tomada; T11–T13 da spec `recompensas` (a GPU
   do notebook está livre); conferir o `espera.log` no PC do lab.
+
+## Spec `recompensas` concluída e merge; BlueROV2Dock-v0 refeito (2026-10-11)
+Pedido do usuário: "pode rodar as T11 a T13 e depois refazer o BlueROV2Dock". Detalhes em `specs/recompensas/log.md`.
+- O notebook estava na bateria (30%). Os testes só começaram depois de ligado na tomada (09:10).
+- **T11:** smoke de 200 passos nos 24 ambientes da fila com a recompensa v1: **24/24 ok**, 0 simuladores sobrando.
+  Sonar (v2 de BlueBoat/BlueROV2) a **4,1–4,4 passos/s**, contra 0,58–0,72 em 2026-09-28.
+- **T12:** políticas fixas com o simulador (`tests/sim_politicas_fixas.py`):
+  - BlueBoatTrajectoryFollower-v0: parado × seguir = 1454 × 1487 no v0 e **0 × 341** no v1;
+  - DjiMatriceHover-v0: hover × tombar = 0,01 × −0,35 no v0 e **0,01 × −10,36** no v1;
+  - pilotos do `run.py` com `+env_kwargs.reward_version`: valor inválido → `ValueError`; `v0` → `exit 0`.
+- **Achados novos**, possíveis com o `termination_reason` (ações aleatórias):
+  - DjiMatriceNav-v0 termina **sempre por inclinação > 15°** (53/53; 7,5 passos por episódio);
+  - BlueROV2Nav-v0 nasce a 10 cm do limite superior da área (z = −0,2; limite −0,1): 5 de 11 términos por
+    `out_of_bounds`. Isso deve explicar as estatísticas idênticas de BlueROV2Nav e BlueROV2TrajectoryFollower na linha de
+    base. A investigar.
+- **T13:** critérios R1–R7 verificados (tabela no `log.md`); 35 testes passam.
+- **Merge:** `spec/recompensas` → `testes-ambientes` (`eacd500`, `--no-ff`), submódulo em `fcf4358`. No checkout
+  principal: `pytest tests/` → 35 passed; `smoke_test.py --list` → 54 ids. Push feito.
+  - A partir daqui, o padrão do checkout é a recompensa **v1**. A original é `+env_kwargs.reward_version=v0`.
+- **`treinos/fila_100k.sh`:** nova variável `EXTRA` (argumentos extras do `run.py`).
+- **BlueROV2Dock-v0 seed 0 refeito** (o run de 2026-10-08 caiu pela suspensão):
+  - a pasta antiga foi renomeada para `runs/BlueROV2Dock-v0_s0_falha_suspensao_20261008`;
+  - novo run iniciado às 09:49 com
+    `EXTRA="+env_kwargs.reward_version=v0" nohup setsid systemd-inhibit ... bash treinos/fila_100k.sh`
+    (os outros têm `.ok`, então só ele roda);
+  - o `v0` no código novo reproduz a recompensa original (teste `test_v0_identico_ao_original`), então o run fica
+    comparável aos outros 7 da linha de base;
+  - conferido: o comando tem `+env_kwargs.reward_version=v0`, 2 simuladores, VRAM 3478 MiB, sem traceback;
+  - o notebook precisa ficar na tomada (o bloqueio de suspensão não segura a bateria crítica).
