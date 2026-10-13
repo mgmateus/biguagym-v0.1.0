@@ -1455,3 +1455,28 @@ Pedido do usuário: "pode rodar as T11 a T13 e depois refazer o BlueROV2Dock". D
     comparável aos outros 7 da linha de base;
   - conferido: o comando tem `+env_kwargs.reward_version=v0`, 2 simuladores, VRAM 3478 MiB, sem traceback;
   - o notebook precisa ficar na tomada (o bloqueio de suspensão não segura a bateria crítica).
+
+## BlueROV2Dock-v0 terminou: linha de base v0 completa (conferido em 2026-10-13)
+Comando de conferência: `cat treinos/100k/estado.csv`, `tail treinos/100k/fila.log`, `ps` e `nvidia-smi`.
+- **BlueROV2Dock-v0 seed 0 (TD3, `reward_version=v0`):** 2026-10-11 09:49 → 2026-10-12 02:47, **1018 min (17 h),
+  `exit=0`**, 100 000 passos, `.ok` criado, 0 tracebacks no `saida.log`, 0 simuladores ao fim.
+- Processos órfãos em 2026-10-13 08:36: **nenhum**; VRAM usada 393 MiB (só o desktop).
+- Avaliações (`logs/td3-state/BlueROV2Dock-v0/run_0/eval.log`): passo 0 → média −2,48; passo 99 999 → média −0,0015
+  (melhor 0,007).
+- Curva (`curves/td3-state-BlueROV2Dock_v0.csv`, 26 082 episódios):
+
+  | Passos | Episódios | Passos/episódio (média / mediana) | Retorno médio | Retorno máximo |
+  |---|---|---|---|---|
+  | 0–10k | 754 | 13,2 / 2 | −1,78 | 0,03 |
+  | 10k–30k | 2749 | 7,3 / 2 | −0,79 | 0,17 |
+  | 30k–60k | 9675 | 3,1 / 2 | −0,07 | 0,18 |
+  | 60k–90k | 9702 | 3,1 / 2 | −0,07 | 0,17 |
+  | 90k–100k | 3202 | 3,1 / 2 | −0,07 | 0,18 |
+
+- **Leitura:** o run completou, mas o agente **não aprendeu a docar**. Nenhum episódio passou de 0,18 de retorno
+  (nenhum sucesso) e os episódios encurtaram para ~3 passos: o retorno subiu de −1,8 para ~0 porque o episódio acaba
+  antes de acumular penalidade. É o mesmo padrão dos outros runs da linha de base (DjiMatriceNav 8→3 passos,
+  DjiMatriceLand 6→2, BlueROV2Nav 36→12).
+- Com isso a linha de base v0 no notebook está completa: 8 runs de 100k, seed 0, todos com `exit=0`.
+- Nenhum arquivo de código alterado. O motivo dos términos não fica gravado neste run (o harness não registra o
+  `termination_reason`); a suspeita é o spawn do BlueROV2 a 10 cm do limite da área (achado da T12).
