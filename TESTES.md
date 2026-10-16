@@ -1515,3 +1515,19 @@ testar todos novamente, mas dessa vez com 250 mil steps".
   `eval_freq=250000` porque com 100000 haveria avaliações em 0/100k/200k/fim → 5 simuladores (~8,5 GB) > 6 GB do notebook.
 - Configuração padrão do harness: `num_train_steps: 1000000`, `eval_freq: 100000` (`config/config.yaml`): é de onde vem
   o "1 milhão" e a conta do bug dos ~800k (1 simulador vazado por avaliação).
+- **Política treinada, demais ambientes** (`tools/diag_politica.py`, laço com `timeout 900` por ambiente):
+  - BlueROV2Nav-v0: os 6 motores saturados (±278,9, desvio 0); 50/50 episódios por `tilt` em 12 passos (o "12 passos
+    fixos" da curva);
+  - DjiMatriceTrajectoryFollower-v0: os 4 motores no máximo (592,4); o drone sobe reto e sai pelo teto em 21 passos
+    (28/28 `out_of_bounds`), ganhando `cte`+`align` (1,36/passo) enquanto sobe sobre o caminho. A curva "sobe", mas
+    a política é "acelerar tudo";
+  - BlueBoatTrajectoryFollower e BlueROV2TrajectoryFollower: `TypeError` da 1ª versão do script (sem `_target`;
+    corrigido depois, não rodado de novo);
+  - BlueROV2Dock, DjiMatriceLand, DjiMatriceNav: sem resultado, o `timeout 900` cortou antes de 600 passos (resets a
+    cada 2–3 passos, ~2 s cada).
+- **Processos órfãos:** o `timeout` mata o Python com SIGTERM e o atexit do biguasim não roda: ficaram **2 simuladores
+  órfãos** (pids 72306 e 80581, iniciados por mim, pai = init, sozinhos nos seus grupos). Encerrados com
+  `kill -TERM`; depois: 0 simuladores, VRAM 399 MiB. Nos próximos diagnósticos: limitar por passos, não por `timeout`.
+- Em comum nas políticas que não aprenderam: **ação saturada (desvio 0)**, ou seja, o TD3 converge para os extremos
+  do Box (tanh saturado). Isso reforça as causas 1–5 (sem o alvo na observação não há gradiente útil) e fica como
+  observação para o design (escala da ação/ruído), sem requisito novo por enquanto.
