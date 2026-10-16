@@ -1480,3 +1480,38 @@ Comando de conferência: `cat treinos/100k/estado.csv`, `tail treinos/100k/fila.
 - Com isso a linha de base v0 no notebook está completa: 8 runs de 100k, seed 0, todos com `exit=0`.
 - Nenhum arquivo de código alterado. O motivo dos términos não fica gravado neste run (o harness não registra o
   `termination_reason`); a suspeita é o spawn do BlueROV2 a 10 cm do limite da área (achado da T12).
+
+## Por que as curvas não sobem; spec `ajuste-ambientes` e fila de 250k (2026-10-16)
+Pedido do usuário: "verifique os treinos que não tiveram a curva de aprendizado subindo e melhore eles. E vamos
+testar todos novamente, mas dessa vez com 250 mil steps".
+- **Curvas** (script em scratchpad sobre `treinos/100k/curves/*.csv`, faixas de 20k passos): sobem DjiMatriceTrajectoryFollower
+  (16 → 27,5) e BlueBoatTrajectoryFollower (755 → 1439, pelo "ficar parado", já corrigido na v1); pioram BlueBoatNav
+  (−26 → −230), BlueROV2Nav e BlueROV2TrajectoryFollower (82 → 27); DjiMatriceNav, DjiMatriceLand e BlueROV2Dock sobem
+  só porque o episódio encurta (2–3 passos). No Dock e no Land os episódios já são curtos nos 25k passos aleatórios
+  iniciais do TD3 (mediana 2 e 5).
+- **Diagnóstico com simulador** (`tools/diag_termino.py <env> 300`, novo; ação zero e aleatória, recompensa v1 para ter o
+  `termination_reason`; um processo por ambiente; 0 simuladores ao fim conferido com `ps`):
+  - BlueROV2Dock-v0: aleatória → 18/22 `out_of_bounds`, mediana 2 passos, z final −0,198 (teto −0,2 = spawn);
+  - DjiMatriceLand-v0: aleatória → 19 `out_of_bounds` (teto 5,0 = spawn) e 25 `tilt`, mediana 4; motores em 0 → `hard_landing`;
+  - BlueROV2Nav-v0 / BlueROV2TrajectoryFollower-v0: parado não termina; aleatória → `tilt` (5/6 e 4/6), mediana 46 e 34;
+  - DjiMatriceNav-v0: aleatória → 39/39 `tilt` (17,6°), mediana 6;
+  - BlueBoatNav-v0: não termina em 300 passos (nem parado nem aleatória).
+  (O contador "simuladores após" do laço dava 1–2 porque o `pgrep -f` casava com a linha de comando do próprio shell.)
+- **Política treinada** (`tools/diag_politica.py <env> <actor_last.pt> 600`, novo): BlueBoatNav-v0 satura os motores
+  em sentidos opostos (+288/−296, desvio 0) e gira parado a 3,1 rad/s (`spin` −0,60/passo; alvo a 5,6–9,4 m).
+  A 1ª versão do script quebrava nos Trajectory (sem `_target`): corrigido.
+- **Causas encontradas no código** (`biguagym/core/environments.py`, detalhes em `specs/ajuste-ambientes/requirements.md`):
+  1. teto da área = altura do spawn no Dock (`DockEnv._build_params`) e no Land (`HoverEnv._build_params`);
+  2. folga de 10 cm até o teto no BlueROV2 Nav/Trajectory;
+  3. inclinação máxima de 15° com controle direto dos motores;
+  4. alvo do BlueBoatNav sorteado em z ∈ [−1; 0,1], inalcançável para o barco na superfície;
+  5. **o alvo não está na observação** dos Hover/Nav/Land/Dock (só o `DynamicsSensor`, 19 valores), embora seja
+     sorteado a cada episódio. Só os Trajectory, que têm o caminho na observação, aprenderam.
+- **Spec `ajuste-ambientes`:** branch `spec/ajuste-ambientes` (worktree `.claude/worktrees/ajuste-ambientes`),
+  `requirements.md` em **rascunho** (commits `3e86307`, `f59b1d7`), aguardando aprovação. Nenhum código de ambiente alterado.
+- **Fila de 250k** (`treinos/fila_100k.sh`): `OUT` e `ENVS_LISTA` agora configuráveis (padrões iguais aos de antes);
+  `treinos/.gitignore` ignora `250k/`. Comando previsto, só depois da spec:
+  `OUT=$PWD/treinos/250k STEPS=250000 TIMEOUT=432000 EXTRA="eval_freq=250000" ENVS_LISTA="<8 ids v0>" bash treinos/fila_100k.sh`.
+  `eval_freq=250000` porque com 100000 haveria avaliações em 0/100k/200k/fim → 5 simuladores (~8,5 GB) > 6 GB do notebook.
+- Configuração padrão do harness: `num_train_steps: 1000000`, `eval_freq: 100000` (`config/config.yaml`): é de onde vem
+  o "1 milhão" e a conta do bug dos ~800k (1 simulador vazado por avaliação).
