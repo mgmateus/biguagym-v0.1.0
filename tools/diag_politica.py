@@ -28,7 +28,7 @@ for _ in range(N):
     for n_, v in (info.get('reward_terms') or {}).items():
         termos[n_] += v
     yaw.append(abs(float(u._dynamics[14])))
-    if hasattr(u, '_target'):
+    if getattr(u, '_target', None) is not None:
         dist.append(float(np.linalg.norm(np.asarray(u._target) - np.asarray(u._dynamics[6:9]))))
     if term or trunc:
         motivos[info.get('termination_reason')] += 1; compr.append(k); k = 0; obs, _ = env.reset()
