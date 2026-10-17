@@ -34,7 +34,8 @@ ps -o pgid= $$ | tr -d ' ' > "$OUT/espera.pgid"
 log() { echo "$(date '+%F %T') $*" | tee -a "$LOG"; }
 
 ram_mb() { awk '/^MemAvailable:/{print int($2/1024)}' /proc/meminfo; }
-procs_gpu() { nvidia-smi --query-compute-apps=pid --format=csv,noheader 2>/dev/null | grep -c . || true; }
+# só treinos (python) e simuladores (Holodeck): o desktop (gnome-shell, plasmashell, Xorg) também aparece na lista
+procs_gpu() { nvidia-smi --query-compute-apps=process_name --format=csv,noheader 2>/dev/null | grep -c -i -E 'python|holodeck' || true; }
 vram_livre() { nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits | head -1 | tr -d ' '; }
 
 # ---------------------------------------------------------------- 1. espera

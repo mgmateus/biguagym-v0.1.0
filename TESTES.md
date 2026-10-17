@@ -1531,3 +1531,22 @@ testar todos novamente, mas dessa vez com 250 mil steps".
 - Em comum nas políticas que não aprenderam: **ação saturada (desvio 0)**, ou seja, o TD3 converge para os extremos
   do Box (tanh saturado). Isso reforça as causas 1–5 (sem o alvo na observação não há gradiente útil) e fica como
   observação para o design (escala da ação/ruído), sem requisito novo por enquanto.
+
+## Benchmark de treinos em paralelo e passo a passo dos 250k no PC do lab (2026-10-17)
+Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisamos testar quantas seeds rodando por vez
+é mais rápido no total". O usuário lembrou que o benchmark tem de ser na máquina que vai rodar: no notebook só testei o script.
+- **Novo `treinos/cluster/benchmark_workers.sh`:** para N em `NS` (1 2 3 4), N treinos TD3 de `STEPS`=3000 passos do mesmo
+  ambiente (`BlueROV2Nav-v0`), `agent.learning_starts=500` (mede a fase com atualização da rede), `eval_freq=1000000`,
+  `num_eval_episodes=1`; passos/s pela hora de cada linha `| train | S:` (saída com `PYTHONUNBUFFERED=1` e carimbo de
+  hora); total = soma; pico de VRAM e RAM livre mínima; encerra o que sobrar no grupo de cada treino; para no 1º N com
+  falha; recusa rodar se houver python/simulador na GPU (salvo `FORCAR=1`). Saída em `treinos/cluster/benchmark/` (fora do git).
+- **Teste do script no notebook:** `NS="1" STEPS=1200 LS=500 TIMEOUT=1500 bash treinos/cluster/benchmark_workers.sh` →
+  1,77 passos/s, pico de VRAM 5250 MiB, RAM livre mínima 2203 MiB, 0 processos sobrando, exit 0. (Só valida o script.)
+- **Problema achado e corrigido:** o `nvidia-smi --query-compute-apps` lista o desktop (`plasmashell` no notebook), então
+  a 1ª tentativa do benchmark recusou rodar com a GPU livre. A `esperar_e_rodar.sh` usa a mesma contagem: se o desktop do
+  PC do lab aparecer nela, **ela nunca acharia a máquina livre**. As duas agora contam só processos `python`/`Holodeck`.
+- **`fila_cluster.sh`:** nova variável `EXTRA` (argumentos extras do `run.py`, ex.: `eval_freq=250000`).
+- **`treinos/cluster/runs_250k.csv`:** os 8 ambientes v0 da linha de base, TD3, seed 0.
+- **`treinos/cluster/LEIAME.md`:** seção "250k passos no PC do laboratório": parar a espera antiga, atualizar para a
+  `testes-ambientes`, rodar o benchmark, iniciar a fila de 250k (depois da spec `ajuste-ambientes`).
+- `treinos/.gitignore`: `cluster/benchmark/` e `cluster/saida_250k/`.

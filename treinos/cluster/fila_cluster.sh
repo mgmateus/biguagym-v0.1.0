@@ -28,6 +28,7 @@ CL=$REPO/treinos/cluster
 OUT=${OUT:-$CL/saida}
 RUNS=${RUNS:-$CL/runs.csv}
 STEPS=${STEPS:-100000}
+EXTRA=${EXTRA:-}                     # argumentos extras do run.py (ex.: EXTRA="eval_freq=250000" nos 250k)
 TIMEOUT=${TIMEOUT:-432000}          # 120 h por run (sonar: ~0,6 passos/s no notebook → ~48 h só de passos)
 NGPU=$(nvidia-smi -L | wc -l)
 WORKERS=${WORKERS:-$NGPU}
@@ -150,7 +151,7 @@ EOF
             setsid --wait bash -c 'echo $$ > "$1"; shift; exec "$@"' _ "$d/pgid" \
                 timeout -k 60 "$TIMEOUT" "$PY" "$REPO/run.py" hydra/launcher=basic env="$env" agent="$agent" \
                 num_train_steps="$STEPS" runs=$((s + 1)) \
-                curves_path="$OUT/curves" logs_path="$OUT/logs" \
+                curves_path="$OUT/curves" logs_path="$OUT/logs" $EXTRA \
                 > "$d/saida.log" 2>&1
         )
         local rc=$? pg; pg=$(cat "$d/pgid" 2>/dev/null)
