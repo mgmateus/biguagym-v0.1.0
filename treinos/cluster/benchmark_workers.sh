@@ -102,5 +102,9 @@ done
 
 melhor=$(for f in "$OUT"/N*/total; do read -r t fl < "$f"; [ "$fl" -eq 0 ] && echo "$t ${f%/total}"; done \
          | sort -gr | head -1)
-log "== melhor: ${melhor##*/} (${melhor%% *} passos/s no total). Use WORKERS=${melhor##*/N} na fila_cluster.sh"
+if [ -n "$melhor" ]; then
+    log "== melhor: ${melhor##*/} (${melhor%% *} passos/s no total). Use WORKERS=${melhor##*/N} na fila_cluster.sh"
+else
+    log "== nenhum N funcionou: veja o saida.log do N=1 (treinos/cluster/benchmark/N1/w0/saida.log)"
+fi
 log "   simuladores abertos agora: $(pgrep -c -f "$SIM_RE" || true)"
