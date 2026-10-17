@@ -1614,3 +1614,7 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   `conda create -p`, que não tem `bin/activate`), e o `python` usado foi o do conda base 3.13 →
   `ModuleNotFoundError: gymnasium`. Erro da instrução, não da instalação. A mensagem final do instalador agora manda
   chamar `$VENV/bin/python` pelo caminho (benchmark e filas já usam assim).
+- **Smoke no PC do lab com o mundo novo** (`~/venv-biguagym/bin/python smoke_test.py --env DjiMatriceLand-v0 --steps 200`):
+  **ainda "Timed out waiting for binary to load"**; 0 simuladores depois. No notebook o `make_s` é ~7 s (lote v0).
+  Pedido ao usuário: tamanho do `Holodeck` novo e execução direta com `timeout 120`, `-stdout -FullStdOutLogOutput`
+  (separa "ainda cai" de "carrega em mais de 30 s", o limite do semáforo do biguasim).
