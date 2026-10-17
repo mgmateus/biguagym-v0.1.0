@@ -1550,3 +1550,8 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
 - **`treinos/cluster/LEIAME.md`:** seção "250k passos no PC do laboratório": parar a espera antiga, atualizar para a
   `testes-ambientes`, rodar o benchmark, iniciar a fila de 250k (depois da spec `ajuste-ambientes`).
 - `treinos/.gitignore`: `cluster/benchmark/` e `cluster/saida_250k/`.
+- **1º benchmark no PC do lab** (resultado colado pelo usuário, 2026-10-17 07:33; RTX 4070 Ti 12282 MiB, RAM 31273 MiB,
+  16 CPUs; GPU livre antes): N=1 **falhou** logo no início (pico de VRAM 218 MiB: o simulador não chegou a carregar),
+  0 processos sobrando. Causa ainda desconhecida; pedido ao usuário o fim do `N1/w0/saida.log` e do `HolodeckLog.txt`
+  (suspeita: o mesmo "Timed out waiting for binary to load" da verificação de 2026-10-06).
+  A última linha do resultado ficava vazia quando nenhum N funciona: corrigido (`adc2793`).
