@@ -1604,3 +1604,6 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   https://github.com/ttszin/biguasim/releases/tag/skydive-20261002 (pública, não rascunho); `SkyDive.tar.zst`
   1 395 444 889 bytes e `skydive_manifest.txt` 87 585 bytes, ambos `uploaded`. Notas com o md5, onde extrair e a EULA
   do Unreal.
+  Conferência pelo link público que o instalador usa, sem login:
+  `curl -fsSL https://github.com/ttszin/biguasim/releases/download/skydive-20261002/SkyDive.tar.zst | md5sum` →
+  `bd371b063645adabe9ef38c13fdb5b6d` (igual ao original).
