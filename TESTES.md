@@ -1631,4 +1631,10 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   visível); reset + 20 passos; alarme em `ESPERA_S`+120 s. Nada muda no biguasim instalado. (1ª versão trocava
   `biguasim.environments.posix_ipc`, sem efeito, porque o import é local à função.)
   No notebook: semáforo liberado em **7,9 s**, `gym.make` 15,1 s, reset 5,4 s, 20 passos 1,8 s, 0 simuladores depois.
+- **1ª rodada no PC do lab:** "esperando o semáforo" às 08:48:05 e nada por mais de 2,5 min; o usuário interrompeu
+  (Ctrl+C, `KeyboardInterrupt`) antes dos 300 s. O Unreal não imprimiu nada (sem `-stdout`): não dá para saber se
+  travou ou caiu.
+- **`tools/diag_carga.py` v2:** imprime o comando exato do simulador, acrescenta `-stdout -FullStdOutLogOutput`,
+  vigia o processo a cada 10 s (vivo / código de saída) e mostra o uso do `/dev/shm` (memória compartilhada
+  simulador↔Python). No notebook: `/dev/shm` 0,0 de 7,7 GiB (367 arquivos, 52 do Holodeck), semáforo em 5,7 s, ok.
 

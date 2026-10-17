@@ -64,6 +64,40 @@ modulo.Semaphore = lambda nome, *a, **k: (_Semaforo(nome, *a, **k) if 'LOADING' 
 sys.modules['posix_ipc'] = modulo
 be.posix_ipc = modulo
 
+# Popen do simulador: imprime o comando exato, liga o log do Unreal no stdout e vigia o processo a cada 10 s.
+import shutil  # noqa: E402
+import subprocess  # noqa: E402
+import threading  # noqa: E402
+
+_Popen = subprocess.Popen
+
+
+def _vigia(p, t0):
+    while p.poll() is None:
+        time.sleep(10)
+        if p.poll() is None:
+            diag(f'simulador pid {p.pid} VIVO há {time.time() - t0:.0f} s')
+    diag(f'simulador pid {p.pid} SAIU com código {p.returncode} após {time.time() - t0:.1f} s '
+         f'(negativo = sinal, ex. -11 = segfault)')
+
+
+def _popen(args, *a, **k):
+    if isinstance(args, list) and args and 'Holodeck' in str(args[0]):
+        args = list(args) + ['-stdout', '-FullStdOutLogOutput']
+        diag('comando do simulador: ' + ' '.join(map(str, args)))
+        p = _Popen(args, *a, **k)
+        threading.Thread(target=_vigia, args=(p, time.time()), daemon=True).start()
+        return p
+    return _Popen(args, *a, **k)
+
+
+be.subprocess = types.SimpleNamespace(**{**vars(subprocess), 'Popen': _popen})
+
+uso = shutil.disk_usage('/dev/shm')
+diag(f'/dev/shm: {uso.used / 2**30:.1f} GiB usados de {uso.total / 2**30:.1f} GiB; '
+     f'{len(os.listdir("/dev/shm"))} arquivos, '
+     f'{sum(1 for f in os.listdir("/dev/shm") if "HOLODECK" in f.upper())} do Holodeck')
+
 _make = biguasim.make
 biguasim.make = lambda *a, **k: _make(*a, **{**k, 'verbose': True})
 
