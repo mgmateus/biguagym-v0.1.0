@@ -1618,3 +1618,8 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   **ainda "Timed out waiting for binary to load"**; 0 simuladores depois. No notebook o `make_s` é ~7 s (lote v0).
   Pedido ao usuário: tamanho do `Holodeck` novo e execução direta com `timeout 120`, `-stdout -FullStdOutLogOutput`
   (separa "ainda cai" de "carrega em mais de 30 s", o limite do semáforo do biguasim).
+- **Execução direta no PC do lab com o mundo novo:** `Holodeck` com 241 444 168 bytes (inteiro). O simulador **abre e
+  renderiza**: 11:28:47 início, Vulkan na RTX 4070 Ti (driver 580.178.04), 11:28:50 já compilando PSOs e renderizando
+  (~3 s); 1571 linhas de log, nenhum erro. Aos 120 s o `timeout` mandou SIGTERM (`RequestExit`) e o Unreal travou no
+  encerramento; faltou `-k` no comando que passei (o terminal ficou preso). Processo 17334 a ser morto pelo usuário.
+  Hipótese para o timeout do smoke anterior: 1ª execução do mundo novo (compilação de shaders > 30 s). Próximo: smoke de novo.
