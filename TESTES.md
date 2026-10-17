@@ -1610,3 +1610,7 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
 - **PC do lab reinstalado** (`git pull && bash setup/instalar_pc_lab.sh`, colado pelo usuário): chegou a "Instalação
   concluída". Como o instalador agora para com erro se o md5 ou o manifesto não baterem, o mundo baixado da release
   está íntegro. Próximo: smoke de 200 passos e benchmark.
+- 1ª tentativa do smoke no PC do lab: `source ~/venv-biguagym/bin/activate` → "no such file" (o venv foi criado pelo
+  `conda create -p`, que não tem `bin/activate`), e o `python` usado foi o do conda base 3.13 →
+  `ModuleNotFoundError: gymnasium`. Erro da instrução, não da instalação. A mensagem final do instalador agora manda
+  chamar `$VENV/bin/python` pelo caminho (benchmark e filas já usam assim).

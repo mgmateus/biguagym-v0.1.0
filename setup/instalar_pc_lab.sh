@@ -135,8 +135,8 @@ echo "ids registrados: $N (esperado: 54)"
 
 cat <<EOF
 
-Instalação concluída. Para usar:
-  source $VENV/bin/activate
-  python smoke_test.py --env DjiMatriceLand-v0 --steps 200
+Instalação concluída. Para usar (chame o python do venv pelo caminho: se ele foi criado
+pelo conda, não existe bin/activate e o "python" do terminal é o do conda base):
+  $PY smoke_test.py --env DjiMatriceLand-v0 --steps 200
   ps aux | grep -i -E "biguasim|holodeck|unreal" | grep -v grep    # deve vir vazio depois
 EOF
