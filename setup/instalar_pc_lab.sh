@@ -119,8 +119,16 @@ fi
     || falha "o mundo em $WORLDS/SkyDive difere de setup/skydive_manifest.txt (extração incompleta? em 2026-10-17 o
        Holodeck do PC do lab tinha 79 MB em vez de 241 MB e o simulador dava segfault). Refaça:
          df -h $WORLDS      # precisa de alguns GB livres
-         mv $WORLDS/SkyDive $WORLDS/SkyDive_quebrado
+         mv $WORLDS/SkyDive ~/SkyDive_quebrado      # FORA de $WORLDS (ver a checagem abaixo)
          bash setup/instalar_pc_lab.sh"
+# O biguasim acha o mundo pelo "name" do config.json, não pelo nome da pasta, na ordem do os.listdir: uma cópia
+# velha dentro de $WORLDS (ex.: SkyDive_quebrado) pode ser a escolhida (2026-10-17: segfault no PC do lab por isso).
+for d in "$WORLDS"/*/; do
+    [ "$d" = "$WORLDS/SkyDive/" ] && continue
+    grep -q '"name": *"SkyDive"' "$d/config.json" 2>/dev/null \
+        && falha "outro mundo SkyDive em $d: o biguasim pode abrir esse em vez de $WORLDS/SkyDive. Tire-o de lá:
+         mv $d ~/"
+done
 
 passo "6/6 Verificação"
 cd "$REPO"

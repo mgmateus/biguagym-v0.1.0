@@ -1637,4 +1637,15 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
 - **`tools/diag_carga.py` v2:** imprime o comando exato do simulador, acrescenta `-stdout -FullStdOutLogOutput`,
   vigia o processo a cada 10 s (vivo / código de saída) e mostra o uso do `/dev/shm` (memória compartilhada
   simulador↔Python). No notebook: `/dev/shm` 0,0 de 7,7 GiB (367 arquivos, 52 do Holodeck), semáforo em 5,7 s, ok.
+- **Causa do timeout no PC do lab encontrada** (`diag_carga.py` v2, colado pelo usuário): o comando do simulador era
+  `.../worlds/SkyDive_quebrado/Linux/Biguasim/Binaries/Linux/Holodeck ...` → **saiu com código -11 (segfault) em 0,0 s**.
+  O biguasim acha o mundo pelo `"name"` do `config.json` (não pelo nome da pasta), na ordem do `os.listdir` (risco já
+  anotado em 2026-09); a cópia quebrada que **eu mandei manter em `$WORLDS/SkyDive_quebrado`** foi a escolhida.
+  `/dev/shm` do lab ok (0,0 de 15,3 GiB). Instrução ao usuário: `mv .../worlds/SkyDive_quebrado ~/SkyDive_quebrado_backup`
+  e smoke de novo.
+- **`setup/instalar_pc_lab.sh`:** a mensagem de erro do manifesto manda mover o mundo para **fora** de `$WORLDS`, e o
+  passo 5 agora **falha** se houver outro mundo com `"name": "SkyDive"` em `$WORLDS`.
+- Observação (notebook, não alterado): `~/.local/share/biguasim/1.0.0/worlds` tem 3 mundos com nome SkyDive (`SkyDive`,
+  `SkyDive.backup_20260821_045522`, `SkyDive_broken_biguasim_repack`); funciona porque o `os.listdir` devolve `SkyDive`
+  primeiro, mas a ordem não é garantida.
 
