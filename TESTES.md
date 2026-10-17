@@ -1600,3 +1600,7 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   - A criação da release (`gh release create skydive-20261002 SkyDive.tar.zst skydive_manifest.txt -R ttszin/biguasim
     --target testes-biguagym ...`) foi **bloqueada pelo classificador de permissões** (publicação externa). Fica para o
     usuário rodar ou autorizar.
+- **Release publicada** depois que o usuário liberou a permissão ("pode rodar você, eu libero a permissão"):
+  https://github.com/ttszin/biguasim/releases/tag/skydive-20261002 (pública, não rascunho); `SkyDive.tar.zst`
+  1 395 444 889 bytes e `skydive_manifest.txt` 87 585 bytes, ambos `uploaded`. Notas com o md5, onde extrair e a EULA
+  do Unreal.
