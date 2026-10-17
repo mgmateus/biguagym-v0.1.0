@@ -1648,4 +1648,10 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
 - Observação (notebook, não alterado): `~/.local/share/biguasim/1.0.0/worlds` tem 3 mundos com nome SkyDive (`SkyDive`,
   `SkyDive.backup_20260821_045522`, `SkyDive_broken_biguasim_repack`); funciona porque o `os.listdir` devolve `SkyDive`
   primeiro, mas a ordem não é garantida.
+- **PC do lab funcionando** (depois de `mv .../worlds/SkyDive_quebrado ~/SkyDive_quebrado_backup`; colado pelo usuário):
+  `~/venv-biguagym/bin/python smoke_test.py --env DjiMatriceLand-v0 --steps 200` → `error: null`, `make_s` 5,65 s,
+  `obs_in_space: true`, `reward_nan: 0`, 38 episódios, `sim_procs_after: 0`. Resumo das causas do "Timed out waiting
+  for binary to load" no PC do lab: (1) `Holodeck` cortado (79 MB de 241 MB) na cópia de 2026-10-02 pelo AnyDesk →
+  segfault; (2) depois de reinstalar, a cópia quebrada mantida em `worlds/` era a escolhida pelo biguasim.
+  Próximo: benchmark de treinos em paralelo.
 
