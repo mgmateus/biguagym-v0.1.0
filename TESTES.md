@@ -1590,3 +1590,13 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   `SkyDive_quebrado`; não há mundo instalado agora. O pacote do notebook confere (md5 `bd371b06...`, 1 395 444 889 bytes).
   O notebook está em rede doméstica (192.168.0.13): a cópia para o lab é com o usuário (pendrive, scp na rede da
   universidade ou Drive).
+- **Pedido do usuário: "faça com que eu não tenha que copiar nada".** O servidor de mundos do biguasim
+  (`https://10.228.0.40:8000/`) não responde de nenhuma das máquinas (registro de 2026-10-02) e o mundo do notebook
+  tem o patch do BlueBoat; a cópia de 2026-10-02 foi pelo AnyDesk (provável origem do `Holodeck` cortado).
+  - **`setup/instalar_pc_lab.sh`:** se faltar `~/leva/SkyDive.tar.zst`, baixa da release `skydive-20261002` de
+    `ttszin/biguasim` (`WORLD_REPO`/`WORLD_TAG`; `gh release download` se o gh estiver logado, senão `curl` com
+    retomada); se o md5 não bater, apaga o arquivo para baixar de novo.
+  - O usuário escolheu **release pública** no fork `ttszin/biguasim` (pergunta: privada × pública).
+  - A criação da release (`gh release create skydive-20261002 SkyDive.tar.zst skydive_manifest.txt -R ttszin/biguasim
+    --target testes-biguagym ...`) foi **bloqueada pelo classificador de permissões** (publicação externa). Fica para o
+    usuário rodar ou autorizar.

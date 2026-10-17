@@ -25,6 +25,8 @@ SIM_URL=https://github.com/ttszin/biguasim.git             # fork com os patches
 SUB_COMMIT=$(git -C "$REPO" ls-tree HEAD biguagym | awk '{print $3}')   # o que a branch clonada aponta (testes-ambientes: 32698e5; spec/recompensas: fcf4358)
 SIM_COMMIT=53ad1f9dfd5e22ebe6e55c02da5f660a311335c7        # biguasim testes-biguagym (P3)
 WORLD_MD5=bd371b063645adabe9ef38c13fdb5b6d                 # SkyDive.tar.zst
+WORLD_REPO=${WORLD_REPO:-ttszin/biguasim}                 # release pública com o SkyDive.tar.zst (baixado se faltar em $LEVA)
+WORLD_TAG=${WORLD_TAG:-skydive-20261002}
 
 passo() { printf '\n== %s\n' "$*"; }
 falha() { printf '\nERRO: %s\n' "$*" >&2; exit 1; }
@@ -87,11 +89,25 @@ passo "5/6 Mundo SkyDive em $WORLDS"
 if [ -f "$WORLDS/SkyDive/config.json" ]; then
     echo "já existe, extração pulada"
 else
-    [ -f "$LEVA/SkyDive.tar.zst" ] || falha "falta $LEVA/SkyDive.tar.zst"
+    if [ ! -f "$LEVA/SkyDive.tar.zst" ]; then
+        # Baixa da release do GitHub (sem cópia manual). Release privada: precisa do gh logado (gh auth login).
+        echo "baixando SkyDive.tar.zst (1,4 GB) da release $WORLD_TAG de $WORLD_REPO..."
+        mkdir -p "$LEVA"
+        if command -v gh >/dev/null && gh auth status >/dev/null 2>&1; then
+            gh release download "$WORLD_TAG" -R "$WORLD_REPO" -p SkyDive.tar.zst -D "$LEVA" --clobber \
+                || falha "download pelo gh falhou (a release $WORLD_TAG existe em $WORLD_REPO?)"
+        else
+            curl -fL --retry 5 -C - -o "$LEVA/SkyDive.tar.zst.part" \
+                "https://github.com/$WORLD_REPO/releases/download/$WORLD_TAG/SkyDive.tar.zst" \
+                && mv "$LEVA/SkyDive.tar.zst.part" "$LEVA/SkyDive.tar.zst" \
+                || falha "download falhou. Se a release for privada: sudo apt install gh && gh auth login, e rode de novo"
+        fi
+    fi
     command -v zstd >/dev/null || falha "zstd não encontrado (sudo apt install zstd)"
     echo "conferindo md5..."
     [ "$(md5sum "$LEVA/SkyDive.tar.zst" | cut -d' ' -f1)" = "$WORLD_MD5" ] \
-        || falha "SkyDive.tar.zst corrompido ou incompleto (md5 diferente de $WORLD_MD5)"
+        || { rm -f "$LEVA/SkyDive.tar.zst"
+             falha "SkyDive.tar.zst corrompido ou incompleto (md5 diferente de $WORLD_MD5): apagado; rode de novo para baixar"; }
     mkdir -p "$WORLDS"
     tar --zstd -xf "$LEVA/SkyDive.tar.zst" -C "$WORLDS"
 fi
