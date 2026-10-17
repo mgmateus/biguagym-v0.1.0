@@ -1607,3 +1607,6 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   Conferência pelo link público que o instalador usa, sem login:
   `curl -fsSL https://github.com/ttszin/biguasim/releases/download/skydive-20261002/SkyDive.tar.zst | md5sum` →
   `bd371b063645adabe9ef38c13fdb5b6d` (igual ao original).
+- **PC do lab reinstalado** (`git pull && bash setup/instalar_pc_lab.sh`, colado pelo usuário): chegou a "Instalação
+  concluída". Como o instalador agora para com erro se o md5 ou o manifesto não baterem, o mundo baixado da release
+  está íntegro. Próximo: smoke de 200 passos e benchmark.
