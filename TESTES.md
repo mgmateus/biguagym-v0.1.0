@@ -1567,3 +1567,9 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   `rwx`, `DISPLAY=:0`, sem SSH, usuário `nautec`. Falha antes do log do Unreal → suspeita de biblioteca carregada no
   início; o terminal tem o **conda `base` ativo** (Python 3.13). Pedido: repetir com `env -i` (ambiente limpo),
   `LD_LIBRARY_PATH`/`LD_PRELOAD`, `ldd | grep "not found"`, `coredumpctl` e versão do driver.
+- **Ambiente limpo no PC do lab** (`env -i HOME DISPLAY=:0 XDG_RUNTIME_DIR PATH=/usr/bin:/bin`): **segfault de novo**
+  (exit 139) → descarta conda/variáveis. Driver do PC do lab = **580.178.04, igual ao do notebook**. Sem core dump no
+  `coredumpctl`. Referência do notebook: Ubuntu 24.04.5, kernel 6.11.0-17, `libvulkan1` 1.3.275.0-1build1,
+  `libnvidia-gl-580` 580.178.04, `/usr/share/vulkan/icd.d/nvidia_icd.json`; binário Unreal 5 (`Holodeck.sh` só chama o
+  executável com o nome do projeto). Pedido ao usuário: SO/kernel/CPU, pacotes Vulkan, `ldd | grep "not found"`,
+  log com `-stdout -FullStdOutLogOutput`, teste com `-nullrhi` e `gdb ... bt`; e se o TCC usa o simulador nesse PC.
