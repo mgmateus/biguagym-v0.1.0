@@ -100,7 +100,11 @@ fi
     -printf "%s %p\n" | sort -k2) \
     | diff -q "$REPO/setup/skydive_manifest.txt" - >/dev/null \
     && echo "mundo idêntico ao do notebook ($(wc -l < "$REPO/setup/skydive_manifest.txt") arquivos; Saved/ ignorada)" \
-    || echo "AVISO: o mundo difere de setup/skydive_manifest.txt (confira com diff)"
+    || falha "o mundo em $WORLDS/SkyDive difere de setup/skydive_manifest.txt (extração incompleta? em 2026-10-17 o
+       Holodeck do PC do lab tinha 79 MB em vez de 241 MB e o simulador dava segfault). Refaça:
+         df -h $WORLDS      # precisa de alguns GB livres
+         mv $WORLDS/SkyDive $WORLDS/SkyDive_quebrado
+         bash setup/instalar_pc_lab.sh"
 
 passo "6/6 Verificação"
 cd "$REPO"

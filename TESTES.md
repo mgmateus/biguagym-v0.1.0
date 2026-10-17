@@ -1573,3 +1573,14 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   `libnvidia-gl-580` 580.178.04, `/usr/share/vulkan/icd.d/nvidia_icd.json`; binário Unreal 5 (`Holodeck.sh` só chama o
   executável com o nome do projeto). Pedido ao usuário: SO/kernel/CPU, pacotes Vulkan, `ldd | grep "not found"`,
   log com `-stdout -FullStdOutLogOutput`, teste com `-nullrhi` e `gdb ... bt`; e se o TCC usa o simulador nesse PC.
+- **Causa do simulador não abrir no PC do lab: executável incompleto.** No 3º teste (colado pelo usuário): Ubuntu 22.04.5,
+  kernel 6.8.0-138, AMD Ryzen 7 8700G, `libvulkan1` 1.3.204.1-2, `libnvidia-gl-580` 580.178.04, `nvidia_icd.json`
+  presente; **`ldd Holodeck` cai com código 135 (SIGBUS)**; com `-stdout` e com `-nullrhi` (sem render) o simulador
+  dá segfault igual (descarta GPU/Vulkan); `gdb` sem saída. O `ls -l` anterior mostrava o `Holodeck` do lab com
+  **79 317 749 bytes**; no notebook e no `setup/skydive_manifest.txt` ele tem **241 444 168 bytes**
+  (md5 `b33a1302965740040b0128bf5381fcb2`). Arquivo cortado (data 2026-10-02 18:28): extração antiga interrompida;
+  o instalador pulou a extração porque o `config.json` existia e só **avisava** da diferença no manifesto.
+- **`setup/instalar_pc_lab.sh`:** a diferença em relação ao manifesto agora é **erro** (`falha`), com o passo a passo
+  para mover o mundo quebrado e extrair de novo.
+- Pedido ao usuário: conferir espaço (`df -h`) e o md5 do `~/leva/SkyDive.tar.zst`, mover o mundo para
+  `SkyDive_quebrado` (não apagar: pode ter algo do TCC), rodar o instalador e conferir tamanho/md5 do `Holodeck`.
