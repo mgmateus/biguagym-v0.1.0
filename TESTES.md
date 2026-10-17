@@ -1562,3 +1562,8 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   O biguasim manda a saída do Unreal para `/dev/null` (`__linux_start_process__`, sem `verbose`) e espera 30 s pelo
   semáforo `/HOLODECK_LOADING_SEM<uuid>`. Próximo passo pedido ao usuário: rodar o executável direto com `timeout 90`,
   `-RenderOffScreen`, e mandar a saída (`~/sim_direto.log`), o código de saída, `DISPLAY`/`SSH_CONNECTION` e a pasta `Saved/Logs`.
+- **Simulador direto no PC do lab** (`timeout 90 Holodeck Pier-Harbor -HolodeckOn -RenderOffScreen`, colado pelo usuário):
+  **`segmentation fault`, exit 139**, saída vazia (nem uma linha do Unreal), 0 processos depois. Binário com permissão
+  `rwx`, `DISPLAY=:0`, sem SSH, usuário `nautec`. Falha antes do log do Unreal → suspeita de biblioteca carregada no
+  início; o terminal tem o **conda `base` ativo** (Python 3.13). Pedido: repetir com `env -i` (ambiente limpo),
+  `LD_LIBRARY_PATH`/`LD_PRELOAD`, `ldd | grep "not found"`, `coredumpctl` e versão do driver.
