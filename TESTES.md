@@ -1555,3 +1555,10 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   0 processos sobrando. Causa ainda desconhecida; pedido ao usuário o fim do `N1/w0/saida.log` e do `HolodeckLog.txt`
   (suspeita: o mesmo "Timed out waiting for binary to load" da verificação de 2026-10-06).
   A última linha do resultado ficava vazia quando nenhum N funciona: corrigido (`adc2793`).
+- **Log do benchmark no PC do lab** (colado pelo usuário): `posix_ipc.BusyError: Semaphore is busy` →
+  `BiguaSimException: Timed out waiting for binary to load` no `gym.make` (o mesmo erro de 2026-10-06, agora com a GPU
+  livre e 28 GB de RAM: **descarta falta de RAM/TCC** como causa). O `HolodeckLog.txt` do mundo tem só linhas de
+  2026.10.02 (log do notebook que veio no pacote): o simulador do PC do lab não escreveu nada nele.
+  O biguasim manda a saída do Unreal para `/dev/null` (`__linux_start_process__`, sem `verbose`) e espera 30 s pelo
+  semáforo `/HOLODECK_LOADING_SEM<uuid>`. Próximo passo pedido ao usuário: rodar o executável direto com `timeout 90`,
+  `-RenderOffScreen`, e mandar a saída (`~/sim_direto.log`), o código de saída, `DISPLAY`/`SSH_CONNECTION` e a pasta `Saved/Logs`.
