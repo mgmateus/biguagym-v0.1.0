@@ -1584,3 +1584,9 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   para mover o mundo quebrado e extrair de novo.
 - Pedido ao usuário: conferir espaço (`df -h`) e o md5 do `~/leva/SkyDive.tar.zst`, mover o mundo para
   `SkyDive_quebrado` (não apagar: pode ter algo do TCC), rodar o instalador e conferir tamanho/md5 do `Holodeck`.
+- **Reinstalação do mundo no PC do lab** (saída colada pelo usuário): passos 2–4 ok (submódulo `fcf4358`, biguasim
+  `53ad1f9d`, venv 3.12); passo 5 parou com **`ERRO: falta /home/nautec/leva/SkyDive.tar.zst`**: o pacote nunca esteve
+  no PC do lab, então o mundo de 2026-10-02 foi copiado de outro jeito e veio incompleto. O mundo antigo está em
+  `SkyDive_quebrado`; não há mundo instalado agora. O pacote do notebook confere (md5 `bd371b06...`, 1 395 444 889 bytes).
+  O notebook está em rede doméstica (192.168.0.13): a cópia para o lab é com o usuário (pendrive, scp na rede da
+  universidade ou Drive).
