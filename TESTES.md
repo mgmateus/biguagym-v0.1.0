@@ -1623,3 +1623,12 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   (~3 s); 1571 linhas de log, nenhum erro. Aos 120 s o `timeout` mandou SIGTERM (`RequestExit`) e o Unreal travou no
   encerramento; faltou `-k` no comando que passei (o terminal ficou preso). Processo 17334 a ser morto pelo usuário.
   Hipótese para o timeout do smoke anterior: 1ª execução do mundo novo (compilação de shaders > 30 s). Próximo: smoke de novo.
+- **Smoke de novo no PC do lab:** **timeout de carga outra vez** (descarta a hipótese da 1ª execução). Direto o simulador
+  abre em ~3 s, mas pelo biguasim (que passa `--HolodeckUUID`, octree, `-Trace` e espera o semáforo
+  `HOLODECK_LOADING_SEM<uuid>` por 30 s) não sinaliza a tempo.
+- **Novo `tools/diag_carga.py`:** dentro do próprio processo troca o `posix_ipc` em `sys.modules` para que só o semáforo
+  de carga espere `ESPERA_S` (300 s) e imprima o tempo real; `biguasim.make` com `verbose=True` (saída do Unreal
+  visível); reset + 20 passos; alarme em `ESPERA_S`+120 s. Nada muda no biguasim instalado. (1ª versão trocava
+  `biguasim.environments.posix_ipc`, sem efeito, porque o import é local à função.)
+  No notebook: semáforo liberado em **7,9 s**, `gym.make` 15,1 s, reset 5,4 s, 20 passos 1,8 s, 0 simuladores depois.
+
