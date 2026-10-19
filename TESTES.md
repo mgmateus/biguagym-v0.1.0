@@ -1679,3 +1679,13 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   100k no notebook (1,6 h a 24 h). Com 3 workers: ~31 h na ordem antiga e **~27 h** nesta. Episódios mais longos depois
   da spec `ajuste-ambientes` (menos resets de ~2 s) devem reduzir isso.
 - `LEIAME.md`: comando dos 250k com `WORKERS=3`.
+
+## Spec `ajuste-ambientes`: requisitos aprovados, design em rascunho (2026-10-19)
+- Usuário: "aprovado, só aumenta o limite de inclinação do drone" → `requirements.md` com `Status: aprovado` e as
+  decisões (drone: só o limite de inclinação, mantendo `cmd_motor_speeds`; 250k: 8 v0, seed 0, no PC do lab, WORKERS=3)
+  (`b997af1`, branch `spec/ajuste-ambientes`, que recebeu o merge da `testes-ambientes`).
+- `design.md` em **rascunho** (`cb1b93c`, sem código alterado): parâmetro `env_version` ("v1" padrão, "v0" = original,
+  separado do `reward_version`); spawn subaquático em −1,5 m (teto −0,1 → folga 1,4 m); teto do Hover/Land = spawn + 5 m;
+  teto do Dock na superfície (−0,1); limite de inclinação 60° no drone e no ROV, 15° no barco; alvo do barco em z = 0;
+  alvo − posição (3 valores) na observação de Hover/Nav/Land/Dock e variantes (não na Trajectory); testes sem simulador
+  e verificação com `diag_termino.py`, smoke dos 24 e pilotos de 5000 passos.
