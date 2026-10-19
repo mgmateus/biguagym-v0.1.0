@@ -159,11 +159,11 @@ A última linha diz o melhor `WORKERS`. Ele se recusa a rodar se houver treino (
 cancelar: `kill -TERM -$(cat treinos/cluster/benchmark/benchmark.pgid)`.
 
 **4. Fila de 250k** (os 8 ambientes v0 de `runs_250k.csv`, seed 0; só depois da spec `ajuste-ambientes` e de um
-`git pull`). Troque `N` pelo resultado do benchmark:
+`git pull`). WORKERS=3 pelo benchmark de 2026-10-17 (a fila só inicia um run com ≥ 4 GB de VRAM livre):
 ```bash
 mkdir -p treinos/cluster/saida_250k
 RUNS=$PWD/treinos/cluster/runs_250k.csv OUT=$PWD/treinos/cluster/saida_250k STEPS=250000 EXTRA="eval_freq=250000" \
-WORKERS=N nohup setsid systemd-inhibit --what=sleep:idle --why="treinos 250k" \
+WORKERS=3 nohup setsid systemd-inhibit --what=sleep:idle --why="treinos 250k" \
     bash treinos/cluster/fila_cluster.sh > treinos/cluster/saida_250k/fila.log 2>&1 < /dev/null &
 ```
 Acompanhar: `tail treinos/cluster/saida_250k/fila.log` e `cat treinos/cluster/saida_250k/estado.csv`.

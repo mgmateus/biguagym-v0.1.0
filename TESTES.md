@@ -1668,3 +1668,14 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   chegou a 96% e no N=4 um treino falhou (provavelmente VRAM). Pedido ao usuário: linha do N=1 e erro do `N4/w3/saida.log`.
   Proposta: WORKERS=3 com a fila só iniciando um treino se houver ≥ 4 GB de VRAM livre; se a falha não for VRAM, WORKERS=2.
 
+- **Erro do `N4/w3`** (colado pelo usuário): "Timed out waiting for binary to load": o 4º simulador não carregou em
+  30 s com 3 treinos rodando e 11,8 de 12,3 GB de VRAM usados. Limite de capacidade. **Decisão: WORKERS=3.**
+- **`fila_cluster.sh`:** antes de pegar um run, cada worker espera `MIN_VRAM_MB` (4000) livres na sua GPU e
+  `INTERVALO_INICIO` (60 s) desde o último início de qualquer worker (checagem sob `flock`, marca em `$OUT/.ultimo_inicio`).
+  Testado no notebook com a mesma expressão: 1ª chamada libera, 2ª logo depois espera (intervalo), mínimo de 99999 MiB espera.
+- **`runs_250k.csv` reordenado do mais longo ao mais curto** (DjiMatriceLand, BlueROV2Dock, DjiMatriceNav,
+  DjiMatriceTrajectoryFollower, BlueROV2Nav, BlueROV2TrajectoryFollower, BlueBoatNav, BlueBoatTrajectoryFollower).
+  Estimativa: por treino o PC do lab rodou ~2,5× o notebook (4,4 × 1,77 passos/s), então um run de 250k no lab ≈ o de
+  100k no notebook (1,6 h a 24 h). Com 3 workers: ~31 h na ordem antiga e **~27 h** nesta. Episódios mais longos depois
+  da spec `ajuste-ambientes` (menos resets de ~2 s) devem reduzir isso.
+- `LEIAME.md`: comando dos 250k com `WORKERS=3`.
