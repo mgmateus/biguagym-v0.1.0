@@ -35,3 +35,10 @@
   v1; barco: 20° termina e 10° não (15° mantido).
 - Verificação: `pytest -k inclinacao` → 9 passed; `grep -c "np.radians(15)"` → 1 (em `_tilt_limit`); `pytest tests/` →
   56 passed. ✅ Trajectory e LandCoop sem teste unitário de inclinação: cobertos pelo smoke (T9) e `diag_termino` (T10).
+
+## 2026-10-19 — T5: alvo do barco na superfície
+- `HoverEnv._reset` (Nav herda): na v1, para `DOMAIN['surface']`, `self._target[2] = z do spawn` (0) depois do sorteio;
+  x, y continuam sorteados em ±10 m. Land e Dock têm `_reset` próprio e não mudam.
+- Testes (sem simulador, `_reset` com simulador falso e `rng` com seed 0): 1000 alvos do BlueBoat v1 com z = 0 e x, y
+  em [90; 110]; v0 continua sorteando z em [−1; 0,1]; BlueROV2 v1 continua com z sorteado.
+- Verificação: `pytest -k alvo` → 3 passed; `pytest tests/` → 59 passed. ✅

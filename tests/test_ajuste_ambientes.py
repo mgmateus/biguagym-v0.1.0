@@ -134,3 +134,40 @@ def test_inclinacao_barco_continua_15_graus():
     caso = (E.NavEnv, 'BlueBoat', [100, 100, 0], [[90, 90, -1], [110, 110, 0.1]], [105, 105, 0])
     assert um_passo_inclinado(*caso[:2], 'v1', 20, *caso[2:]) == (True, 'tilt')
     assert um_passo_inclinado(*caso[:2], 'v1', 10, *caso[2:]) == (False, None)
+
+
+# --- R3: alvo do barco na superfície ------------------------------------------------------------------------------
+class _SimReset:
+    def reset(self):
+        return {}
+
+
+def sortear_alvos(veiculo, loc, version, n=1000):
+    env = montar(E.NavEnv, veiculo, loc, version)
+    env.rng = np.random.default_rng(0)
+    env._env = _SimReset()
+    env._unwrap_state = lambda s: s
+    env._set_dynamics = lambda s: None
+    env._wrap_state = lambda s: None
+    env._on_target_buf, env._target_factor = 0, 1
+    alvos = []
+    for _ in range(n):
+        env._reset()
+        alvos.append(np.array(env._target))
+    return np.array(alvos)
+
+
+def test_alvo_barco_na_superficie_v1():
+    alvos = sortear_alvos('BlueBoat', [100, 100, 0], 'v1')
+    assert np.all(alvos[:, 2] == 0.0)
+    assert np.all((alvos[:, :2] >= 90) & (alvos[:, :2] <= 110))
+
+
+def test_alvo_barco_v0_continua_em_todo_o_volume():
+    alvos = sortear_alvos('BlueBoat', [100, 100, 0], 'v0')
+    assert alvos[:, 2].min() < -0.5 and alvos[:, 2].max() <= 0.1
+
+
+def test_alvo_rov_continua_sorteado_em_z_na_v1():
+    alvos = sortear_alvos('BlueROV2', [100, 100, -0.2], 'v1')
+    assert alvos[:, 2].std() > 1.0
