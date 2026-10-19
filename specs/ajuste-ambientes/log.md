@@ -15,3 +15,14 @@
   limite de 15° para provocar o término por inclinação).
 - Novo `tests/test_ajuste_ambientes.py`: `test_versao_em_todos_os_construtores`, `test_versao_invalida`.
 - Verificação: `pytest -k versao tests/test_ajuste_ambientes.py` → 2 passed; `pytest tests/` → 37 passed (35 + 2). ✅
+
+## 2026-10-19 — T3: spawn e limites em z
+- `HoverEnv`: constantes `UNDERWATER_SPAWN_Z = -1.5` e `AIR_CEILING_ABOVE_SPAWN = 5.0`; método de classe
+  `_spawn_location(agent_type, location, env_version)` (subaquático na v1 → z = −1,5), chamado no `__init__` antes do
+  `_build_params` (separado num método para poder ser testado sem simulador).
+- `HoverEnv._build_params` (Hover/Land): teto v1 = z do spawn + 5 (v0: `max(z_spawn, 2·piso)` = spawn).
+- `DockEnv._build_params`: teto v1 = −0,1 (v0: `min(z_spawn, −0,2)` = spawn); fundo −10 nas duas.
+- Nav e Trajectory não mudam no código: com o spawn em −1,5 o teto −0,1 passa a ter 1,4 m de folga.
+- Testes: `test_limites_folga_v1` (5 casos: Land, Hover, Nav aéreo, Dock, Nav subaquático) e
+  `test_limites_v0_iguais_aos_de_hoje` (mesmos 5, com os valores medidos no diagnóstico de 2026-10-16).
+- Verificação: `pytest -k limites` → 10 passed; `pytest tests/` → 47 passed. ✅

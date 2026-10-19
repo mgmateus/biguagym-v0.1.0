@@ -9,7 +9,7 @@ PC do lab.
   - Verificação: `git branch --show-current` e `git -C biguagym branch --show-current` → `spec/ajuste-ambientes`; `git -C biguagym rev-parse HEAD` → `fcf4358…`
 - [x] T2 — Parâmetro `env_version` (`"v1"` padrão, `"v0"`; `ValueError` para outro valor) no `HoverEnv`, repassado nos 12 construtores das subclasses; `recompensas_util.make` fixa `_env_version = "v0"` (R5)
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k versao` → passa; `pytest tests/test_recompensas.py` → 35 passam
-- [ ] T3 — Spawn subaquático em −1,5 m (v1); teto do Hover/Land = spawn + 5 m; teto do Dock = −0,1 (R1)
+- [x] T3 — Spawn subaquático em −1,5 m (v1); teto do Hover/Land = spawn + 5 m; teto do Dock = −0,1 (R1)
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k limites` → folga ≥ 1 m no v1 e valores de hoje no v0
 - [ ] T4 — `_tilt_limit()` por domínio (60° aéreo/multi-domínio/subaquático, 15° superfície; 15° no v0) usado nos `_step` de Hover/Nav, Land, Dock, Trajectory e LandCoop (R2)
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k inclinacao` → 30° não termina no drone/ROV v1 e termina no v0; `grep -c "np.radians(15)" biguagym/core/environments.py` → só dentro de `_tilt_limit`
