@@ -23,7 +23,7 @@ PC do lab.
   - Verificação: `git ls-remote https://github.com/ttszin/biguagym.git spec/ajuste-ambientes` → mesmo hash do submódulo do worktree
 - [x] T9 — ⏱ Smoke de 200 passos nos 24 ambientes da fila (v0/v1/v2) e `smoke_test.py --list` (R4, R6)
   - Verificação: 54 ids; 24/24 `ok`; dimensões +3 em relação à tabela de 2026-10-11 (exceto Trajectory); frames do BlueROV2 em −1,5 m sem colisão; 0 simuladores no fim
-- [ ] T10 — ⏱ `tools/diag_termino.py` v0 × v1 nos 6 ambientes do diagnóstico de 2026-10-16 (R1, R2, R3)
+- [x] T10 — ⏱ `tools/diag_termino.py` v0 × v1 nos 6 ambientes do diagnóstico de 2026-10-16 (R1, R2, R3)
   - Verificação: v1 com mediana ≥ 20 passos e `out_of_bounds` < 50% em BlueROV2Dock, DjiMatriceLand, BlueROV2Nav, BlueROV2TrajectoryFollower; DjiMatriceNav e DjiMatriceLand com mediana maior que 6 e 4; 0 simuladores no fim
 - [ ] T11 — ⏱ Pilotos TD3 de 5000 passos (`learning_starts=1000`) em BlueROV2Dock-v0, DjiMatriceLand-v0 e BlueBoatNav-v0, um processo cada, em sequência (geral)
   - Verificação: `exit 0`; episódios do Dock e do Land mais longos que na linha de base no mesmo trecho; 0 simuladores no fim

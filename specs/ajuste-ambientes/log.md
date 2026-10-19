@@ -96,3 +96,24 @@
 - Velocidade: v0 17,9–19,1 passos/s; v1 11–12; v2 com sonar 1,2–3,3 (em 2026-10-11 tinha dado 4,1–4,4; variação não
   investigada); v2 do drone 18,3–18,6.
 - Drone com ação aleatória ainda termina (4–5 de 5 episódios em 200 passos): medido na T10.
+
+## 2026-10-19 — T10: diagnóstico de término v0 × v1 (⏱)
+- Laço: `python tools/diag_termino.py <env> 300 <v1|v0>` (300 passos com ação zero + 300 aleatórios, recompensa v1
+  para ter o `termination_reason`), um processo por vez, `timeout -k 30 1200`, trava de bateria; na tomada. 0
+  simuladores depois de cada um.
+
+  | Ambiente | limites z v0 → v1 | Aleatória v0: mediana (motivos) | Aleatória v1: mediana (motivos) |
+  |---|---|---|---|
+  | BlueROV2Dock | [−10; −0,2] → [−10; −0,1], spawn −0,2 → −1,5 | **2** (17 out_of_bounds, 3 tilt) | **128** (2 tilt a ~60°) |
+  | DjiMatriceLand | [0,1; 5] → [0,1; 10] | **6** (34 tilt, 8 out_of_bounds) | **35** (6 hard_landing, 2 tilt) |
+  | BlueROV2Nav | [−20; −0,1], spawn −0,2 → −1,5 | **21** (5 tilt, 4 out_of_bounds) | **76** (3 tilt) |
+  | BlueROV2TrajectoryFollower | [−5,2; −0,1] → [−6,5; −0,1] | **26** (5 tilt, 4 out_of_bounds) | **101** (2 tilt) |
+  | DjiMatriceNav | [0; 15] (igual) | **7** (36 tilt) | **47** (3 out_of_bounds, 3 tilt) |
+  | BlueBoatNav | [−1; 0,1] (igual) | não termina em 300 | não termina em 300 |
+
+  Ação zero: igual nas duas versões (Dock e Nav do ROV parados até o timeout; drone cai → `hard_landing` no Land e
+  `out_of_bounds` pelo chão no Nav), mas agora o ROV fica parado em −1,5.
+- Critérios: mediana ≥ 20 e `out_of_bounds` < 50% em Dock (128; 0%), Land (35; 0%), BlueROV2Nav (76; 0%),
+  BlueROV2TrajectoryFollower (101; 0%) ✅; DjiMatriceNav 47 > 6 e DjiMatriceLand 35 > 4 ✅.
+- Observação: na v1 os episódios aleatórios ficaram tão longos que 300 passos dão só 2–8 episódios; as medianas são
+  menos precisas, mas a diferença para a v0 (2–26) é grande.
