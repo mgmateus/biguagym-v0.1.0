@@ -94,3 +94,43 @@ def test_limites_v0_iguais_aos_de_hoje(nome):
     assert float(env._location[2]) == pytest.approx(z)
     assert teto_piso(env) == pytest.approx((teto, piso))
     assert np.allclose(env._bounds[:, :2], [[90, 90], [110, 110]])
+
+
+# --- R2: limite de inclinação -------------------------------------------------------------------------------------
+from recompensas_util import dyn, make  # noqa: E402
+
+
+def um_passo_inclinado(cls, veiculo, version, graus, pos, bounds, target):
+    env = make(cls, version='v1', bounds=bounds, target=target)
+    env._env_version = version
+    env._agent_type = veiculo
+    env._env.fila = [dyn(pos, rpy=(np.radians(graus), 0, 0))]
+    _, _, term, _, info = env._step(np.zeros(4, dtype=np.float32))
+    return term, info['termination_reason']
+
+
+CASOS_INCLINACAO = {   # nome: (classe, veículo, posição, limites, alvo)
+    'drone_hover': (E.HoverEnv, 'DjiMatrice', [100, 100, 5], [[90, 90, 0.1], [110, 110, 10]], [105, 105, 6]),
+    'drone_land': (E.LandEnv, 'DjiMatrice', [100, 100, 5], [[90, 90, 0.1], [110, 110, 10]], [105, 105, 0.1]),
+    'rov_dock': (E.DockEnv, 'BlueROV2', [100, 100, -1.5], [[90, 90, -0.1], [110, 110, -10]], [105, 105, -10]),
+    'rov_nav': (E.NavEnv, 'BlueROV2', [100, 100, -1.5], [[90, 90, -20], [110, 110, -0.1]], [105, 105, -5]),
+}
+
+
+@pytest.mark.parametrize('nome', sorted(CASOS_INCLINACAO))
+def test_inclinacao_30_graus_nao_termina_na_v1_e_termina_na_v0(nome):
+    cls, veiculo, pos, bounds, alvo = CASOS_INCLINACAO[nome]
+    assert um_passo_inclinado(cls, veiculo, 'v1', 30, pos, bounds, alvo) == (False, None)
+    assert um_passo_inclinado(cls, veiculo, 'v0', 30, pos, bounds, alvo) == (True, 'tilt')
+
+
+@pytest.mark.parametrize('nome', sorted(CASOS_INCLINACAO))
+def test_inclinacao_70_graus_termina_na_v1(nome):
+    cls, veiculo, pos, bounds, alvo = CASOS_INCLINACAO[nome]
+    assert um_passo_inclinado(cls, veiculo, 'v1', 70, pos, bounds, alvo) == (True, 'tilt')
+
+
+def test_inclinacao_barco_continua_15_graus():
+    caso = (E.NavEnv, 'BlueBoat', [100, 100, 0], [[90, 90, -1], [110, 110, 0.1]], [105, 105, 0])
+    assert um_passo_inclinado(*caso[:2], 'v1', 20, *caso[2:]) == (True, 'tilt')
+    assert um_passo_inclinado(*caso[:2], 'v1', 10, *caso[2:]) == (False, None)

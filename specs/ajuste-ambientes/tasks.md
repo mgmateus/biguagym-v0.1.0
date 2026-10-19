@@ -11,7 +11,7 @@ PC do lab.
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k versao` → passa; `pytest tests/test_recompensas.py` → 35 passam
 - [x] T3 — Spawn subaquático em −1,5 m (v1); teto do Hover/Land = spawn + 5 m; teto do Dock = −0,1 (R1)
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k limites` → folga ≥ 1 m no v1 e valores de hoje no v0
-- [ ] T4 — `_tilt_limit()` por domínio (60° aéreo/multi-domínio/subaquático, 15° superfície; 15° no v0) usado nos `_step` de Hover/Nav, Land, Dock, Trajectory e LandCoop (R2)
+- [x] T4 — `_tilt_limit()` por domínio (60° aéreo/multi-domínio/subaquático, 15° superfície; 15° no v0) usado nos `_step` de Hover/Nav, Land, Dock, Trajectory e LandCoop (R2)
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k inclinacao` → 30° não termina no drone/ROV v1 e termina no v0; `grep -c "np.radians(15)" biguagym/core/environments.py` → só dentro de `_tilt_limit`
 - [ ] T5 — Alvo do barco (domínio superfície) com z = z do spawn no v1 (R3)
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k alvo_barco` → 1000 sorteios com z = 0 e x, y em ±10 m

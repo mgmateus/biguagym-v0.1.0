@@ -26,3 +26,12 @@
 - Testes: `test_limites_folga_v1` (5 casos: Land, Hover, Nav aéreo, Dock, Nav subaquático) e
   `test_limites_v0_iguais_aos_de_hoje` (mesmos 5, com os valores medidos no diagnóstico de 2026-10-16).
 - Verificação: `pytest -k limites` → 10 passed; `pytest tests/` → 47 passed. ✅
+
+## 2026-10-19 — T4: limite de inclinação por domínio
+- `HoverEnv.TILT_LIMIT_DEG = {'aereo': 60, 'multi-domain': 60, 'underwater': 60, 'surface': 15}` e `_tilt_limit()`
+  (v0 → 15° para todos). Os 6 `np.radians(15)` fixos (HoverEnv/Nav, LandEnv, DockEnv, TrajectoryEnv e LandCoopPixelEnv)
+  passam a chamar `self._tilt_limit()`; o único `np.radians(15)` que sobra é o do caminho v0 dentro do método.
+- Testes: a 30° drone (Hover, Land) e ROV (Dock, Nav) não terminam na v1 e terminam por `tilt` na v0; a 70° terminam na
+  v1; barco: 20° termina e 10° não (15° mantido).
+- Verificação: `pytest -k inclinacao` → 9 passed; `grep -c "np.radians(15)"` → 1 (em `_tilt_limit`); `pytest tests/` →
+  56 passed. ✅ Trajectory e LandCoop sem teste unitário de inclinação: cobertos pelo smoke (T9) e `diag_termino` (T10).
