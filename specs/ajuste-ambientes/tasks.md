@@ -15,7 +15,7 @@ PC do lab.
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k inclinacao` → 30° não termina no drone/ROV v1 e termina no v0; `grep -c "np.radians(15)" biguagym/core/environments.py` → só dentro de `_tilt_limit`
 - [x] T5 — Alvo do barco (domínio superfície) com z = z do spawn no v1 (R3)
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k alvo_barco` → 1000 sorteios com z = 0 e x, y em ±10 m
-- [ ] T6 — Alvo − posição na observação (v1; `_HAS_TARGET`, falso na Trajectory): `_init_spaces` +3 e `_wrap_state` (R4)
+- [x] T6 — Alvo − posição na observação (v1; `_HAS_TARGET`, falso na Trajectory): `_init_spaces` +3 e `_wrap_state` (R4)
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k observacao` → dimensão +3 em Hover/Nav/Land/Dock, igual na Trajectory e no v0; últimos 3 valores = alvo − posição
 - [ ] T7 — v0 idêntico ao de hoje: limites, spawn, inclinação, alvo e observação com `env_version="v0"`; suíte inteira (R5)
   - Verificação: `pytest tests/` → todos passam (35 da spec `recompensas` + os novos)

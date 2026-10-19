@@ -42,3 +42,12 @@
 - Testes (sem simulador, `_reset` com simulador falso e `rng` com seed 0): 1000 alvos do BlueBoat v1 com z = 0 e x, y
   em [90; 110]; v0 continua sorteando z em [−1; 0,1]; BlueROV2 v1 continua com z sorteado.
 - Verificação: `pytest -k alvo` → 3 passed; `pytest tests/` → 59 passed. ✅
+
+## 2026-10-19 — T6: alvo relativo na observação
+- `HoverEnv._HAS_TARGET = True`, `TrajectoryEnv._HAS_TARGET = False`; `_target_in_obs()` = v1 e `_HAS_TARGET`.
+- `HoverEnv._init_spaces`: `total_dim += 3` quando `_target_in_obs()`. `HoverEnv._wrap_state`: acrescenta
+  `alvo − posição` (float32; zeros se ainda não houver alvo ou dinâmica). Variantes v1 (pixels) e v2 (range/sonar)
+  leem o tamanho e chamam `super()._wrap_state`, então herdam sem mudança.
+- Testes: dimensão 19 → 22 na v1 (Land, Hover, Nav aéreo, Dock, Nav subaquático) e 19 na v0; Trajectory 19 nas duas
+  (antes do caminho); `_wrap_state` com posição (101, 98, −2) e alvo (105, 95, −7) → últimos 3 = (4, −3, −5).
+- Verificação: `pytest -k observacao` → 7 passed; `pytest tests/` → 66 passed. ✅

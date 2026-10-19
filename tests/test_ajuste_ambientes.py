@@ -171,3 +171,54 @@ def test_alvo_barco_v0_continua_em_todo_o_volume():
 def test_alvo_rov_continua_sorteado_em_z_na_v1():
     alvos = sortear_alvos('BlueROV2', [100, 100, -0.2], 'v1')
     assert alvos[:, 2].std() > 1.0
+
+
+# --- R4: alvo relativo na observação ------------------------------------------------------------------------------
+class _AcaoFalsa:
+    shape = (4,)
+
+    def get_low(self):
+        return [0.0] * 4
+
+    def get_high(self):
+        return [1.0] * 4
+
+
+class _SimEspacos:
+    _dynamics_dict = {}
+    action_space = _AcaoFalsa()
+
+
+def dim_obs(cls, veiculo, loc, version):
+    env = montar(cls, veiculo, loc, version)
+    _, env.obs_cfg = env._build_params()
+    env._env = _SimEspacos()
+    E.HoverEnv._init_spaces(env)          # só a parte do HoverEnv (a Trajectory acrescenta o caminho depois)
+    return env.observation_space.shape[0]
+
+
+@pytest.mark.parametrize('nome', sorted(CASOS_LIMITES))
+def test_observacao_tem_mais_3_na_v1(nome):
+    cls, veiculo, loc = CASOS_LIMITES[nome]
+    assert dim_obs(cls, veiculo, loc, 'v0') == 19            # DynamicsSensor
+    assert dim_obs(cls, veiculo, loc, 'v1') == 19 + 3
+
+
+def test_observacao_trajectory_sem_alvo():
+    for version in ('v0', 'v1'):
+        assert dim_obs(E.TrajectoryEnv, 'BlueROV2', [100, 100, -0.2], version) == 19
+
+
+def test_observacao_ultimos_3_valores_sao_alvo_menos_posicao():
+    env = montar(E.NavEnv, 'BlueROV2', [100, 100, -0.2], 'v1')
+    env._getter = lambda d: (d['DynamicsSensor'],)
+    d = np.zeros(19)
+    d[6:9] = [101.0, 98.0, -2.0]
+    env._dynamics = d
+    env._target = np.array([105.0, 95.0, -7.0])
+    obs = env._wrap_state({'DynamicsSensor': d})
+    assert obs.shape == (22,) and obs.dtype == np.float32
+    assert np.allclose(obs[:19], d)
+    assert np.allclose(obs[-3:], [4.0, -3.0, -5.0])
+    env._env_version = 'v0'
+    assert env._wrap_state({'DynamicsSensor': d}).shape == (19,)
