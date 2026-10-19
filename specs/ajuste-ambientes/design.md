@@ -1,8 +1,8 @@
-Status: rascunho
+Status: aprovado
 
 # ajuste-ambientes — Design
 
-Requisitos aprovados em 2026-10-19 ("aprovado, só aumenta o limite de inclinação do drone"). Mudanças no submódulo,
+Design aprovado em 2026-10-19 ("aprovado, pode deixar o ROV em 60° também"). Requisitos aprovados em 2026-10-19 ("aprovado, só aumenta o limite de inclinação do drone"). Mudanças no submódulo,
 numa branch `spec/ajuste-ambientes` do fork `ttszin/biguagym` a partir de `fcf4358` (recompensa v1), como na spec
 `recompensas`.
 
