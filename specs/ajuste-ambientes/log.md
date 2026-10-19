@@ -158,3 +158,8 @@
 
 - Merge `spec/ajuste-ambientes` → `testes-ambientes` (`--no-ff`) e push; submódulo em `ff452dc` (fork). Conferência no
   checkout principal logo abaixo.
+- Conferência no checkout principal depois do merge (`d74229e`): submódulo `ff452dc`; `pytest tests/` → 66 passed;
+  `smoke_test.py --list` → 54 ids. As cópias soltas (não versionadas) de `tools/diag_politica.py` (idêntica) e
+  `tools/diag_termino.py` (versão sem `env_version`) no checkout principal impediam o merge e foram removidas; as
+  versões oficiais estão na branch. ✅
+- Reproduzir a linha de base de 100k: `+env_kwargs.reward_version=v0 +env_kwargs.env_version=v0`.

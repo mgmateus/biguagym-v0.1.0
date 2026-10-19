@@ -1691,3 +1691,27 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   e verificação com `diag_termino.py`, smoke dos 24 e pilotos de 5000 passos.
 - Usuário: "aprovado, pode deixar o ROV em 60° também" → `design.md` `Status: aprovado`; `tasks.md` (T1–T12) em
   **rascunho**. Pergunta "Posso rodar no pc do lab?": ainda não; os 250k esperam as T1–T12 (correção no código e verificação).
+
+## Spec `ajuste-ambientes` concluída e merge (2026-10-19)
+Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajuste-ambientes/log.md`.
+- Código (submódulo, fork `ttszin/biguagym`, branch `spec/ajuste-ambientes`, `ff452dc`): parâmetro `env_version`
+  ("v1" padrão, "v0" original) nos 13 construtores; v1: spawn subaquático em −1,5 m; teto do Hover/Land = spawn + 5 m;
+  teto do Dock na superfície (−0,1); inclinação máxima 60° (drone e ROV) e 15° (barco); alvo do barco em z = 0;
+  alvo − posição (3 valores) na observação de Hover/Nav/Land/Dock e variantes (não na Trajectory).
+- Testes: `tests/test_ajuste_ambientes.py` (31, sem simulador) + 35 da spec `recompensas` (agora com `_env_version="v0"`
+  nos ambientes falsos) → 66 passed.
+- Com simulador (notebook; começou na bateria, 61%, com trava de < 35%; ligado na tomada às 18:18):
+  - T9 smoke dos 24 da fila: **24/24 ok**, 0 simuladores; dimensões +3 nos ambientes com alvo (19→22, v2 129→132,
+    119→122, 29→32); BlueROV2 nasce em −1,5; alvo do barco em z = 0. Os v1 têm `include_state=False` por padrão (só
+    imagem): o alvo relativo só entra neles com `include_state=True`.
+  - T10 `diag_termino.py` ação aleatória, mediana de passos por episódio v0 → v1: BlueROV2Dock 2 → **128**,
+    DjiMatriceLand 6 → **35**, BlueROV2Nav 21 → **76**, BlueROV2TrajectoryFollower 26 → **101**, DjiMatriceNav 7 → **47**;
+    `out_of_bounds` 0% nos subaquáticos e no Land.
+  - T11 pilotos TD3 de 5000 passos: 3 × `exit 0`; mediana de passos/ep no Dock 2 → 86 (aleatório) e 3 → 28 (aprendendo);
+    Land 4,5 → 39 e 5 → 19. **BlueBoatNav volta a "girar parado" (−231 por episódio) logo que o TD3 começa a aprender:
+    o problema dele é do TD3 (ação travada nos extremos), fora desta spec.** Dock/Land encurtam ao aprender (pode ser o
+    incentivo de terminar cedo com `stable` até −3/passo entre 35° e 60°): acompanhar nas curvas dos 250k.
+- Merge `spec/ajuste-ambientes` → `testes-ambientes` (`d74229e`); no checkout principal: 66 testes, 54 ids, submódulo
+  `ff452dc`. Removidas as cópias soltas de `tools/diag_politica.py`/`diag_termino.py` (versões oficiais na branch).
+- `treinos/cluster/LEIAME.md`: os 250k pedem `git pull && git submodule update --init` (submódulo `ff452dc`); como
+  reproduzir a linha de base (`reward_version=v0`, `env_version=v0`).

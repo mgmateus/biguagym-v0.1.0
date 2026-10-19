@@ -158,8 +158,8 @@ tail -f treinos/cluster/benchmark/resultado.txt      # Ctrl+C só sai do tail
 A última linha diz o melhor `WORKERS`. Ele se recusa a rodar se houver treino (python) ou simulador na GPU; para
 cancelar: `kill -TERM -$(cat treinos/cluster/benchmark/benchmark.pgid)`.
 
-**4. Fila de 250k** (os 8 ambientes v0 de `runs_250k.csv`, seed 0; só depois da spec `ajuste-ambientes` e de um
-`git pull`). WORKERS=3 pelo benchmark de 2026-10-17 (a fila só inicia um run com ≥ 4 GB de VRAM livre):
+**4. Fila de 250k** (os 8 ambientes v0 de `runs_250k.csv`, seed 0; spec `ajuste-ambientes` concluída em 2026-10-19: faça
+`git pull && git submodule update --init` antes; o submódulo tem de estar em `ff452dc`). WORKERS=3 pelo benchmark de 2026-10-17 (a fila só inicia um run com ≥ 4 GB de VRAM livre):
 ```bash
 mkdir -p treinos/cluster/saida_250k
 RUNS=$PWD/treinos/cluster/runs_250k.csv OUT=$PWD/treinos/cluster/saida_250k STEPS=250000 EXTRA="eval_freq=250000" \
@@ -169,3 +169,6 @@ WORKERS=3 nohup setsid systemd-inhibit --what=sleep:idle --why="treinos 250k" \
 Acompanhar: `tail treinos/cluster/saida_250k/fila.log` e `cat treinos/cluster/saida_250k/estado.csv`.
 Parar: `kill -TERM -$(cat treinos/cluster/saida_250k/fila.pgid)`.
 `eval_freq=250000`: avaliação só no início e no fim (3 simuladores por treino); com 100000 seriam 5 (vazamento do `close()`).
+Os 250k usam os padrões novos (`reward_version=v1`, `env_version=v1`). A linha de base de 100k (notebook) é reproduzida
+com `EXTRA="... +env_kwargs.reward_version=v0 +env_kwargs.env_version=v0"`; modelos dela não carregam nos ambientes v1
+(a observação ganhou 3 valores).
