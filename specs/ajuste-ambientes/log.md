@@ -141,3 +141,20 @@
   - Dock e Land: com o TD3 aprendendo, os episódios encurtam (86 → 28, 39 → 19) enquanto o retorno melhora. Com o
     limite de 60°, o termo `stable` chega a −3 por passo acima de 35° e a queda custa −10 uma vez: terminar cedo pode
     voltar a compensar. 5000 passos não distinguem isso de aprendizado; acompanhar nas curvas dos 250k.
+
+## 2026-10-19 — T12: critérios de aceitação e merge
+
+| Requisito | Critério | Evidência | |
+|---|---|---|---|
+| R1 | folga ≥ 1 m entre spawn e limites z; teto subaquático ≤ −0,1; piso aéreo ≥ 0 | `test_limites_folga_v1` (5 casos); smoke T9: BlueROV2 nasce em −1,5, teto −0,1 | ✅ |
+| R1, R2 | ação aleatória: mediana ≥ 20 e `out_of_bounds` < 50% (Dock, Land, BlueROV2Nav, BlueROV2Traj) | T10: 128 / 35 / 76 / 101; `out_of_bounds` 0% nos quatro | ✅ |
+| R2 | DjiMatriceNav e DjiMatriceLand com mediana maior que hoje (6 e 4) | T10: 47 e 35 | ✅ |
+| R2 | 30° não termina no drone/ROV v1 e termina no v0; 70° termina; barco 15° | `test_inclinacao_*` (9) | ✅ |
+| R3 | alvo do BlueBoat na superfície | `test_alvo_barco_na_superficie_v1` (1000 sorteios z = 0); smoke T9: alvo z = 0,0 | ✅ |
+| R4 | observação = sensores + 3; últimos 3 = alvo − posição; Trajectory e v0 iguais | `test_observacao_*` (7); smoke T9: 19→22, 129→132, 119→122, 29→32; Trajectory igual | ✅ (v1 pixels só com `include_state=True`, registrado na T9) |
+| R5 | com `env_version="v0"`, tudo igual a hoje; testes da spec `recompensas` passando | `test_limites_v0_*`, partes v0 dos testes de inclinação/alvo/observação, 35 testes da spec `recompensas`; revisão do diff (T7) | ✅ |
+| R6 | 54 ids; smoke dos 24 da fila `ok` | T9: 24/24 `ok`, 0 simuladores; `smoke_test.py --list` → 54 (abaixo) | ✅ |
+| Geral | pilotos de 5000 passos sem erro; Dock e Land com episódios mais longos | T11: 3 × `exit 0`; Dock 2→86 / 3→28, Land 4,5→39 / 5→19 | ✅ |
+
+- Merge `spec/ajuste-ambientes` → `testes-ambientes` (`--no-ff`) e push; submódulo em `ff452dc` (fork). Conferência no
+  checkout principal logo abaixo.

@@ -27,5 +27,5 @@ PC do lab.
   - Verificação: v1 com mediana ≥ 20 passos e `out_of_bounds` < 50% em BlueROV2Dock, DjiMatriceLand, BlueROV2Nav, BlueROV2TrajectoryFollower; DjiMatriceNav e DjiMatriceLand com mediana maior que 6 e 4; 0 simuladores no fim
 - [x] T11 — ⏱ Pilotos TD3 de 5000 passos (`learning_starts=1000`) em BlueROV2Dock-v0, DjiMatriceLand-v0 e BlueBoatNav-v0, um processo cada, em sequência (geral)
   - Verificação: `exit 0`; episódios do Dock e do Land mais longos que na linha de base no mesmo trecho; 0 simuladores no fim
-- [ ] T12 — Verificar todos os critérios de aceitação do requirements.md; merge `spec/ajuste-ambientes` → `testes-ambientes` e push
+- [x] T12 — Verificar todos os critérios de aceitação do requirements.md; merge `spec/ajuste-ambientes` → `testes-ambientes` e push
   - Verificação: tabela de critérios preenchida no `log.md`; no checkout principal `pytest tests/` passa e `smoke_test.py --list` → 54 ids
