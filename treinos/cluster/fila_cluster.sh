@@ -28,6 +28,9 @@ CL=$REPO/treinos/cluster
 OUT=${OUT:-$CL/saida}
 RUNS=${RUNS:-$CL/runs.csv}
 STEPS=${STEPS:-100000}
+MIN_VRAM_MB=${MIN_VRAM_MB:-4000}        # VRAM livre mínima para começar um run (um treino chega a ~4 GB: 3 simuladores)
+INTERVALO_INICIO=${INTERVALO_INICIO:-60}  # segundos mínimos entre inícios de runs
+EXTRA=${EXTRA:-}                     # argumentos extras do run.py (ex.: EXTRA="eval_freq=250000" nos 250k)
 TIMEOUT=${TIMEOUT:-432000}          # 120 h por run (sonar: ~0,6 passos/s no notebook → ~48 h só de passos)
 NGPU=$(nvidia-smi -L | wc -l)
 WORKERS=${WORKERS:-$NGPU}
@@ -113,6 +116,21 @@ exec "$REAL_SMI" -i $gpu "\$@"
 EOF
     chmod +x "$wd/bin/nvidia-smi"
     while true; do
+        # Só pega um run novo com MIN_VRAM_MB livres na GPU e INTERVALO_INICIO s depois do último início (de qualquer
+        # worker): o simulador recém-aberto leva um tempo para ocupar a VRAM. Benchmark do PC do lab (2026-10-17):
+        # 3 treinos chegaram a 11,8 de 12,3 GB e o 4º não carregou em 30 s ("Timed out waiting for binary to load").
+        local avisou=0
+        while true; do
+            if flock "$LOCK.inicio" bash -c '
+                livre=$("$1" -i "$2" --query-gpu=memory.free --format=csv,noheader,nounits | head -1 | tr -d " ")
+                ultimo=$(stat -c %Y "$4" 2>/dev/null || echo 0)
+                [ "$livre" -ge "$3" ] && [ $(( $(date +%s) - ultimo )) -ge "$5" ] && touch "$4"' \
+                _ "$REAL_SMI" "$gpu" "$MIN_VRAM_MB" "$OUT/.ultimo_inicio" "$INTERVALO_INICIO"; then
+                break
+            fi
+            [ $avisou -eq 0 ] && echo "$(date +%T) w$w: esperando ${MIN_VRAM_MB} MiB livres na GPU $gpu"
+            avisou=1; sleep 30
+        done
         local linha
         linha=$(flock "$LOCK" bash -c "$(declare -f proximo curva_externa_pronta); OUT='$OUT' RUNS='$RUNS' STEPS='$STEPS'; r=\$(proximo); \
             [ -n \"\$r\" ] && { IFS=, read -r e a s <<< \"\$r\"; mkdir -p \"\$OUT/runs/\${e}_s\$s\"; touch \"\$OUT/runs/\${e}_s\$s/.rodando\"; echo \"\$r\"; }")
@@ -150,7 +168,7 @@ EOF
             setsid --wait bash -c 'echo $$ > "$1"; shift; exec "$@"' _ "$d/pgid" \
                 timeout -k 60 "$TIMEOUT" "$PY" "$REPO/run.py" hydra/launcher=basic env="$env" agent="$agent" \
                 num_train_steps="$STEPS" runs=$((s + 1)) \
-                curves_path="$OUT/curves" logs_path="$OUT/logs" \
+                curves_path="$OUT/curves" logs_path="$OUT/logs" $EXTRA \
                 > "$d/saida.log" 2>&1
         )
         local rc=$? pg; pg=$(cat "$d/pgid" 2>/dev/null)

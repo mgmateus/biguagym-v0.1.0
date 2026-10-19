@@ -1480,3 +1480,202 @@ Comando de conferência: `cat treinos/100k/estado.csv`, `tail treinos/100k/fila.
 - Com isso a linha de base v0 no notebook está completa: 8 runs de 100k, seed 0, todos com `exit=0`.
 - Nenhum arquivo de código alterado. O motivo dos términos não fica gravado neste run (o harness não registra o
   `termination_reason`); a suspeita é o spawn do BlueROV2 a 10 cm do limite da área (achado da T12).
+
+## Por que as curvas não sobem; spec `ajuste-ambientes` e fila de 250k (2026-10-16)
+Pedido do usuário: "verifique os treinos que não tiveram a curva de aprendizado subindo e melhore eles. E vamos
+testar todos novamente, mas dessa vez com 250 mil steps".
+- **Curvas** (script em scratchpad sobre `treinos/100k/curves/*.csv`, faixas de 20k passos): sobem DjiMatriceTrajectoryFollower
+  (16 → 27,5) e BlueBoatTrajectoryFollower (755 → 1439, pelo "ficar parado", já corrigido na v1); pioram BlueBoatNav
+  (−26 → −230), BlueROV2Nav e BlueROV2TrajectoryFollower (82 → 27); DjiMatriceNav, DjiMatriceLand e BlueROV2Dock sobem
+  só porque o episódio encurta (2–3 passos). No Dock e no Land os episódios já são curtos nos 25k passos aleatórios
+  iniciais do TD3 (mediana 2 e 5).
+- **Diagnóstico com simulador** (`tools/diag_termino.py <env> 300`, novo; ação zero e aleatória, recompensa v1 para ter o
+  `termination_reason`; um processo por ambiente; 0 simuladores ao fim conferido com `ps`):
+  - BlueROV2Dock-v0: aleatória → 18/22 `out_of_bounds`, mediana 2 passos, z final −0,198 (teto −0,2 = spawn);
+  - DjiMatriceLand-v0: aleatória → 19 `out_of_bounds` (teto 5,0 = spawn) e 25 `tilt`, mediana 4; motores em 0 → `hard_landing`;
+  - BlueROV2Nav-v0 / BlueROV2TrajectoryFollower-v0: parado não termina; aleatória → `tilt` (5/6 e 4/6), mediana 46 e 34;
+  - DjiMatriceNav-v0: aleatória → 39/39 `tilt` (17,6°), mediana 6;
+  - BlueBoatNav-v0: não termina em 300 passos (nem parado nem aleatória).
+  (O contador "simuladores após" do laço dava 1–2 porque o `pgrep -f` casava com a linha de comando do próprio shell.)
+- **Política treinada** (`tools/diag_politica.py <env> <actor_last.pt> 600`, novo): BlueBoatNav-v0 satura os motores
+  em sentidos opostos (+288/−296, desvio 0) e gira parado a 3,1 rad/s (`spin` −0,60/passo; alvo a 5,6–9,4 m).
+  A 1ª versão do script quebrava nos Trajectory (sem `_target`): corrigido.
+- **Causas encontradas no código** (`biguagym/core/environments.py`, detalhes em `specs/ajuste-ambientes/requirements.md`):
+  1. teto da área = altura do spawn no Dock (`DockEnv._build_params`) e no Land (`HoverEnv._build_params`);
+  2. folga de 10 cm até o teto no BlueROV2 Nav/Trajectory;
+  3. inclinação máxima de 15° com controle direto dos motores;
+  4. alvo do BlueBoatNav sorteado em z ∈ [−1; 0,1], inalcançável para o barco na superfície;
+  5. **o alvo não está na observação** dos Hover/Nav/Land/Dock (só o `DynamicsSensor`, 19 valores), embora seja
+     sorteado a cada episódio. Só os Trajectory, que têm o caminho na observação, aprenderam.
+- **Spec `ajuste-ambientes`:** branch `spec/ajuste-ambientes` (worktree `.claude/worktrees/ajuste-ambientes`),
+  `requirements.md` em **rascunho** (commits `3e86307`, `f59b1d7`), aguardando aprovação. Nenhum código de ambiente alterado.
+- **Fila de 250k** (`treinos/fila_100k.sh`): `OUT` e `ENVS_LISTA` agora configuráveis (padrões iguais aos de antes);
+  `treinos/.gitignore` ignora `250k/`. Comando previsto, só depois da spec:
+  `OUT=$PWD/treinos/250k STEPS=250000 TIMEOUT=432000 EXTRA="eval_freq=250000" ENVS_LISTA="<8 ids v0>" bash treinos/fila_100k.sh`.
+  `eval_freq=250000` porque com 100000 haveria avaliações em 0/100k/200k/fim → 5 simuladores (~8,5 GB) > 6 GB do notebook.
+- Configuração padrão do harness: `num_train_steps: 1000000`, `eval_freq: 100000` (`config/config.yaml`): é de onde vem
+  o "1 milhão" e a conta do bug dos ~800k (1 simulador vazado por avaliação).
+- **Política treinada, demais ambientes** (`tools/diag_politica.py`, laço com `timeout 900` por ambiente):
+  - BlueROV2Nav-v0: os 6 motores saturados (±278,9, desvio 0); 50/50 episódios por `tilt` em 12 passos (o "12 passos
+    fixos" da curva);
+  - DjiMatriceTrajectoryFollower-v0: os 4 motores no máximo (592,4); o drone sobe reto e sai pelo teto em 21 passos
+    (28/28 `out_of_bounds`), ganhando `cte`+`align` (1,36/passo) enquanto sobe sobre o caminho. A curva "sobe", mas
+    a política é "acelerar tudo";
+  - BlueBoatTrajectoryFollower e BlueROV2TrajectoryFollower: `TypeError` da 1ª versão do script (sem `_target`;
+    corrigido depois, não rodado de novo);
+  - BlueROV2Dock, DjiMatriceLand, DjiMatriceNav: sem resultado, o `timeout 900` cortou antes de 600 passos (resets a
+    cada 2–3 passos, ~2 s cada).
+- **Processos órfãos:** o `timeout` mata o Python com SIGTERM e o atexit do biguasim não roda: ficaram **2 simuladores
+  órfãos** (pids 72306 e 80581, iniciados por mim, pai = init, sozinhos nos seus grupos). Encerrados com
+  `kill -TERM`; depois: 0 simuladores, VRAM 399 MiB. Nos próximos diagnósticos: limitar por passos, não por `timeout`.
+- Em comum nas políticas que não aprenderam: **ação saturada (desvio 0)**, ou seja, o TD3 converge para os extremos
+  do Box (tanh saturado). Isso reforça as causas 1–5 (sem o alvo na observação não há gradiente útil) e fica como
+  observação para o design (escala da ação/ruído), sem requisito novo por enquanto.
+
+## Benchmark de treinos em paralelo e passo a passo dos 250k no PC do lab (2026-10-17)
+Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisamos testar quantas seeds rodando por vez
+é mais rápido no total". O usuário lembrou que o benchmark tem de ser na máquina que vai rodar: no notebook só testei o script.
+- **Novo `treinos/cluster/benchmark_workers.sh`:** para N em `NS` (1 2 3 4), N treinos TD3 de `STEPS`=3000 passos do mesmo
+  ambiente (`BlueROV2Nav-v0`), `agent.learning_starts=500` (mede a fase com atualização da rede), `eval_freq=1000000`,
+  `num_eval_episodes=1`; passos/s pela hora de cada linha `| train | S:` (saída com `PYTHONUNBUFFERED=1` e carimbo de
+  hora); total = soma; pico de VRAM e RAM livre mínima; encerra o que sobrar no grupo de cada treino; para no 1º N com
+  falha; recusa rodar se houver python/simulador na GPU (salvo `FORCAR=1`). Saída em `treinos/cluster/benchmark/` (fora do git).
+- **Teste do script no notebook:** `NS="1" STEPS=1200 LS=500 TIMEOUT=1500 bash treinos/cluster/benchmark_workers.sh` →
+  1,77 passos/s, pico de VRAM 5250 MiB, RAM livre mínima 2203 MiB, 0 processos sobrando, exit 0. (Só valida o script.)
+- **Problema achado e corrigido:** o `nvidia-smi --query-compute-apps` lista o desktop (`plasmashell` no notebook), então
+  a 1ª tentativa do benchmark recusou rodar com a GPU livre. A `esperar_e_rodar.sh` usa a mesma contagem: se o desktop do
+  PC do lab aparecer nela, **ela nunca acharia a máquina livre**. As duas agora contam só processos `python`/`Holodeck`.
+- **`fila_cluster.sh`:** nova variável `EXTRA` (argumentos extras do `run.py`, ex.: `eval_freq=250000`).
+- **`treinos/cluster/runs_250k.csv`:** os 8 ambientes v0 da linha de base, TD3, seed 0.
+- **`treinos/cluster/LEIAME.md`:** seção "250k passos no PC do laboratório": parar a espera antiga, atualizar para a
+  `testes-ambientes`, rodar o benchmark, iniciar a fila de 250k (depois da spec `ajuste-ambientes`).
+- `treinos/.gitignore`: `cluster/benchmark/` e `cluster/saida_250k/`.
+- **1º benchmark no PC do lab** (resultado colado pelo usuário, 2026-10-17 07:33; RTX 4070 Ti 12282 MiB, RAM 31273 MiB,
+  16 CPUs; GPU livre antes): N=1 **falhou** logo no início (pico de VRAM 218 MiB: o simulador não chegou a carregar),
+  0 processos sobrando. Causa ainda desconhecida; pedido ao usuário o fim do `N1/w0/saida.log` e do `HolodeckLog.txt`
+  (suspeita: o mesmo "Timed out waiting for binary to load" da verificação de 2026-10-06).
+  A última linha do resultado ficava vazia quando nenhum N funciona: corrigido (`adc2793`).
+- **Log do benchmark no PC do lab** (colado pelo usuário): `posix_ipc.BusyError: Semaphore is busy` →
+  `BiguaSimException: Timed out waiting for binary to load` no `gym.make` (o mesmo erro de 2026-10-06, agora com a GPU
+  livre e 28 GB de RAM: **descarta falta de RAM/TCC** como causa). O `HolodeckLog.txt` do mundo tem só linhas de
+  2026.10.02 (log do notebook que veio no pacote): o simulador do PC do lab não escreveu nada nele.
+  O biguasim manda a saída do Unreal para `/dev/null` (`__linux_start_process__`, sem `verbose`) e espera 30 s pelo
+  semáforo `/HOLODECK_LOADING_SEM<uuid>`. Próximo passo pedido ao usuário: rodar o executável direto com `timeout 90`,
+  `-RenderOffScreen`, e mandar a saída (`~/sim_direto.log`), o código de saída, `DISPLAY`/`SSH_CONNECTION` e a pasta `Saved/Logs`.
+- **Simulador direto no PC do lab** (`timeout 90 Holodeck Pier-Harbor -HolodeckOn -RenderOffScreen`, colado pelo usuário):
+  **`segmentation fault`, exit 139**, saída vazia (nem uma linha do Unreal), 0 processos depois. Binário com permissão
+  `rwx`, `DISPLAY=:0`, sem SSH, usuário `nautec`. Falha antes do log do Unreal → suspeita de biblioteca carregada no
+  início; o terminal tem o **conda `base` ativo** (Python 3.13). Pedido: repetir com `env -i` (ambiente limpo),
+  `LD_LIBRARY_PATH`/`LD_PRELOAD`, `ldd | grep "not found"`, `coredumpctl` e versão do driver.
+- **Ambiente limpo no PC do lab** (`env -i HOME DISPLAY=:0 XDG_RUNTIME_DIR PATH=/usr/bin:/bin`): **segfault de novo**
+  (exit 139) → descarta conda/variáveis. Driver do PC do lab = **580.178.04, igual ao do notebook**. Sem core dump no
+  `coredumpctl`. Referência do notebook: Ubuntu 24.04.5, kernel 6.11.0-17, `libvulkan1` 1.3.275.0-1build1,
+  `libnvidia-gl-580` 580.178.04, `/usr/share/vulkan/icd.d/nvidia_icd.json`; binário Unreal 5 (`Holodeck.sh` só chama o
+  executável com o nome do projeto). Pedido ao usuário: SO/kernel/CPU, pacotes Vulkan, `ldd | grep "not found"`,
+  log com `-stdout -FullStdOutLogOutput`, teste com `-nullrhi` e `gdb ... bt`; e se o TCC usa o simulador nesse PC.
+- **Causa do simulador não abrir no PC do lab: executável incompleto.** No 3º teste (colado pelo usuário): Ubuntu 22.04.5,
+  kernel 6.8.0-138, AMD Ryzen 7 8700G, `libvulkan1` 1.3.204.1-2, `libnvidia-gl-580` 580.178.04, `nvidia_icd.json`
+  presente; **`ldd Holodeck` cai com código 135 (SIGBUS)**; com `-stdout` e com `-nullrhi` (sem render) o simulador
+  dá segfault igual (descarta GPU/Vulkan); `gdb` sem saída. O `ls -l` anterior mostrava o `Holodeck` do lab com
+  **79 317 749 bytes**; no notebook e no `setup/skydive_manifest.txt` ele tem **241 444 168 bytes**
+  (md5 `b33a1302965740040b0128bf5381fcb2`). Arquivo cortado (data 2026-10-02 18:28): extração antiga interrompida;
+  o instalador pulou a extração porque o `config.json` existia e só **avisava** da diferença no manifesto.
+- **`setup/instalar_pc_lab.sh`:** a diferença em relação ao manifesto agora é **erro** (`falha`), com o passo a passo
+  para mover o mundo quebrado e extrair de novo.
+- Pedido ao usuário: conferir espaço (`df -h`) e o md5 do `~/leva/SkyDive.tar.zst`, mover o mundo para
+  `SkyDive_quebrado` (não apagar: pode ter algo do TCC), rodar o instalador e conferir tamanho/md5 do `Holodeck`.
+- **Reinstalação do mundo no PC do lab** (saída colada pelo usuário): passos 2–4 ok (submódulo `fcf4358`, biguasim
+  `53ad1f9d`, venv 3.12); passo 5 parou com **`ERRO: falta /home/nautec/leva/SkyDive.tar.zst`**: o pacote nunca esteve
+  no PC do lab, então o mundo de 2026-10-02 foi copiado de outro jeito e veio incompleto. O mundo antigo está em
+  `SkyDive_quebrado`; não há mundo instalado agora. O pacote do notebook confere (md5 `bd371b06...`, 1 395 444 889 bytes).
+  O notebook está em rede doméstica (192.168.0.13): a cópia para o lab é com o usuário (pendrive, scp na rede da
+  universidade ou Drive).
+- **Pedido do usuário: "faça com que eu não tenha que copiar nada".** O servidor de mundos do biguasim
+  (`https://10.228.0.40:8000/`) não responde de nenhuma das máquinas (registro de 2026-10-02) e o mundo do notebook
+  tem o patch do BlueBoat; a cópia de 2026-10-02 foi pelo AnyDesk (provável origem do `Holodeck` cortado).
+  - **`setup/instalar_pc_lab.sh`:** se faltar `~/leva/SkyDive.tar.zst`, baixa da release `skydive-20261002` de
+    `ttszin/biguasim` (`WORLD_REPO`/`WORLD_TAG`; `gh release download` se o gh estiver logado, senão `curl` com
+    retomada); se o md5 não bater, apaga o arquivo para baixar de novo.
+  - O usuário escolheu **release pública** no fork `ttszin/biguasim` (pergunta: privada × pública).
+  - A criação da release (`gh release create skydive-20261002 SkyDive.tar.zst skydive_manifest.txt -R ttszin/biguasim
+    --target testes-biguagym ...`) foi **bloqueada pelo classificador de permissões** (publicação externa). Fica para o
+    usuário rodar ou autorizar.
+- **Release publicada** depois que o usuário liberou a permissão ("pode rodar você, eu libero a permissão"):
+  https://github.com/ttszin/biguasim/releases/tag/skydive-20261002 (pública, não rascunho); `SkyDive.tar.zst`
+  1 395 444 889 bytes e `skydive_manifest.txt` 87 585 bytes, ambos `uploaded`. Notas com o md5, onde extrair e a EULA
+  do Unreal.
+  Conferência pelo link público que o instalador usa, sem login:
+  `curl -fsSL https://github.com/ttszin/biguasim/releases/download/skydive-20261002/SkyDive.tar.zst | md5sum` →
+  `bd371b063645adabe9ef38c13fdb5b6d` (igual ao original).
+- **PC do lab reinstalado** (`git pull && bash setup/instalar_pc_lab.sh`, colado pelo usuário): chegou a "Instalação
+  concluída". Como o instalador agora para com erro se o md5 ou o manifesto não baterem, o mundo baixado da release
+  está íntegro. Próximo: smoke de 200 passos e benchmark.
+- 1ª tentativa do smoke no PC do lab: `source ~/venv-biguagym/bin/activate` → "no such file" (o venv foi criado pelo
+  `conda create -p`, que não tem `bin/activate`), e o `python` usado foi o do conda base 3.13 →
+  `ModuleNotFoundError: gymnasium`. Erro da instrução, não da instalação. A mensagem final do instalador agora manda
+  chamar `$VENV/bin/python` pelo caminho (benchmark e filas já usam assim).
+- **Smoke no PC do lab com o mundo novo** (`~/venv-biguagym/bin/python smoke_test.py --env DjiMatriceLand-v0 --steps 200`):
+  **ainda "Timed out waiting for binary to load"**; 0 simuladores depois. No notebook o `make_s` é ~7 s (lote v0).
+  Pedido ao usuário: tamanho do `Holodeck` novo e execução direta com `timeout 120`, `-stdout -FullStdOutLogOutput`
+  (separa "ainda cai" de "carrega em mais de 30 s", o limite do semáforo do biguasim).
+- **Execução direta no PC do lab com o mundo novo:** `Holodeck` com 241 444 168 bytes (inteiro). O simulador **abre e
+  renderiza**: 11:28:47 início, Vulkan na RTX 4070 Ti (driver 580.178.04), 11:28:50 já compilando PSOs e renderizando
+  (~3 s); 1571 linhas de log, nenhum erro. Aos 120 s o `timeout` mandou SIGTERM (`RequestExit`) e o Unreal travou no
+  encerramento; faltou `-k` no comando que passei (o terminal ficou preso). Processo 17334 a ser morto pelo usuário.
+  Hipótese para o timeout do smoke anterior: 1ª execução do mundo novo (compilação de shaders > 30 s). Próximo: smoke de novo.
+- **Smoke de novo no PC do lab:** **timeout de carga outra vez** (descarta a hipótese da 1ª execução). Direto o simulador
+  abre em ~3 s, mas pelo biguasim (que passa `--HolodeckUUID`, octree, `-Trace` e espera o semáforo
+  `HOLODECK_LOADING_SEM<uuid>` por 30 s) não sinaliza a tempo.
+- **Novo `tools/diag_carga.py`:** dentro do próprio processo troca o `posix_ipc` em `sys.modules` para que só o semáforo
+  de carga espere `ESPERA_S` (300 s) e imprima o tempo real; `biguasim.make` com `verbose=True` (saída do Unreal
+  visível); reset + 20 passos; alarme em `ESPERA_S`+120 s. Nada muda no biguasim instalado. (1ª versão trocava
+  `biguasim.environments.posix_ipc`, sem efeito, porque o import é local à função.)
+  No notebook: semáforo liberado em **7,9 s**, `gym.make` 15,1 s, reset 5,4 s, 20 passos 1,8 s, 0 simuladores depois.
+- **1ª rodada no PC do lab:** "esperando o semáforo" às 08:48:05 e nada por mais de 2,5 min; o usuário interrompeu
+  (Ctrl+C, `KeyboardInterrupt`) antes dos 300 s. O Unreal não imprimiu nada (sem `-stdout`): não dá para saber se
+  travou ou caiu.
+- **`tools/diag_carga.py` v2:** imprime o comando exato do simulador, acrescenta `-stdout -FullStdOutLogOutput`,
+  vigia o processo a cada 10 s (vivo / código de saída) e mostra o uso do `/dev/shm` (memória compartilhada
+  simulador↔Python). No notebook: `/dev/shm` 0,0 de 7,7 GiB (367 arquivos, 52 do Holodeck), semáforo em 5,7 s, ok.
+- **Causa do timeout no PC do lab encontrada** (`diag_carga.py` v2, colado pelo usuário): o comando do simulador era
+  `.../worlds/SkyDive_quebrado/Linux/Biguasim/Binaries/Linux/Holodeck ...` → **saiu com código -11 (segfault) em 0,0 s**.
+  O biguasim acha o mundo pelo `"name"` do `config.json` (não pelo nome da pasta), na ordem do `os.listdir` (risco já
+  anotado em 2026-09); a cópia quebrada que **eu mandei manter em `$WORLDS/SkyDive_quebrado`** foi a escolhida.
+  `/dev/shm` do lab ok (0,0 de 15,3 GiB). Instrução ao usuário: `mv .../worlds/SkyDive_quebrado ~/SkyDive_quebrado_backup`
+  e smoke de novo.
+- **`setup/instalar_pc_lab.sh`:** a mensagem de erro do manifesto manda mover o mundo para **fora** de `$WORLDS`, e o
+  passo 5 agora **falha** se houver outro mundo com `"name": "SkyDive"` em `$WORLDS`.
+- Observação (notebook, não alterado): `~/.local/share/biguasim/1.0.0/worlds` tem 3 mundos com nome SkyDive (`SkyDive`,
+  `SkyDive.backup_20260821_045522`, `SkyDive_broken_biguasim_repack`); funciona porque o `os.listdir` devolve `SkyDive`
+  primeiro, mas a ordem não é garantida.
+- **PC do lab funcionando** (depois de `mv .../worlds/SkyDive_quebrado ~/SkyDive_quebrado_backup`; colado pelo usuário):
+  `~/venv-biguagym/bin/python smoke_test.py --env DjiMatriceLand-v0 --steps 200` → `error: null`, `make_s` 5,65 s,
+  `obs_in_space: true`, `reward_nan: 0`, 38 episódios, `sim_procs_after: 0`. Resumo das causas do "Timed out waiting
+  for binary to load" no PC do lab: (1) `Holodeck` cortado (79 MB de 241 MB) na cópia de 2026-10-02 pelo AnyDesk →
+  segfault; (2) depois de reinstalar, a cópia quebrada mantida em `worlds/` era a escolhida pelo biguasim.
+  Próximo: benchmark de treinos em paralelo.
+- **Benchmark no PC do lab** (`benchmark_workers.sh`, BlueROV2Nav-v0, 3000 passos, `learning_starts=500`; início 08:58;
+  colado pelo usuário, sem a linha do N=1):
+
+  | N | Total (passos/s) | Por treino | Pico VRAM | RAM livre mín. | Falhas |
+  |---|---|---|---|---|---|
+  | 2 | 6,51 | 3,65 / 2,87 | 9123 MiB | 18263 MiB | 0 |
+  | 3 | 19,16 | 4,36 / 10,31 / 4,49 | **11797 MiB** (de 12282) | 14470 MiB | 0 |
+  | 4 | 11,82 (3 de 4) | 4,61 / 4,35 / 2,87 | 11810 MiB | 12597 MiB | 1 (w3) |
+
+  O script indicou `WORKERS=3`. Ressalvas: (1) o 10,31 de um worker no N=3 é ponto fora da curva (3000 passos são
+  poucos; a velocidade depende de quantos resets caem na janela); sem ele o N=3 daria ~13 passos/s; (2) no N=3 a VRAM
+  chegou a 96% e no N=4 um treino falhou (provavelmente VRAM). Pedido ao usuário: linha do N=1 e erro do `N4/w3/saida.log`.
+  Proposta: WORKERS=3 com a fila só iniciando um treino se houver ≥ 4 GB de VRAM livre; se a falha não for VRAM, WORKERS=2.
+
+- **Erro do `N4/w3`** (colado pelo usuário): "Timed out waiting for binary to load": o 4º simulador não carregou em
+  30 s com 3 treinos rodando e 11,8 de 12,3 GB de VRAM usados. Limite de capacidade. **Decisão: WORKERS=3.**
+- **`fila_cluster.sh`:** antes de pegar um run, cada worker espera `MIN_VRAM_MB` (4000) livres na sua GPU e
+  `INTERVALO_INICIO` (60 s) desde o último início de qualquer worker (checagem sob `flock`, marca em `$OUT/.ultimo_inicio`).
+  Testado no notebook com a mesma expressão: 1ª chamada libera, 2ª logo depois espera (intervalo), mínimo de 99999 MiB espera.
+- **`runs_250k.csv` reordenado do mais longo ao mais curto** (DjiMatriceLand, BlueROV2Dock, DjiMatriceNav,
+  DjiMatriceTrajectoryFollower, BlueROV2Nav, BlueROV2TrajectoryFollower, BlueBoatNav, BlueBoatTrajectoryFollower).
+  Estimativa: por treino o PC do lab rodou ~2,5× o notebook (4,4 × 1,77 passos/s), então um run de 250k no lab ≈ o de
+  100k no notebook (1,6 h a 24 h). Com 3 workers: ~31 h na ordem antiga e **~27 h** nesta. Episódios mais longos depois
+  da spec `ajuste-ambientes` (menos resets de ~2 s) devem reduzir isso.
+- `LEIAME.md`: comando dos 250k com `WORKERS=3`.

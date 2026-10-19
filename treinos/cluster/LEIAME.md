@@ -133,3 +133,39 @@ O `esperar_e_rodar.sh`:
 - Cancelar antes de começar: `kill -TERM -$(cat treinos/cluster/saida/espera.pgid)`.
 - Para não matar os treinos do TCC por falta de RAM, **não** rode o `verificar_cluster.sh` à mão enquanto o TCC estiver
   rodando.
+
+## 250k passos no PC do laboratório (2026-10-17)
+Tudo no terminal do PC do lab, dentro de `~/biguagym-v0.1.0`, com o TCC parado (o benchmark e a fila usam a GPU inteira).
+
+**1. Parar a espera antiga**, se ainda estiver rodando (ela iniciaria a fila de 100k sozinha):
+```bash
+tail -5 treinos/cluster/saida/espera.log
+kill -TERM -$(cat treinos/cluster/saida/espera.pgid) 2>/dev/null; ps aux | grep -E "esperar_e_rodar|fila_cluster" | grep -v grep
+```
+
+**2. Atualizar o código** (o PC foi instalado pela `spec/recompensas`, que já entrou na `testes-ambientes`):
+```bash
+export GIT_PAGER=cat
+git fetch && git checkout testes-ambientes && git pull && git submodule update --init
+git log --oneline -1
+```
+
+**3. Benchmark: quantos treinos em paralelo** (~1 h; roda 1, 2, 3 e 4 treinos de 3000 passos ao mesmo tempo):
+```bash
+nohup setsid bash treinos/cluster/benchmark_workers.sh > /dev/null 2>&1 < /dev/null &
+tail -f treinos/cluster/benchmark/resultado.txt      # Ctrl+C só sai do tail
+```
+A última linha diz o melhor `WORKERS`. Ele se recusa a rodar se houver treino (python) ou simulador na GPU; para
+cancelar: `kill -TERM -$(cat treinos/cluster/benchmark/benchmark.pgid)`.
+
+**4. Fila de 250k** (os 8 ambientes v0 de `runs_250k.csv`, seed 0; só depois da spec `ajuste-ambientes` e de um
+`git pull`). WORKERS=3 pelo benchmark de 2026-10-17 (a fila só inicia um run com ≥ 4 GB de VRAM livre):
+```bash
+mkdir -p treinos/cluster/saida_250k
+RUNS=$PWD/treinos/cluster/runs_250k.csv OUT=$PWD/treinos/cluster/saida_250k STEPS=250000 EXTRA="eval_freq=250000" \
+WORKERS=3 nohup setsid systemd-inhibit --what=sleep:idle --why="treinos 250k" \
+    bash treinos/cluster/fila_cluster.sh > treinos/cluster/saida_250k/fila.log 2>&1 < /dev/null &
+```
+Acompanhar: `tail treinos/cluster/saida_250k/fila.log` e `cat treinos/cluster/saida_250k/estado.csv`.
+Parar: `kill -TERM -$(cat treinos/cluster/saida_250k/fila.pgid)`.
+`eval_freq=250000`: avaliação só no início e no fim (3 simuladores por treino); com 100000 seriam 5 (vazamento do `close()`).

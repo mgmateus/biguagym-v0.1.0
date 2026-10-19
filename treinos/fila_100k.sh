@@ -17,7 +17,7 @@ set -uo pipefail
 
 REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 PY=${PY:-$HOME/venv-biguagym/bin/python}
-OUT=$REPO/treinos/100k
+OUT=${OUT:-$REPO/treinos/100k}     # ex.: OUT=$PWD/treinos/250k STEPS=250000 EXTRA="eval_freq=250000"
 STEPS=${STEPS:-100000}
 SEEDS=${SEEDS:-1}                    # 1ª etapa: só a seed 0; depois SEEDS=3 retoma pulando o que tem .ok
 TIMEOUT=${TIMEOUT:-172800}          # 48 h por run (DjiMatriceNav: ~1,4 passos/s após learning_starts → ~17 h)
@@ -34,6 +34,7 @@ ENVS=(
     BlueBoatNav-v2
     BlueBoatNav-v1                  # pixels: ainda com o bug do np.resize (Etapa 6); por isso fica por último
 )
+[ -n "${ENVS_LISTA:-}" ] && read -r -a ENVS <<< "$ENVS_LISTA"   # substitui a lista (ids separados por espaço)
 SIM_RE='Binaries/Linux/Holodeck'   # processo do simulador (mesmo padrão de smoke_results/repro_19/monitor.sh)
 
 mkdir -p "$OUT/curves" "$OUT/logs" "$OUT/runs"
