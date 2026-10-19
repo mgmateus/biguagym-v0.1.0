@@ -54,6 +54,7 @@ def make(cls, version=None, bounds=None, target=None, trajectory=None):
     env._dynamics = None
     if version is not None:
         env._reward_version = version
+    env._env_version = 'v0'   # geometria original (spec ajuste-ambientes): estes casos usam o limite de 15°
     env._bounds = np.array(bounds if bounds is not None else [LOC - 10.0, LOC + 10.0], dtype=np.float64)
     if target is not None:
         env._target = np.asarray(target, dtype=np.float64)
