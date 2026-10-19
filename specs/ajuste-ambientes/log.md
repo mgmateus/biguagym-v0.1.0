@@ -62,3 +62,12 @@
   repasses de parâmetro, os 6 `np.radians(15)` trocados por `_tilt_limit()` (15° na v0) e as 3 expressões originais
   (spawn, teto do Hover/Land, teto do Dock), que continuam no ramo v0. Nenhuma lógica original perdida.
 - Verificação: `pytest tests/` → 66 passed (35 da spec `recompensas` + 31 novos). ✅
+
+## 2026-10-19 — T8: fork, ponteiro do submódulo e `diag_termino.py`
+- Submódulo: `git -C biguagym push git@github.com:ttszin/biguagym.git spec/ajuste-ambientes` (5 commits sobre `fcf4358`:
+  `df0296a` T2, `fecdd64` T3, `9b431b6` T4, `9cfaae4` T5, `ff452dc` T6).
+- Ponteiro do submódulo na `spec/ajuste-ambientes` do repositório principal → `ff452dc`.
+- `tools/diag_termino.py`: 3º argumento opcional `env_version` (padrão v1), passado ao `gym.make`; a saída inclui
+  `env_version` e `z_spawn`.
+- Verificação: `git ls-remote https://github.com/ttszin/biguagym.git spec/ajuste-ambientes` → `ff452dcf…` = HEAD do
+  submódulo do worktree. ✅

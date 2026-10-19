@@ -1,5 +1,5 @@
 """Diagnóstico: motivo de término e altura com ação zero e aleatória (um ambiente por processo, < 5k passos).
-Uso: python tools/diag_termino.py <env_id> [passos_por_politica=300]"""
+Uso: python tools/diag_termino.py <env_id> [passos_por_politica=300] [env_version=v1]"""
 import json, os, sys, collections
 import numpy as np, gymnasium as gym
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -7,9 +7,10 @@ sys.path.insert(0, os.path.join(REPO, 'biguagym'))
 import register  # noqa: F401
 
 env_id, N = sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 300
-env = gym.make(env_id, reward_version='v1')
+versao = sys.argv[3] if len(sys.argv) > 3 else 'v1'
+env = gym.make(env_id, reward_version='v1', env_version=versao)
 u = env.unwrapped
-out = {'env': env_id, 'bounds_z': [float(u._bounds[0, 2]), float(u._bounds[1, 2])],
+out = {'env': env_id, 'env_version': versao, 'z_spawn': float(u._location[2]), 'bounds_z': [float(u._bounds[0, 2]), float(u._bounds[1, 2])],
        'acao': [float(env.action_space.low[0]), float(env.action_space.high[0])]}
 for pol in ('zero', 'aleatoria'):
     env.reset(seed=0)

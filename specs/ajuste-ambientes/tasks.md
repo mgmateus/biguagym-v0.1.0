@@ -19,7 +19,7 @@ PC do lab.
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k observacao` → dimensão +3 em Hover/Nav/Land/Dock, igual na Trajectory e no v0; últimos 3 valores = alvo − posição
 - [x] T7 — v0 idêntico ao de hoje: limites, spawn, inclinação, alvo e observação com `env_version="v0"`; suíte inteira (R5)
   - Verificação: `pytest tests/` → todos passam (35 da spec `recompensas` + os novos)
-- [ ] T8 — Commit no submódulo, push da branch `spec/ajuste-ambientes` para o fork `ttszin/biguagym` e ponteiro do submódulo na `spec/ajuste-ambientes` do repositório principal; `tools/diag_termino.py` aceita `env_version`
+- [x] T8 — Commit no submódulo, push da branch `spec/ajuste-ambientes` para o fork `ttszin/biguagym` e ponteiro do submódulo na `spec/ajuste-ambientes` do repositório principal; `tools/diag_termino.py` aceita `env_version`
   - Verificação: `git ls-remote https://github.com/ttszin/biguagym.git spec/ajuste-ambientes` → mesmo hash do submódulo do worktree
 - [ ] T9 — ⏱ Smoke de 200 passos nos 24 ambientes da fila (v0/v1/v2) e `smoke_test.py --list` (R4, R6)
   - Verificação: 54 ids; 24/24 `ok`; dimensões +3 em relação à tabela de 2026-10-11 (exceto Trajectory); frames do BlueROV2 em −1,5 m sem colisão; 0 simuladores no fim
