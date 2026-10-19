@@ -71,3 +71,28 @@
   `env_version` e `z_spawn`.
 - Verificação: `git ls-remote https://github.com/ttszin/biguagym.git spec/ajuste-ambientes` → `ff452dcf…` = HEAD do
   submódulo do worktree. ✅
+
+## 2026-10-19 — T9: smoke dos 24 ambientes da fila (⏱)
+- Laço (um ambiente por vez, sob `systemd-inhibit`, com trava: para se a bateria < 35% fora da tomada):
+  `python smoke_test.py --env <id> --steps 200 --frame-every 100 --out smoke_results/t9_ajuste`, nos 24 ids do
+  `treinos/cluster/runs.csv`, a partir do worktree (submódulo `ff452dc`). Começou na bateria (61%); o notebook foi ligado
+  na tomada durante o laço (18:18). 18:15–18:39.
+- Resultado: **24/24 `status ok`, `exit 0`, 0 simuladores depois de cada um.** `smoke_test.py --list` (T12) → 54 ids.
+
+  | Ambiente | obs antes (2026-10-11) → agora | z do spawn | z do alvo |
+  |---|---|---|---|
+  | BlueBoatNav v0 / v2 | 19 → **22** / 129 → **132** | 0 | **0,0** (antes sorteado em [−1; 0,1]) |
+  | BlueROV2Dock v0 | 19 → **22** | **−1,5** | −10 |
+  | BlueROV2Nav v0 / v2 | 19 → **22** / 119 → **122** | **−1,5** | −2,9 |
+  | DjiMatriceHover v0 | 19 → **22** | 5 | 8,6 (teto agora 10) |
+  | DjiMatriceLand v0 | 19 → **22** | 5 | 0,1 |
+  | DjiMatriceNav v0 / v2 | 19 → **22** / 29 → **32** | 5 | 12,9 |
+  | Trajectory (Dji/BlueBoat/BlueROV2) v0 / v2 | 39 / 49, 149, 139 (iguais) | BlueROV2 **−1,5** | — |
+  | todos os v1 | `rgb:9x84x84` (igual) | | |
+
+- **Limitação encontrada:** os ambientes v1 têm `include_state=False` por padrão (observação só com a imagem), então o
+  alvo relativo só entra neles com `include_state=True`. Por padrão, o agente v1 só "vê" o alvo pelo marcador desenhado
+  na cena (e o bug do `np.resize` dos pixels continua aberto). O R4 previa a v1 "na parte de estado": atendido; registrado.
+- Velocidade: v0 17,9–19,1 passos/s; v1 11–12; v2 com sonar 1,2–3,3 (em 2026-10-11 tinha dado 4,1–4,4; variação não
+  investigada); v2 do drone 18,3–18,6.
+- Drone com ação aleatória ainda termina (4–5 de 5 episódios em 200 passos): medido na T10.
