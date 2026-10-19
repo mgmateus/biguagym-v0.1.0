@@ -1689,3 +1689,5 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   teto do Dock na superfície (−0,1); limite de inclinação 60° no drone e no ROV, 15° no barco; alvo do barco em z = 0;
   alvo − posição (3 valores) na observação de Hover/Nav/Land/Dock e variantes (não na Trajectory); testes sem simulador
   e verificação com `diag_termino.py`, smoke dos 24 e pilotos de 5000 passos.
+- Usuário: "aprovado, pode deixar o ROV em 60° também" → `design.md` `Status: aprovado`; `tasks.md` (T1–T12) em
+  **rascunho**. Pergunta "Posso rodar no pc do lab?": ainda não; os 250k esperam as T1–T12 (correção no código e verificação).
