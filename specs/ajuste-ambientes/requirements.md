@@ -1,4 +1,4 @@
-Status: rascunho
+Status: aprovado
 
 # ajuste-ambientes — Requisitos
 
@@ -110,7 +110,12 @@ encurtamento do episódio. Depois, retreinar os ambientes com 250 000 passos.
   só a seed 0. Episódios mais longos devem reduzir o custo de reset e acelerar um pouco os ambientes que hoje
   terminam em 2–3 passos (o reset custa ~2 s).
 
-## Perguntas em aberto
+## Decisões do usuário (2026-10-19)
+- "aprovado, só aumenta o limite de inclinação do drone": requisitos aprovados; no drone, opção (a) — só aumentar o
+  limite de inclinação, mantendo `cmd_motor_speeds` (sem ação relativa ao hover nem troca de controle).
+- 250k: os 8 v0 da linha de base, seed 0, recompensa v1, no PC do lab com `WORKERS=3` (benchmark de 2026-10-17).
+
+## Perguntas em aberto (respondidas acima)
 - **Drone com `cmd_motor_speeds`:** mesmo com um limite de inclinação maior, motores sorteados ao acaso derrubam o
   quadricóptero em poucos passos (é o esperado para controle direto de motores). Alternativas: (a) só aumentar o
   limite de inclinação (mínimo, mantém a tarefa); (b) ação relativa à rotação de hover (a ação 0 mantém o drone
