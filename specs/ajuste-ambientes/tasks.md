@@ -1,11 +1,11 @@
-Status: rascunho
+Status: aprovado
 
 # ajuste-ambientes — Tarefas
 
 T1–T8 não usam o simulador. T9–T11 usam o simulador do notebook (livre). Depois da T12, os 250k podem começar no
 PC do lab.
 
-- [ ] T1 — Branch `spec/ajuste-ambientes` no repositório principal (já existe, worktree `.claude/worktrees/ajuste-ambientes`) e, no submódulo do worktree, branch `spec/ajuste-ambientes` a partir de `fcf4358`
+- [x] T1 — Branch `spec/ajuste-ambientes` no repositório principal (já existe, worktree `.claude/worktrees/ajuste-ambientes`) e, no submódulo do worktree, branch `spec/ajuste-ambientes` a partir de `fcf4358`
   - Verificação: `git branch --show-current` e `git -C biguagym branch --show-current` → `spec/ajuste-ambientes`; `git -C biguagym rev-parse HEAD` → `fcf4358…`
 - [ ] T2 — Parâmetro `env_version` (`"v1"` padrão, `"v0"`; `ValueError` para outro valor) no `HoverEnv`, repassado nos 12 construtores das subclasses; `recompensas_util.make` fixa `_env_version = "v0"` (R5)
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k versao` → passa; `pytest tests/test_recompensas.py` → 35 passam
