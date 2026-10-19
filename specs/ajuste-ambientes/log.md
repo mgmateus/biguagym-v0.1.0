@@ -117,3 +117,27 @@
   BlueROV2TrajectoryFollower (101; 0%) ✅; DjiMatriceNav 47 > 6 e DjiMatriceLand 35 > 4 ✅.
 - Observação: na v1 os episódios aleatórios ficaram tão longos que 300 passos dão só 2–8 episódios; as medianas são
   menos precisas, mas a diferença para a v0 (2–26) é grande.
+
+## 2026-10-19 — T11: pilotos TD3 de 5000 passos (⏱)
+- Laço, um por vez, na tomada, `systemd-inhibit`, pasta própria por piloto:
+  `python run.py hydra/launcher=basic env=<id> agent=td3 num_train_steps=5000 runs=1 agent.learning_starts=1000
+  eval_freq=1000000 num_eval_episodes=1 curves_path=... logs_path=...` (worktree, submódulo `ff452dc`, padrões v1/v1).
+- Resultado: BlueROV2Dock-v0 `exit 0` em 14 min; DjiMatriceLand-v0 `exit 0` em 20 min; BlueBoatNav-v0 `exit 0` em 7 min;
+  0 tracebacks; 0 simuladores depois de cada um.
+
+  | Ambiente | Trecho | Linha de base: passos/ep (mediana) | Piloto v1: passos/ep (mediana) | Retorno médio do piloto |
+  |---|---|---|---|---|
+  | BlueROV2Dock | 0–1000 (aleatório) | 2 | **86** | −218 |
+  | BlueROV2Dock | 1000–5000 | 3 | **28** | −27 |
+  | DjiMatriceLand | 0–1000 (aleatório) | 4,5 | **39** | −199 |
+  | DjiMatriceLand | 1000–5000 | 5 | **19** | −96 |
+  | BlueBoatNav | 0–1000 / 1000–5000 | 400 / 400 | 400 / 400 | −30 / −211 |
+
+- Critério (episódios do Dock e do Land mais longos que na linha de base no mesmo trecho): ✅.
+- **Observações para os 250k (não bloqueiam a spec):**
+  - BlueBoatNav: logo depois de começar a aprender (passo ~2400) o retorno cai para −231 por episódio, o mesmo valor do
+    "gira parado" da linha de base. Ter o alvo na observação não evitou o colapso: o problema do BlueBoatNav é do TD3
+    (ação travada nos extremos dos motores, ±290), fora do escopo desta spec (hiperparâmetros). Proposta: spec própria.
+  - Dock e Land: com o TD3 aprendendo, os episódios encurtam (86 → 28, 39 → 19) enquanto o retorno melhora. Com o
+    limite de 60°, o termo `stable` chega a −3 por passo acima de 35° e a queda custa −10 uma vez: terminar cedo pode
+    voltar a compensar. 5000 passos não distinguem isso de aprendizado; acompanhar nas curvas dos 250k.
