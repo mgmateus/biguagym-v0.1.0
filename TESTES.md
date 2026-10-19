@@ -1654,4 +1654,17 @@ Pedido do usuário: "como eu coloco para rodar no pc do laboratório? e precisam
   for binary to load" no PC do lab: (1) `Holodeck` cortado (79 MB de 241 MB) na cópia de 2026-10-02 pelo AnyDesk →
   segfault; (2) depois de reinstalar, a cópia quebrada mantida em `worlds/` era a escolhida pelo biguasim.
   Próximo: benchmark de treinos em paralelo.
+- **Benchmark no PC do lab** (`benchmark_workers.sh`, BlueROV2Nav-v0, 3000 passos, `learning_starts=500`; início 08:58;
+  colado pelo usuário, sem a linha do N=1):
+
+  | N | Total (passos/s) | Por treino | Pico VRAM | RAM livre mín. | Falhas |
+  |---|---|---|---|---|---|
+  | 2 | 6,51 | 3,65 / 2,87 | 9123 MiB | 18263 MiB | 0 |
+  | 3 | 19,16 | 4,36 / 10,31 / 4,49 | **11797 MiB** (de 12282) | 14470 MiB | 0 |
+  | 4 | 11,82 (3 de 4) | 4,61 / 4,35 / 2,87 | 11810 MiB | 12597 MiB | 1 (w3) |
+
+  O script indicou `WORKERS=3`. Ressalvas: (1) o 10,31 de um worker no N=3 é ponto fora da curva (3000 passos são
+  poucos; a velocidade depende de quantos resets caem na janela); sem ele o N=3 daria ~13 passos/s; (2) no N=3 a VRAM
+  chegou a 96% e no N=4 um treino falhou (provavelmente VRAM). Pedido ao usuário: linha do N=1 e erro do `N4/w3/saida.log`.
+  Proposta: WORKERS=3 com a fila só iniciando um treino se houver ≥ 4 GB de VRAM livre; se a falha não for VRAM, WORKERS=2.
 
