@@ -17,7 +17,7 @@ PC do lab.
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k alvo_barco` → 1000 sorteios com z = 0 e x, y em ±10 m
 - [x] T6 — Alvo − posição na observação (v1; `_HAS_TARGET`, falso na Trajectory): `_init_spaces` +3 e `_wrap_state` (R4)
   - Verificação: `pytest tests/test_ajuste_ambientes.py -k observacao` → dimensão +3 em Hover/Nav/Land/Dock, igual na Trajectory e no v0; últimos 3 valores = alvo − posição
-- [ ] T7 — v0 idêntico ao de hoje: limites, spawn, inclinação, alvo e observação com `env_version="v0"`; suíte inteira (R5)
+- [x] T7 — v0 idêntico ao de hoje: limites, spawn, inclinação, alvo e observação com `env_version="v0"`; suíte inteira (R5)
   - Verificação: `pytest tests/` → todos passam (35 da spec `recompensas` + os novos)
 - [ ] T8 — Commit no submódulo, push da branch `spec/ajuste-ambientes` para o fork `ttszin/biguagym` e ponteiro do submódulo na `spec/ajuste-ambientes` do repositório principal; `tools/diag_termino.py` aceita `env_version`
   - Verificação: `git ls-remote https://github.com/ttszin/biguagym.git spec/ajuste-ambientes` → mesmo hash do submódulo do worktree

@@ -51,3 +51,14 @@
 - Testes: dimensão 19 → 22 na v1 (Land, Hover, Nav aéreo, Dock, Nav subaquático) e 19 na v0; Trajectory 19 nas duas
   (antes do caminho); `_wrap_state` com posição (101, 98, −2) e alvo (105, 95, −7) → últimos 3 = (4, −3, −5).
 - Verificação: `pytest -k observacao` → 7 passed; `pytest tests/` → 66 passed. ✅
+
+## 2026-10-19 — T7: v0 idêntico ao de hoje
+- Cobertura do caminho `env_version="v0"` nos testes: limites e spawn (`test_limites_v0_iguais_aos_de_hoje`, valores
+  medidos em 2026-10-16), inclinação de 15° (`test_inclinacao_30_graus_...`, parte v0), alvo do barco em todo o volume
+  (`test_alvo_barco_v0_...`), observação com 19 valores (`test_observacao_tem_mais_3_na_v1`, parte v0) e os testes da
+  spec `recompensas` (ambientes falsos com `_env_version="v0"`), inclusive `test_v0_identico_ao_original` contra
+  `tests/dados/recompensa_v0.json`.
+- Revisão do diff do submódulo (`git -C biguagym diff fcf4358`): 92 inserções e 22 remoções; as 22 linhas removidas são
+  repasses de parâmetro, os 6 `np.radians(15)` trocados por `_tilt_limit()` (15° na v0) e as 3 expressões originais
+  (spawn, teto do Hover/Land, teto do Dock), que continuam no ramo v0. Nenhuma lógica original perdida.
+- Verificação: `pytest tests/` → 66 passed (35 da spec `recompensas` + 31 novos). ✅
