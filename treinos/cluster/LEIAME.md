@@ -172,3 +172,6 @@ Parar: `kill -TERM -$(cat treinos/cluster/saida_250k/fila.pgid)`.
 Os 250k usam os padrões novos (`reward_version=v1`, `env_version=v1`). A linha de base de 100k (notebook) é reproduzida
 com `EXTRA="... +env_kwargs.reward_version=v0 +env_kwargs.env_version=v0"`; modelos dela não carregam nos ambientes v1
 (a observação ganhou 3 valores).
+Desde a spec `colapso-blueboat` (2026-10-20) o padrão é `env_version=v2`, que só muda o BlueBoatNav (alvo a 3 m da borda,
+raio de sucesso de 1 m, ação em [−1, 1]). Os 250k iniciados em 2026-10-20 rodaram com a v1: para reproduzi-los, use
+`EXTRA="eval_freq=250000 +env_kwargs.env_version=v1"`. Não faça `git pull` no PC do lab com a fila rodando.

@@ -65,3 +65,16 @@
   desta spec; previsto no design).
 - Verificação: `pytest tests/` → **90 passed** (66 de antes + 24 novos); `grep -c '== "v1"'` → 0. ✅
 - Obs.: as edições foram feitas com a T3 já rodando; o módulo já estava importado (simulador aberto), então a T3 usa o código v1.
+
+### T9 — `tools/diag_politica.py`
+- Argumentos `reward_version` (padrão `v0`) e `env_version` (padrão `v1`, explícito porque o padrão do código virou `v2`):
+  sem eles, mesmo comportamento de antes. Métricas novas: `frac_dois_motores_saturados` (todos os motores a ≥ 95% do limite,
+  na escala do espaço de ação) e `dist_ini_fim_media` (média por episódio da distância ao alvo no início e no fim).
+- Verificação: `py_compile` ok; leitura do diff (o `gym.make` sem argumentos novos = `reward_version='v0', env_version='v1'`). ✅
+
+### T10 — fork, ponteiro e LEIAME
+- `git -C biguagym push git@github.com:ttszin/biguagym.git spec/colapso-blueboat` (o HTTPS pedia credenciais).
+- `git ls-remote https://github.com/ttszin/biguagym.git spec/colapso-blueboat` = `9558348…` = HEAD do submódulo. ✅
+- Ponteiro do submódulo commitado na `spec/colapso-blueboat`.
+- `treinos/cluster/LEIAME.md`: parágrafo sobre o padrão `v2`, como reproduzir os 250k (`+env_kwargs.env_version=v1`) e
+  "não fazer `git pull` no PC do lab com a fila rodando".

@@ -24,9 +24,9 @@ código do checkout ao começar, então o BlueBoatNav (7º da fila) passaria a r
   - Verificação: `pytest tests/test_colapso_blueboat.py -k acao` → `[1, −1]` → `[288,08; −295,75]`, `[0, 0]` → `[0, 0]`, `[0,5; −0,5]` → `[144,04; −147,875]`; espaço de ação do v1 e dos outros ambientes igual ao de hoje
 - [x] T8 — Regressão sem simulador (R5)
   - Verificação: `pytest tests/` → os 66 de hoje + os novos passam; `grep -c '== "v1"' biguagym/core/environments.py` → 0
-- [ ] T9 — `tools/diag_politica.py`: argumentos `reward_version` e `env_version` (padrões de hoje: `v0` e `v1`); métricas `frac_dois_motores_saturados` (os dois motores a ≥ 95% do limite) e `dist_ini_fim_media` (média por episódio) (R3, R4)
+- [x] T9 — `tools/diag_politica.py`: argumentos `reward_version` e `env_version` (padrões de hoje: `v0` e `v1`); métricas `frac_dois_motores_saturados` (os dois motores a ≥ 95% do limite) e `dist_ini_fim_media` (média por episódio) (R3, R4)
   - Verificação: `python -m py_compile tools/diag_politica.py` → sem erro; chamada sem os argumentos novos → mesmo comportamento de hoje (leitura do código)
-- [ ] T10 — Commit no submódulo, push da `spec/colapso-blueboat` para o fork `ttszin/biguagym`, ponteiro do submódulo no repositório principal; linha no `treinos/cluster/LEIAME.md` sobre `+env_kwargs.env_version=v1` para os runs anteriores à spec
+- [x] T10 — Commit no submódulo, push da `spec/colapso-blueboat` para o fork `ttszin/biguagym`, ponteiro do submódulo no repositório principal; linha no `treinos/cluster/LEIAME.md` sobre `+env_kwargs.env_version=v1` para os runs anteriores à spec
   - Verificação: `git ls-remote https://github.com/ttszin/biguagym.git spec/colapso-blueboat` → mesmo hash do submódulo do worktree
 - [ ] T11 — Smoke de 200 passos em BlueBoatNav-v0/v1/v2 e `smoke_test.py --list` (~5 min) (R6)
   - Verificação: 54 ids; 3/3 `ok`; ação `[-1, 1]` no `summary.json`; 0 simuladores no fim
