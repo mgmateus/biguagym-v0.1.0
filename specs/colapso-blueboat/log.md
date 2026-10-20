@@ -9,3 +9,8 @@
 - Ponto novo em relação ao diagnóstico anterior: o BlueBoatTrajectoryFollower aprende com o mesmo TD3 e os mesmos motores,
   então a causa não é só o TD3; os requisitos começam por um diagnóstico da ordem das recompensas (R1, R2).
 - Arquivo criado: `specs/colapso-blueboat/requirements.md` (`Status: rascunho`).
+
+## 2026-10-20 — Requisitos aprovados
+- Usuário: "aprovado, segue suas sugestões nas perguntas em aberto".
+- `requirements.md`: `Status: aprovado`; seção "Perguntas em aberto" trocada por "Decisões (2026-10-20)" (ambiente primeiro,
+  TD3 só se necessário e opcional; sucesso = não colapsar e se aproximar; piloto de 15k; BlueBoatNav continua nos 250k).

@@ -1,4 +1,4 @@
-Status: rascunho
+Status: aprovado
 
 # colapso-blueboat — Requisitos
 
@@ -90,14 +90,11 @@ sem mudar o comportamento dos outros ambientes nem a reprodução da linha de ba
   configuração (R5). Uma mudança padrão no agente tornaria os 250k e a linha de base incomparáveis com os runs novos.
 - A linha de base de 100k continua reproduzível com `+env_kwargs.reward_version=v0 +env_kwargs.env_version=v0`.
 
-## Perguntas em aberto
-- **Onde corrigir, se o diagnóstico apontar para as duas causas** (recompensa e ação saturada)? Minha sugestão:
-  primeiro o ambiente (vale para qualquer agente do artigo); a normalização da ação no TD3 só se o piloto ainda
-  colapsar.
-- **Critério de sucesso:** basta "não colapsar e se aproximar do alvo" (R3, R4), ou o barco tem de **atingir** o
-  alvo em parte dos episódios? Com o raio de 0,15 m isso é muito difícil para um barco; aumentar o raio para a
-  superfície seria uma mudança de ambiente a decidir no design.
-- **Orçamento de simulador:** piloto de 15k passos (~25 min no notebook) é suficiente? O colapso aparece em ~2400
-  passos depois do `learning_starts`.
-- **BlueBoatNav nos 250k atuais:** deixar rodar como está (registro do "antes") ou tirar da fila? Sugestão: deixar
-  rodar. É o 7º da fila e não atrapalha os outros.
+## Decisões (2026-10-20)
+Requisitos aprovados pelo usuário em 2026-10-20 ("aprovado, segue suas sugestões nas perguntas em aberto"):
+- **Onde corrigir:** primeiro no ambiente (vale para qualquer agente); normalização da ação no TD3 só se o piloto
+  ainda colapsar, e opcional por configuração (R5).
+- **Critério de sucesso:** não colapsar e se aproximar do alvo (R3, R4); atingir o alvo não é exigido. Aumentar o
+  raio de sucesso da superfície pode ser proposto no design.
+- **Orçamento:** piloto TD3 de 15k passos (~25 min no notebook), com autorização na fase de execução (⏱).
+- **BlueBoatNav nos 250k atuais:** continua na fila do PC do lab, como registro do "antes da correção".
