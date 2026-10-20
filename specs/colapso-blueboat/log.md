@@ -47,3 +47,21 @@
 - Novo `tests/test_colapso_blueboat.py` (4 testes do controlador: alvo à frente, à esquerda → boreste > bombordo, atrás → gira
   sem avançar, limites).
 - Verificação: `py_compile` ok; `pytest tests/test_colapso_blueboat.py` → 4 passed. ✅
+
+### T4–T8 — `env_version="v2"` e testes (submódulo `9558348`)
+- `biguagym/core/environments.py`:
+  - validação aceita `v0`/`v1`/`v2`; padrão `"v2"` nos 13 construtores; as checagens `== "v1"` (spawn subaquático,
+    alvo na observação, alvo do barco na superfície) viraram `!= "v0"`, então a v2 herda toda a geometria da v1;
+  - `_boat_nav_v2()`: v2, domínio superfície e `_HAS_TARGET` (falso na Trajectory) → só o BlueBoatNav (v0/v1/v2 de id);
+  - T5: `TARGET_MARGIN_SURFACE = 3.0`; no `HoverEnv._reset` o alvo do BlueBoatNav v2 é sorteado em ±7 m (x, y) do spawn,
+    com uma única chamada `rng.uniform` (sequência de sorteios dos outros ambientes inalterada);
+  - T6: `SUCCESS_RADIUS = 0.15`, `SUCCESS_RADIUS_SURFACE = 1.0`; `HoverEnv._reward` usa 1 m no BlueBoatNav v2;
+  - T7: `_init_spaces` guarda `_motor_lo`/`_motor_hi` e, no BlueBoatNav v2, `Box(-1, 1, (2,))`; `_to_motor_speeds`
+    (0 → 0, +1 → 288,08, −1 → −295,75, satura fora do Box) chamado no `HoverEnv._step` antes do simulador.
+- `tests/test_colapso_blueboat.py`: +20 testes (versão padrão/inválida; `_boat_nav_v2` só no BlueBoatNav; v2 = v1 em limites,
+  spawn, inclinação, observação e sequência de alvos de drone/ROV; margem do alvo; raio; espaço de ação; conversão; `_step`
+  envia rad/s ao simulador na v2 e a ação crua na v1).
+- `tests/test_ajuste_ambientes.py`: `test_versao_em_todos_os_construtores` passa a esperar o padrão `'v2'` (motivo: padrão novo
+  desta spec; previsto no design).
+- Verificação: `pytest tests/` → **90 passed** (66 de antes + 24 novos); `grep -c '== "v1"'` → 0. ✅
+- Obs.: as edições foram feitas com a T3 já rodando; o módulo já estava importado (simulador aberto), então a T3 usa o código v1.

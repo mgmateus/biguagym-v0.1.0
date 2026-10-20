@@ -21,7 +21,7 @@ def test_versao_em_todos_os_construtores():
     for c in CLASSES:
         p = inspect.signature(c.__init__).parameters
         assert 'env_version' in p, c.__name__
-        assert p['env_version'].default == 'v1', c.__name__
+        assert p['env_version'].default == 'v2', c.__name__   # padrão da spec colapso-blueboat
 
 
 def test_versao_invalida():

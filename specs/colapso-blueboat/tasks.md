@@ -14,15 +14,15 @@ código do checkout ao começar, então o BlueBoatNav (7º da fila) passaria a r
   - Verificação: `python -m py_compile tools/diag_referencia.py` → sem erro; teste sem simulador do controlador (alvo à frente → os dois motores para frente; alvo à esquerda → motor de boreste > bombordo) → passa
 - [ ] T3 — ⏱ (~8 min) Diagnóstico da recompensa de hoje: `python tools/diag_referencia.py BlueBoatNav-v0 6 v1` (R1)
   - Verificação: tabela das 4 políticas no `log.md`; sinal do giro do controlador conferido no 1º episódio; 0 simuladores no fim. Se o controlador não superar parado e girar, registrar e seguir (a T5/T6 atacam isso; a T12 confere)
-- [ ] T4 — `env_version="v2"` (padrão novo): validação aceita `v0`/`v1`/`v2`; as 5 checagens `== "v1"` viram `!= "v0"`; padrão `"v2"` no `HoverEnv` e nos 12 repasses; método `_boat_nav_v2()` (R5)
+- [x] T4 — `env_version="v2"` (padrão novo): validação aceita `v0`/`v1`/`v2`; as 5 checagens `== "v1"` viram `!= "v0"`; padrão `"v2"` no `HoverEnv` e nos 12 repasses; método `_boat_nav_v2()` (R5)
   - Verificação: `pytest tests/test_colapso_blueboat.py -k versao` → `"v3"` dá `ValueError`; v2 = v1 em limites, alvo, espaços e recompensa em Hover/Land/Dock/Nav (drone, ROV) e BlueBoatTrajectory; `_boat_nav_v2()` verdadeiro só no BlueBoatNav v2
-- [ ] T5 — Alvo do BlueBoatNav v2 a ≥ 3 m da borda (`TARGET_MARGIN_SURFACE = 3.0`, `HoverEnv._reset`) (R2)
+- [x] T5 — Alvo do BlueBoatNav v2 a ≥ 3 m da borda (`TARGET_MARGIN_SURFACE = 3.0`, `HoverEnv._reset`) (R2)
   - Verificação: `pytest tests/test_colapso_blueboat.py -k margem` → 1000 sorteios com x, y em ±7 m do spawn e z = 0; v1 continua em ±10 m
-- [ ] T6 — Raio de sucesso de superfície de 1 m no BlueBoatNav v2 (`SUCCESS_RADIUS`, `_on_target` em `HoverEnv._reward`) (R2)
+- [x] T6 — Raio de sucesso de superfície de 1 m no BlueBoatNav v2 (`SUCCESS_RADIUS`, `_on_target` em `HoverEnv._reward`) (R2)
   - Verificação: `pytest tests/test_colapso_blueboat.py -k raio` → a 0,9 m do alvo: sucesso na v2, não na v1; drone/ROV v2 continuam em 0,15 m
-- [ ] T7 — Ação normalizada no BlueBoatNav v2: `action_space = Box(−1, 1, (2,))` em `_init_spaces` e `_to_motor_speeds` no `HoverEnv._step` (0 → 0; ±1 → limites reais) (R3)
+- [x] T7 — Ação normalizada no BlueBoatNav v2: `action_space = Box(−1, 1, (2,))` em `_init_spaces` e `_to_motor_speeds` no `HoverEnv._step` (0 → 0; ±1 → limites reais) (R3)
   - Verificação: `pytest tests/test_colapso_blueboat.py -k acao` → `[1, −1]` → `[288,08; −295,75]`, `[0, 0]` → `[0, 0]`, `[0,5; −0,5]` → `[144,04; −147,875]`; espaço de ação do v1 e dos outros ambientes igual ao de hoje
-- [ ] T8 — Regressão sem simulador (R5)
+- [x] T8 — Regressão sem simulador (R5)
   - Verificação: `pytest tests/` → os 66 de hoje + os novos passam; `grep -c '== "v1"' biguagym/core/environments.py` → 0
 - [ ] T9 — `tools/diag_politica.py`: argumentos `reward_version` e `env_version` (padrões de hoje: `v0` e `v1`); métricas `frac_dois_motores_saturados` (os dois motores a ≥ 95% do limite) e `dist_ini_fim_media` (média por episódio) (R3, R4)
   - Verificação: `python -m py_compile tools/diag_politica.py` → sem erro; chamada sem os argumentos novos → mesmo comportamento de hoje (leitura do código)
