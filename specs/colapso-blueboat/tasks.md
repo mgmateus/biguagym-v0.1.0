@@ -30,7 +30,7 @@ código do checkout ao começar, então o BlueBoatNav (7º da fila) passaria a r
   - Verificação: `git ls-remote https://github.com/ttszin/biguagym.git spec/colapso-blueboat` → mesmo hash do submódulo do worktree
 - [x] T11 — Smoke de 200 passos em BlueBoatNav-v0/v1/v2 e `smoke_test.py --list` (~5 min) (R6)
   - Verificação: 54 ids; 3/3 `ok`; ação `[-1, 1]` no `summary.json`; 0 simuladores no fim
-- [ ] T12 — ⏱ (~8 min) `python tools/diag_referencia.py BlueBoatNav-v0 6 v2` (R2)
+- [x] T12 — ⏱ (~8 min) `python tools/diag_referencia.py BlueBoatNav-v0 6 v2` (R2)
   - Verificação: retorno(controlador) > retorno(parado) e > retorno(girar); 0 simuladores no fim
 - [ ] T13 — ⏱ (~25 min, **pede autorização**) Piloto TD3 de 15k: `python run.py env=BlueBoatNav-v0 agent=td3 num_train_steps=15000 eval_freq=1000000 num_eval_episodes=1 runs=1 agent.learning_starts=1000` (padrão v2) e `python tools/diag_politica.py BlueBoatNav-v0 <actor_last.pt> 600 v1 v2` (R3, R4)
   - Verificação: retorno médio de treino em 5k–15k > em 0–1k; `frac_dois_motores_saturados` < 0,5; distância final média < inicial; comparação com o piloto T11 da `ajuste-ambientes` no `log.md`; 0 simuladores no fim. Se colapsar: parar, atualizar o design (etapa 4) e pedir aprovação

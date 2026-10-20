@@ -106,3 +106,21 @@
   | BlueBoatNav-v2 | ok | 1,33 (sonar, como antes) | 132 | Box(−1, 1, (2,)) | 0 | idem | 0 |
 
 - Verificação: 54 ids; 3/3 `ok`; ação `[-1, 1]`; 0 simuladores. ✅
+
+### T12 — ⏱ diagnóstico com a v2
+- Comando: `python tools/diag_referencia.py BlueBoatNav-v0 6 v2` (notebook, exit 0, 0 simuladores no fim). Mesmas sementes da T3;
+  os alvos mudam porque a faixa de sorteio é ±7 m (distância inicial média 5,61 m, antes 8,02).
+
+  | Política | Retorno médio | Retornos | Término | Dist. inicial → final |
+  |---|---|---|---|---|
+  | controlador | **+12,60** | 7,4 / 19,6 / 4,7 / 10,0 / 16,9 / 17,0 | **6 success** (mediana 186 passos) | 5,61 → 0,99 |
+  | parado | +3,77 | 20,5 / 0 / 2,2 / 0 / 0 / 0 | 6 timeout | 5,61 → 5,62 |
+  | aleatória | −27,49 | −34,8 … −20,2 | 6 timeout | 5,61 → 7,17 |
+  | girar | −237,02 | −214,5 … −243,0 | 6 timeout | 5,61 → 5,57 |
+
+- Critério R2: retorno(controlador) 12,60 > parado 3,77 e > girar −237,02. ✅
+- **Observação (risco para a T13):** no 1º episódio (alvo perto do spawn) parado (+20,5) > controlador (+7,4). Com o sucesso
+  terminando o episódio, o `norm` (exp(−2·d)) deixa de ser acumulado: ficar parado logo fora do raio de 1 m renderia
+  ~0,13/passo × 400 ≈ 50, mais que o bônus de +10. É o mesmo incentivo de "ficar perto sem completar" do Trajectory. Não
+  reprova R2 (média), mas pode aparecer no piloto; se aparecer, candidato na etapa 4: bônus de sucesso proporcional aos passos
+  restantes. Registrado para decisão do usuário antes da T13.
