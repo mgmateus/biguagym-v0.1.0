@@ -26,3 +26,6 @@
   v1 exceto no BlueBoatNav): alvo a ≥ 3 m da borda, raio de sucesso de 1 m na superfície, ação normalizada em [−1, 1];
   piloto TD3 de 15k; TD3 só numa etapa condicional com nova aprovação.
 - Arquivo criado: `specs/colapso-blueboat/design.md` (`Status: rascunho`).
+
+## 2026-10-20 — Design aprovado
+- Usuário: "aprovado, pode seguir para as tarefas". `design.md`: `Status: aprovado`.

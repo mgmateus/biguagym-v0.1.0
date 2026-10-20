@@ -1,8 +1,8 @@
-Status: rascunho
+Status: aprovado
 
 # colapso-blueboat — Design
 
-Requisitos aprovados em 2026-10-20 ("aprovado, segue suas sugestões nas perguntas em aberto"). Correção primeiro no
+Design aprovado em 2026-10-20 ("aprovado, pode seguir para as tarefas"). Requisitos aprovados em 2026-10-20 ("aprovado, segue suas sugestões nas perguntas em aberto"). Correção primeiro no
 ambiente; o TD3 só entra se o piloto ainda colapsar, e de forma opcional.
 
 ## O que o código mostra (leitura feita nesta fase)
