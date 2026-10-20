@@ -32,3 +32,18 @@
 
 ## 2026-10-20 — Fase 3: tarefas (rascunho)
 - `/spec-tarefas colapso-blueboat`: `specs/colapso-blueboat/tasks.md` criado (`Status: rascunho`), T1–T14; T3, T12 e T13 com ⏱ (T13 = piloto de 15k, pede autorização). Aviso: não fazer `git pull` no PC do lab até os 250k terminarem.
+
+## 2026-10-20 — Tarefas aprovadas; execução T1–T12
+- Usuário: "aprovado, pode fazer da T1 à T12". `tasks.md`: `Status: aprovado`.
+
+### T1 — branches
+- `git submodule update --init biguagym` no worktree (`ff452dc`); `git -C biguagym checkout -b spec/colapso-blueboat`.
+- Verificação: as duas branches em `spec/colapso-blueboat`; submódulo em `ff452dc`. ✅
+
+### T2 — `tools/diag_referencia.py`
+- Novo script: 4 políticas (parado, girar = [máx, mín], aleatória, controlador "aponta e acelera"); `u.rng` refeito com a
+  semente `1000 + episódio` antes de cada reset (o `reset(seed=)` não reinicia o rng do alvo), então as 4 veem os mesmos alvos;
+  converte rad/s para [−1, 1] quando o espaço de ação é normalizado (v2). Função `controlador` pura, testável.
+- Novo `tests/test_colapso_blueboat.py` (4 testes do controlador: alvo à frente, à esquerda → boreste > bombordo, atrás → gira
+  sem avançar, limites).
+- Verificação: `py_compile` ok; `pytest tests/test_colapso_blueboat.py` → 4 passed. ✅

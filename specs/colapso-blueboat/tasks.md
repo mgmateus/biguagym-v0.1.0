@@ -1,4 +1,4 @@
-Status: rascunho
+Status: aprovado
 
 # colapso-blueboat — Tarefas
 
@@ -8,9 +8,9 @@ TD3 de 15k (~25 min) e **pede autorização antes de rodar**. Nada aqui usa o PC
 Atenção: depois do merge (T14), **não fazer `git pull` no PC do lab até a fila dos 250k terminar**. Cada run lê o
 código do checkout ao começar, então o BlueBoatNav (7º da fila) passaria a rodar com o padrão novo `v2`.
 
-- [ ] T1 — Branch `spec/colapso-blueboat` no repositório principal (já existe, worktree `.claude/worktrees/colapso-blueboat`); no worktree, `git submodule update --init` (`ff452dc`) e, no submódulo, branch `spec/colapso-blueboat` a partir de `ff452dc`
+- [x] T1 — Branch `spec/colapso-blueboat` no repositório principal (já existe, worktree `.claude/worktrees/colapso-blueboat`); no worktree, `git submodule update --init` (`ff452dc`) e, no submódulo, branch `spec/colapso-blueboat` a partir de `ff452dc`
   - Verificação: `git branch --show-current` e `git -C biguagym branch --show-current` → `spec/colapso-blueboat`; `git -C biguagym rev-parse --short HEAD` → `ff452dc`
-- [ ] T2 — `tools/diag_referencia.py <env_id> [episodios=6] [env_version=v1]` (novo): políticas parado, girar, aleatória e controlador "aponta e acelera"; mesmas sementes de alvo para as 4; saída `REF {json}` com retorno médio, motivos, passos medianos e distância inicial/final média (R1)
+- [x] T2 — `tools/diag_referencia.py <env_id> [episodios=6] [env_version=v1]` (novo): políticas parado, girar, aleatória e controlador "aponta e acelera"; mesmas sementes de alvo para as 4; saída `REF {json}` com retorno médio, motivos, passos medianos e distância inicial/final média (R1)
   - Verificação: `python -m py_compile tools/diag_referencia.py` → sem erro; teste sem simulador do controlador (alvo à frente → os dois motores para frente; alvo à esquerda → motor de boreste > bombordo) → passa
 - [ ] T3 — ⏱ (~8 min) Diagnóstico da recompensa de hoje: `python tools/diag_referencia.py BlueBoatNav-v0 6 v1` (R1)
   - Verificação: tabela das 4 políticas no `log.md`; sinal do giro do controlador conferido no 1º episódio; 0 simuladores no fim. Se o controlador não superar parado e girar, registrar e seguir (a T5/T6 atacam isso; a T12 confere)
