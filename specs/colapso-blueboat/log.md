@@ -29,3 +29,6 @@
 
 ## 2026-10-20 — Design aprovado
 - Usuário: "aprovado, pode seguir para as tarefas". `design.md`: `Status: aprovado`.
+
+## 2026-10-20 — Fase 3: tarefas (rascunho)
+- `/spec-tarefas colapso-blueboat`: `specs/colapso-blueboat/tasks.md` criado (`Status: rascunho`), T1–T14; T3, T12 e T13 com ⏱ (T13 = piloto de 15k, pede autorização). Aviso: não fazer `git pull` no PC do lab até os 250k terminarem.
