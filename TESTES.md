@@ -1722,3 +1722,15 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
 - Resultado: fila iniciada às 04:06:59 (8 runs, GPU 0). w0 DjiMatriceLand-v0 às 04:06:59; w2 BlueROV2Dock-v0 às 04:07:59; w1 esperou VRAM (`MIN_VRAM_MB=4000`) e começou o DjiMatriceNav-v0 às 04:08:59. 3 processos python na GPU (294 MiB cada no `--query-compute-apps`; o Holodeck é processo gráfico e não aparece nessa consulta). `estado.csv` só com cabeçalho (normal: uma linha por run terminado).
 - Observação: o `[1] + done` do zsh logo após o comando é o `setsid` saindo depois de criar o processo novo; a fila continua (`fila_cluster.sh` PIDs 7338/7350 sob `systemd-inhibit` 7337).
 - Estimativa: ~27 h para os 8 runs.
+
+## 2026-10-20 — Spec `colapso-blueboat` (T1–T12)
+- Pedido: "escreve a spec do colapso do BlueBoatNav"; requisitos, design e tarefas aprovados; "aprovado, pode fazer da T1 à T12".
+- Branch `spec/colapso-blueboat` (worktree `.claude/worktrees/colapso-blueboat`), submódulo `9558348` no fork `ttszin/biguagym`.
+- Diagnóstico (`tools/diag_referencia.py`, novo): com a recompensa de hoje (v1) a ordem já é controlador (+55) > parado (+1) >
+  aleatória (−27) > girar (−241): o colapso do TD3 é de aprendizado, não de recompensa; o controlador chega a 0,75 m mas nunca
+  entra no raio de 0,15 m, e sai da área quando o alvo está na borda.
+- Mudança: `env_version="v2"` (padrão novo), igual à v1 exceto no BlueBoatNav: alvo a ≥ 3 m da borda, raio de sucesso de 1 m,
+  ação em [−1, 1] convertida para rad/s no ambiente. Com a v2 o controlador tem 6/6 sucessos (+12,6 > parado +3,8 > girar −237).
+- `tools/diag_politica.py`: argumentos de versão e métricas de saturação/distância. `pytest tests/` → 90 passed. Smoke
+  BlueBoatNav-v0/v1/v2 ok; 54 ids; 0 simuladores sobrando em todos os testes.
+- Pendente: T13 (piloto TD3 de 15k, ~25 min, pede autorização) e T14 (critérios e merge). Detalhes em `specs/colapso-blueboat/log.md`.
