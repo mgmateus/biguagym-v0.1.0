@@ -78,3 +78,31 @@
 - Ponteiro do submódulo commitado na `spec/colapso-blueboat`.
 - `treinos/cluster/LEIAME.md`: parágrafo sobre o padrão `v2`, como reproduzir os 250k (`+env_kwargs.env_version=v1`) e
   "não fazer `git pull` no PC do lab com a fila rodando".
+
+### T3 — ⏱ diagnóstico com a recompensa de hoje (v1)
+- Comando: `python tools/diag_referencia.py BlueBoatNav-v0 6 v1` (notebook, ~9 min, exit 0; código v1 já importado antes das
+  edições da T4). Alvos (sementes 1000–1005): (100,4; 102,1), (102,3; 90,3), (97,6; 97,1), (93,8; 95,1), (90,0; 92,6), (91,6; 108,6).
+
+  | Política | Retorno médio | Retornos | Término | Dist. inicial → final (média) |
+  |---|---|---|---|---|
+  | controlador | **+54,96** | 85,7 / 50,3 / 79,9 / 65,5 / 0,6 / 47,7 | 5 timeout, 1 out_of_bounds | 8,02 → **0,75** |
+  | parado | +0,99 | 5,7 / 0 / 0,2 / 0 / 0 / 0 | 6 timeout | 8,02 → 8,02 |
+  | aleatória | −27,45 | −37,0 … −19,6 | 6 timeout | 8,02 → 9,24 |
+  | girar | −240,52 | −233,7 … −243,0 | 6 timeout | 8,02 → 7,97 |
+
+- Leitura: **a ordem das recompensas já está certa na v1** (controlador > parado > aleatória > girar); o colapso do TD3 é
+  de aprendizado, não de recompensa. O controlador chega a ~0,75 m do alvo mas **nunca** entra no raio de 0,15 m (0 sucessos),
+  e o único `out_of_bounds` foi o episódio com o alvo em x = 90,02 (na borda) — os dois pontos que a T5/T6 tratam.
+- Sinal do giro do controlador conferido: chega perto do alvo em 5/6 episódios. 0 simuladores no fim. ✅
+
+### T11 — smoke do BlueBoatNav e lista
+- `python smoke_test.py --list` → **54** ids.
+- `python smoke_test.py --env BlueBoatNav-v{0,1,2} --steps 200 --frame-every 100 --out <scratchpad>/t11` (padrão v2):
+
+  | Ambiente | status | passos/s | obs | ação | NaN/inf | alvo | simuladores depois |
+  |---|---|---|---|---|---|---|---|
+  | BlueBoatNav-v0 | ok | 18,95 | 22 | Box(−1, 1, (2,)) | 0 | (103,8; 99,1; 0) | 0 |
+  | BlueBoatNav-v1 | ok | 12,33 | rgb 9×84×84 | Box(−1, 1, (2,)) | 0 | idem | 0 |
+  | BlueBoatNav-v2 | ok | 1,33 (sonar, como antes) | 132 | Box(−1, 1, (2,)) | 0 | idem | 0 |
+
+- Verificação: 54 ids; 3/3 `ok`; ação `[-1, 1]`; 0 simuladores. ✅
