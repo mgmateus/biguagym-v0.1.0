@@ -1715,3 +1715,10 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   `ff452dc`. Removidas as cópias soltas de `tools/diag_politica.py`/`diag_termino.py` (versões oficiais na branch).
 - `treinos/cluster/LEIAME.md`: os 250k pedem `git pull && git submodule update --init` (submódulo `ff452dc`); como
   reproduzir a linha de base (`reward_version=v0`, `env_version=v0`).
+
+## 2026-10-20 — Início dos 250k no PC do lab
+
+- Comando (PC do lab, `nautec`): `git pull && git submodule update --init` (submódulo `ff452dc`) e a fila do `treinos/cluster/LEIAME.md` com `runs_250k.csv`, `STEPS=250000`, `EXTRA="eval_freq=250000"`, `WORKERS=3`.
+- Resultado: fila iniciada às 04:06:59 (8 runs, GPU 0). w0 DjiMatriceLand-v0 às 04:06:59; w2 BlueROV2Dock-v0 às 04:07:59; w1 esperou VRAM (`MIN_VRAM_MB=4000`) e começou o DjiMatriceNav-v0 às 04:08:59. 3 processos python na GPU (294 MiB cada no `--query-compute-apps`; o Holodeck é processo gráfico e não aparece nessa consulta). `estado.csv` só com cabeçalho (normal: uma linha por run terminado).
+- Observação: o `[1] + done` do zsh logo após o comando é o `setsid` saindo depois de criar o processo novo; a fila continua (`fila_cluster.sh` PIDs 7338/7350 sob `systemd-inhibit` 7337).
+- Estimativa: ~27 h para os 8 runs.
