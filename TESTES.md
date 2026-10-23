@@ -1722,3 +1722,19 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
 - Resultado: fila iniciada às 04:06:59 (8 runs, GPU 0). w0 DjiMatriceLand-v0 às 04:06:59; w2 BlueROV2Dock-v0 às 04:07:59; w1 esperou VRAM (`MIN_VRAM_MB=4000`) e começou o DjiMatriceNav-v0 às 04:08:59. 3 processos python na GPU (294 MiB cada no `--query-compute-apps`; o Holodeck é processo gráfico e não aparece nessa consulta). `estado.csv` só com cabeçalho (normal: uma linha por run terminado).
 - Observação: o `[1] + done` do zsh logo após o comando é o `setsid` saindo depois de criar o processo novo; a fila continua (`fila_cluster.sh` PIDs 7338/7350 sob `systemd-inhibit` 7337).
 - Estimativa: ~27 h para os 8 runs.
+
+## 2026-10-23 — Conferência dos 250k no PC do lab
+
+- Comando (PC do lab): `pgrep -af "fila_cluster|run.py"`, `column -s, -t < treinos/cluster/saida_250k/estado.csv`, `tail -5 treinos/cluster/saida_250k/fila.log`, contagem de processos do simulador.
+- Resultado: nenhuma fila ou `run.py` vivo; 0 simuladores. 6/8 runs no `estado.csv`, todos `exit=0`, `sims_ao_fim=0`:
+
+  | Ambiente | Início | Fim | min |
+  |---|---|---|---|
+  | BlueROV2Dock-v0 | 20/10 04:07 | 09:12 | 304 |
+  | DjiMatriceLand-v0 | 20/10 04:06 | 09:44 | 337 |
+  | DjiMatriceNav-v0 | 20/10 04:08 | 12:50 | 521 |
+  | BlueROV2Nav-v0 | 20/10 09:44 | 18:04 | 500 |
+  | BlueROV2TrajectoryFollower-v0 | 20/10 12:50 | 18:44 | 354 |
+  | BlueBoatTrajectoryFollower-v0 | 20/10 18:44 | 22:34 | 229 |
+
+- Problema: **DjiMatriceTrajectoryFollower-v0** (w2, começou ~09:12) e **BlueBoatNav-v0** (w0, começou 18:04:55) não têm linha no `estado.csv` nem "fim" no `fila.log`, e não estão mais rodando. O `timeout` (120 h) não explica. Hipóteses: reinício/logout da máquina ou OOM depois das 22:34 de 20/10. Diagnóstico pedido ao usuário (uptime/last, OOM no journal, fim dos logs dos dois runs, curvas parciais).
