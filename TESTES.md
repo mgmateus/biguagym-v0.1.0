@@ -1748,3 +1748,12 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   - DjiMatriceTrajectoryFollower-v0: 23/10 10:53 → 20:32 (579 min).
 - `fila.log`: "fila concluída" às 20:34:29; `runs/*/.ok` = 8; 0 `run.py` e 0 simuladores vivos às 21:22.
 - Próximo: copiar `saida_250k` (curves/logs) para o notebook e analisar as curvas.
+
+## 2026-10-23 — Script de curvas de aprendizado
+
+- Arquivo novo: `tools/curvas_aprendizado.py` (análise, não muda ambiente/agente). Motivo: mostrar que as tarefas são
+  aprendíveis comparando a recompensa por episódio da fase aleatória do TD3 (`learning_starts=25000`) com o fim do treino,
+  em blocos de 5k passos, mais o tamanho dos episódios e as avaliações do `eval.log`. As curvas não têm coluna de sucesso.
+- `--exportar blocos.csv` gera um resumo pequeno (~10 KB) para trazer do PC do lab sem copiar as curvas inteiras.
+- Teste: `python tools/curvas_aprendizado.py treinos/100k --png ...` reproduz a tabela dos 100k (2026-10-11).
+- Pendente: dados dos 250k (o notebook bloqueou a tela às 21:28 e o AnyDesk ficou inacessível).
