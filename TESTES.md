@@ -1757,3 +1757,29 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
 - `--exportar blocos.csv` gera um resumo pequeno (~10 KB) para trazer do PC do lab sem copiar as curvas inteiras.
 - Teste: `python tools/curvas_aprendizado.py treinos/100k --png ...` reproduz a tabela dos 100k (2026-10-11).
 - Pendente: dados dos 250k (o notebook bloqueou a tela às 21:28 e o AnyDesk ficou inacessível).
+
+## 2026-10-23 — Curvas de aprendizado dos 250k (TD3, seed 0, recompensa v1, env v1)
+
+- Dados: resumo por blocos de 5k gerado no PC do lab (mesmo cálculo de `tools/curvas_aprendizado.py --exportar`,
+  digitado pelo AnyDesk) e trazido pela área de transferência (25 136 bytes, 417 linhas, conferido com `wc`).
+  Salvo em `treinos/cluster/saida_250k/blocos.csv`; figura `treinos/cluster/saida_250k/curvas_250k.png`.
+- Comando: `python tools/curvas_aprendizado.py --blocos treinos/cluster/saida_250k/blocos.csv --png ...`
+
+| Ambiente | R aleatória (0–25k) | R final (225–250k) | Passos/ep (aleat. → final) | Eval 0 → 250k |
+|---|---|---|---|---|
+| BlueROV2Nav | −194 | −18,8 | 124 → 28 | −46,8 → −18,8 |
+| DjiMatriceLand | −196 | −64,9 | 40 → 75 | −34,7 → −48,7 |
+| BlueROV2TrajectoryFollower | −121 | −31,2 | 127 → 80 | 25,5 → −30,8 |
+| DjiMatriceNav | −103 | −16,9 | 50 → 27 | −38,9 → −16,4 |
+| DjiMatriceTrajectoryFollower | −60,9 | −10,3 | 49 → 22 | −14,7 → −10,0 |
+| BlueBoatNav | −26,5 | −23,7 | 400 → 59 | −215 → −23,4 |
+| BlueROV2Dock | −211 | −341 | 123 → 129 | −299 → −337 |
+| BlueBoatTrajectoryFollower | 56,4 | −155 | 507 → 590 | −175 → −184 |
+
+- Leitura: em 5/8 a recompensa de treino sobe muito acima da fase aleatória logo após os 25k e fica plana; mas a faixa
+  p25–p75 quase some e o tamanho do episódio fica constante (27, 22, 28, 80, 75 passos), o que sugere política
+  convergida para um comportamento fixo (mesmo fim em todo episódio), não necessariamente dirigida ao alvo.
+  Dock: bom entre 30k e 50k (−25, 28 passos) e depois cai para −340. BlueBoatTrajectory: pior que o aleatório.
+  BlueBoatNav (v1): parou de girar (eval −215 → −23), mas a recompensa de treino fica no nível do aleatório.
+- Limitação: as curvas não registram sucesso nem motivo de término. Próximo passo proposto: `diag_politica.py` com o
+  `actor_last` de cada run no PC do lab (motivo de término, distância final), antes de afirmar aprendizado no artigo.
