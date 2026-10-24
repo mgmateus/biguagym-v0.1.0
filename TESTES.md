@@ -1783,3 +1783,16 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   BlueBoatNav (v1): parou de girar (eval −215 → −23), mas a recompensa de treino fica no nível do aleatório.
 - Limitação: as curvas não registram sucesso nem motivo de término. Próximo passo proposto: `diag_politica.py` com o
   `actor_last` de cada run no PC do lab (motivo de término, distância final), antes de afirmar aprendizado no artigo.
+
+## 2026-10-23 — Avaliação das políticas dos 250k (preparação)
+
+- Autorizado pelo usuário: `diag_politica` e gráficos úteis. O `diag_politica.py` do lab fixa `reward_version='v0'`
+  (os 250k usaram v1), então foi criado `tools/avaliar_politica.py`: TD3 (`actor_last.pt`) × aleatória nos mesmos
+  alvos (rng do alvo refeito por episódio), 10 episódios cada, com motivo de término, passos, retorno, distância ao alvo
+  (início/mínima/fim), progresso (Trajectory), saturação e variação da ação entre episódios, trajetória XYZ.
+  `tools/graficos_avaliacao.py` gera `tabela.md`, `motivos.png`, `distancias.png` e `trajetorias.png`.
+- Teste no notebook: `avaliar_politica.py DjiMatriceNav-v0 treinos/100k/.../actor_last.pt ... 2 v0 v0` → ok, 0
+  simuladores no fim. O ator dos 100k do DjiMatriceNav dá ação constante `[0, 592, 592, 592]` (desvio 0) e tomba em 3
+  passos (tilt) — confirma a suspeita de comportamento fixo.
+- Commit `bb16fac` enviado ao origin (`testes-ambientes`) para o `git pull` no PC do lab (fila terminada).
+- Pendente: rodar no PC do lab (o notebook bloqueou a tela às 21:39).
