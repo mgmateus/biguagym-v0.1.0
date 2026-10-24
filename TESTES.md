@@ -1738,3 +1738,13 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   | BlueBoatTrajectoryFollower-v0 | 20/10 18:44 | 22:34 | 229 |
 
 - Problema: **DjiMatriceTrajectoryFollower-v0** (w2, começou ~09:12) e **BlueBoatNav-v0** (w0, começou 18:04:55) não têm linha no `estado.csv` nem "fim" no `fila.log`, e não estão mais rodando. O `timeout` (120 h) não explica. Hipóteses: reinício/logout da máquina ou OOM depois das 22:34 de 20/10. Diagnóstico pedido ao usuário (uptime/last, OOM no journal, fim dos logs dos dois runs, curvas parciais).
+
+## 2026-10-23 — Fim dos 250k no PC do lab (8/8)
+
+- Acesso: AnyDesk do notebook para o PC do lab (autorizado pelo usuário), só comandos de leitura em `treinos/cluster/saida_250k`.
+- O PC do lab reiniciou em 2026-10-22 13:09 (`uptime -s`), o que explica a interrupção dos 2 runs. O usuário relançou a fila; ela pulou os 6 `.ok` e refez os 2 do zero (seed 0, mesmos padrões da `aafb960`: BlueBoatNav na v1).
+- Resultado (`estado.csv`): ambos `exit=0`, `sims_ao_fim=0`:
+  - BlueBoatNav-v0: 23/10 10:54 → 16:38 (344 min).
+  - DjiMatriceTrajectoryFollower-v0: 23/10 10:53 → 20:32 (579 min).
+- `fila.log`: "fila concluída" às 20:34:29; `runs/*/.ok` = 8; 0 `run.py` e 0 simuladores vivos às 21:22.
+- Próximo: copiar `saida_250k` (curves/logs) para o notebook e analisar as curvas.
