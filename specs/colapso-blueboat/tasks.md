@@ -32,7 +32,9 @@ código do checkout ao começar, então o BlueBoatNav (7º da fila) passaria a r
   - Verificação: 54 ids; 3/3 `ok`; ação `[-1, 1]` no `summary.json`; 0 simuladores no fim
 - [x] T12 — ⏱ (~8 min) `python tools/diag_referencia.py BlueBoatNav-v0 6 v2` (R2)
   - Verificação: retorno(controlador) > retorno(parado) e > retorno(girar); 0 simuladores no fim
-- [ ] T13 — ⏱ (~25 min, **pede autorização**) Piloto TD3 de 15k: `python run.py env=BlueBoatNav-v0 agent=td3 num_train_steps=15000 eval_freq=1000000 num_eval_episodes=1 runs=1 agent.learning_starts=1000` (padrão v2) e `python tools/diag_politica.py BlueBoatNav-v0 <actor_last.pt> 600 v1 v2` (R3, R4)
+- [ ] T13 — ⏱ (~25 min, **autorizado em 2026-10-25, no PC do lab**) Pilotos TD3 de 15k no BlueBoatNav e no BlueBoatTrajectoryFollower: `python run.py env=BlueBoatNav-v0 agent=td3 num_train_steps=15000 eval_freq=1000000 num_eval_episodes=1 runs=1 agent.learning_starts=1000` (padrão v2) e `python tools/diag_politica.py BlueBoatNav-v0 <actor_last.pt> 600 v1 v2` (R3, R4)
   - Verificação: retorno médio de treino em 5k–15k > em 0–1k; `frac_dois_motores_saturados` < 0,5; distância final média < inicial; comparação com o piloto T11 da `ajuste-ambientes` no `log.md`; 0 simuladores no fim. Se colapsar: parar, atualizar o design (etapa 4) e pedir aprovação
+- [x] T15 — (mudança de design de 2026-10-25) `_boat_acao_v2()`: ação em [−1, 1] também no BlueBoatTrajectoryFollower v2 (`HoverEnv._init_spaces`, `HoverEnv._step`, `TrajectoryEnv._step`)
+  - Verificação: `pytest tests/` → 93 passam (3 novos: `_boat_acao_v2` só na superfície v2; `TrajectoryEnv._step` envia `[288,08; −295,75]` na v2 e a ação crua na v1)
 - [ ] T14 — Verificar todos os critérios de aceitação do requirements.md; merge `spec/colapso-blueboat` → `testes-ambientes` e push
   - Verificação: tabela de critérios preenchida no `log.md`; no checkout principal `pytest tests/` passa e `smoke_test.py --list` → 54 ids

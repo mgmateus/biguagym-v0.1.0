@@ -180,3 +180,31 @@ def test_acao_step_envia_rad_s_ao_simulador(version, esperado):
     env._env = _SimGravaAcao()
     env._step(np.array([1.0, -1.0], dtype=np.float32))
     assert np.allclose(env._env.acoes[0], esperado)
+
+
+# --- T15: ação normalizada também no BlueBoatTrajectoryFollower (v2) -------------------------------------------
+def test_acao_v2_cobre_trajectory_do_barco():
+    traj = object.__new__(E.TrajectoryEnv)
+    traj._env_version, traj._agent_type = 'v2', 'BlueBoat'
+    assert traj._boat_acao_v2() and not traj._boat_nav_v2()     # ação normalizada, sem margem/raio (não tem alvo)
+    traj._env_version = 'v1'
+    assert not traj._boat_acao_v2()
+    traj._env_version, traj._agent_type = 'v2', 'DjiMatrice'
+    assert not traj._boat_acao_v2()
+    assert TA.montar(E.NavEnv, *BARCO, 'v2')._boat_acao_v2()
+
+
+@pytest.mark.parametrize('version,esperado', [('v2', [HI, LO]), ('v1', [1.0, -1.0])])
+def test_acao_trajectory_step_envia_rad_s_ao_simulador(version, esperado):
+    from recompensas_util import TRAJ
+    env = make(E.TrajectoryEnv, version='v1', trajectory=TRAJ)
+    env._env_version, env._agent_type = version, 'BlueBoat'
+    env._motor_lo, env._motor_hi = LO, HI
+    grava = _SimGravaAcao()
+    env._env = grava
+    env._draw = lambda *a, **k: None
+    env._env_constraints = lambda: None
+    env._dynamics = dyn(TRAJ[1])
+    grava.step = lambda action, action_repeat=1: (grava.acoes.append(action), dyn(TRAJ[1]))[1]
+    env._step(np.array([1.0, -1.0], dtype=np.float32))
+    assert np.allclose(grava.acoes[0], esperado)

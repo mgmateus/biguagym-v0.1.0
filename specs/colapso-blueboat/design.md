@@ -151,3 +151,19 @@ Parar, atualizar este design e pedir nova aprovação. Candidatas, nesta ordem:
 | R4 | `diag_politica.py` → média da distância final por episódio < média da inicial |
 | R5 | `pytest tests/` → os 66 de hoje + os novos passam; testes: v2 = v1 (limites, alvo, recompensa, espaços) em Hover/Land/Dock/Nav (drone, ROV) e BlueBoatTrajectory; v0 e v1 do BlueBoatNav iguais aos de hoje |
 | R6 | `python smoke_test.py --list` → 54; ⏱ smoke de 200 passos em BlueBoatNav-v0/v1/v2 → 3/3 `ok`, ação `[-1, 1]` no `summary.json`, 0 simuladores |
+
+## Mudança de 2026-10-25 — ação normalizada também no BlueBoatTrajectoryFollower
+
+Aprovada pelo usuário em 2026-10-25 ("certo, pode fazer isso e colocar para rodar no pc do lab"), depois da proposta
+apresentada na conversa.
+
+- **Motivo:** a avaliação dos 250k (`TESTES.md`, 2026-10-25) mostrou o BlueBoatTrajectoryFollower com o mesmo colapso do
+  BlueBoatNav: ação constante `[288, −296]` (motores opostos no limite), girando parado em 10/10 episódios; recompensa
+  de treino 56 → −155. A causa é a mesma (ação crua em rad/s, ator saturado num canto).
+- **O que muda:** novo `_boat_acao_v2()` = `env_version == "v2"` e domínio de superfície (Nav e Trajectory). Ele passa a
+  controlar o `Box(−1, 1)` em `HoverEnv._init_spaces` e a conversão `_to_motor_speeds` em `HoverEnv._step` e em
+  `TrajectoryEnv._step`. `_boat_nav_v2()` (com `_HAS_TARGET`) continua controlando só a margem do alvo e o raio de 1 m,
+  que não se aplicam ao Trajectory.
+- **Riscos:** muda os resultados do BlueBoatTrajectoryFollower na v2 (os runs antigos se reproduzem com
+  `+env_kwargs.env_version=v1`); drone e ROV continuam iguais à v1 (testes de regressão).
+- **Verificação:** `pytest tests/` (T15, 3 testes novos); piloto de 15k também no BlueBoatTrajectoryFollower (T13).

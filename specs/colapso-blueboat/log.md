@@ -124,3 +124,14 @@
   ~0,13/passo × 400 ≈ 50, mais que o bônus de +10. É o mesmo incentivo de "ficar perto sem completar" do Trajectory. Não
   reprova R2 (média), mas pode aparecer no piloto; se aparecer, candidato na etapa 4: bônus de sucesso proporcional aos passos
   restantes. Registrado para decisão do usuário antes da T13.
+
+## 2026-10-25 — Mudança de design e T15 (ação normalizada no BlueBoatTrajectoryFollower)
+
+- Motivo: avaliação dos 250k (TESTES.md, 2026-10-25): BlueBoatTrajectoryFollower gira parado com `[288, −296]` em 10/10
+  episódios. Proposta na conversa e aprovada pelo usuário ("certo, pode fazer isso e colocar para rodar no pc do lab").
+  `design.md` ganhou a seção "Mudança de 2026-10-25".
+- Código (submódulo): `_boat_acao_v2()` novo; `_init_spaces`, `HoverEnv._step` e `TrajectoryEnv._step` passam a usá-lo;
+  `_boat_nav_v2()` fica só com margem e raio.
+- Testes: `tests/test_colapso_blueboat.py` +3. `pytest tests/` → 93 passed.
+- T13 autorizada no mesmo pedido, para rodar no PC do lab (pilotos dos dois barcos), junto com os seeds 1 e 2 do
+  BlueROV2Dock (v2 = v1 fora do barco).
