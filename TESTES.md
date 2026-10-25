@@ -1822,3 +1822,14 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   aprendizado dirigido ao alvo; as tarefas não ficam demonstradas como aprendíveis por esses runs. Mesmo padrão do
   colapso do BlueBoatNav (spec `colapso-blueboat`): ação crua em rad/s + ator saturado num canto.
 - A conferir: no BlueROV2Dock, `_bounds` em z aparece como [−0,1, −10] (mínimo > máximo).
+
+## 2026-10-25 — Figura de recompensa dos 250k (para o artigo)
+
+- Pedido do usuário: só mostrar que a recompensa média sobe no treino (não é preciso aprender a tarefa). A taxa de
+  sucesso não é gravada no treino e foi 0% na avaliação, então a métrica é a recompensa média por episódio.
+- Arquivo novo: `tools/figura_recompensa.py` (lê `blocos.csv`; um painel por ambiente; média e p25–p75 por bloco de 5k;
+  faixa cinza = 25k passos de ações aleatórias; tracejado = média da fase aleatória).
+- Saída: `treinos/cluster/saida_250k/recompensa_250k.png` e `.pdf`.
+- Sobem: BlueROV2Nav (−194 → −19), DjiMatriceLand (−196 → −65), BlueROV2Trajectory (−121 → −31), DjiMatriceNav
+  (−103 → −17), DjiMatriceTrajectory (−61 → −10). Não sobem: BlueBoatNav (−27 → −24, igual ao aleatório),
+  BlueROV2Dock (−211 → −341), BlueBoatTrajectory (56 → −155).
