@@ -1734,3 +1734,113 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
 - `tools/diag_politica.py`: argumentos de versão e métricas de saturação/distância. `pytest tests/` → 90 passed. Smoke
   BlueBoatNav-v0/v1/v2 ok; 54 ids; 0 simuladores sobrando em todos os testes.
 - Pendente: T13 (piloto TD3 de 15k, ~25 min, pede autorização) e T14 (critérios e merge). Detalhes em `specs/colapso-blueboat/log.md`.
+## 2026-10-23 — Conferência dos 250k no PC do lab
+
+- Comando (PC do lab): `pgrep -af "fila_cluster|run.py"`, `column -s, -t < treinos/cluster/saida_250k/estado.csv`, `tail -5 treinos/cluster/saida_250k/fila.log`, contagem de processos do simulador.
+- Resultado: nenhuma fila ou `run.py` vivo; 0 simuladores. 6/8 runs no `estado.csv`, todos `exit=0`, `sims_ao_fim=0`:
+
+  | Ambiente | Início | Fim | min |
+  |---|---|---|---|
+  | BlueROV2Dock-v0 | 20/10 04:07 | 09:12 | 304 |
+  | DjiMatriceLand-v0 | 20/10 04:06 | 09:44 | 337 |
+  | DjiMatriceNav-v0 | 20/10 04:08 | 12:50 | 521 |
+  | BlueROV2Nav-v0 | 20/10 09:44 | 18:04 | 500 |
+  | BlueROV2TrajectoryFollower-v0 | 20/10 12:50 | 18:44 | 354 |
+  | BlueBoatTrajectoryFollower-v0 | 20/10 18:44 | 22:34 | 229 |
+
+- Problema: **DjiMatriceTrajectoryFollower-v0** (w2, começou ~09:12) e **BlueBoatNav-v0** (w0, começou 18:04:55) não têm linha no `estado.csv` nem "fim" no `fila.log`, e não estão mais rodando. O `timeout` (120 h) não explica. Hipóteses: reinício/logout da máquina ou OOM depois das 22:34 de 20/10. Diagnóstico pedido ao usuário (uptime/last, OOM no journal, fim dos logs dos dois runs, curvas parciais).
+
+## 2026-10-23 — Fim dos 250k no PC do lab (8/8)
+
+- Acesso: AnyDesk do notebook para o PC do lab (autorizado pelo usuário), só comandos de leitura em `treinos/cluster/saida_250k`.
+- O PC do lab reiniciou em 2026-10-22 13:09 (`uptime -s`), o que explica a interrupção dos 2 runs. O usuário relançou a fila; ela pulou os 6 `.ok` e refez os 2 do zero (seed 0, mesmos padrões da `aafb960`: BlueBoatNav na v1).
+- Resultado (`estado.csv`): ambos `exit=0`, `sims_ao_fim=0`:
+  - BlueBoatNav-v0: 23/10 10:54 → 16:38 (344 min).
+  - DjiMatriceTrajectoryFollower-v0: 23/10 10:53 → 20:32 (579 min).
+- `fila.log`: "fila concluída" às 20:34:29; `runs/*/.ok` = 8; 0 `run.py` e 0 simuladores vivos às 21:22.
+- Próximo: copiar `saida_250k` (curves/logs) para o notebook e analisar as curvas.
+
+## 2026-10-23 — Script de curvas de aprendizado
+
+- Arquivo novo: `tools/curvas_aprendizado.py` (análise, não muda ambiente/agente). Motivo: mostrar que as tarefas são
+  aprendíveis comparando a recompensa por episódio da fase aleatória do TD3 (`learning_starts=25000`) com o fim do treino,
+  em blocos de 5k passos, mais o tamanho dos episódios e as avaliações do `eval.log`. As curvas não têm coluna de sucesso.
+- `--exportar blocos.csv` gera um resumo pequeno (~10 KB) para trazer do PC do lab sem copiar as curvas inteiras.
+- Teste: `python tools/curvas_aprendizado.py treinos/100k --png ...` reproduz a tabela dos 100k (2026-10-11).
+- Pendente: dados dos 250k (o notebook bloqueou a tela às 21:28 e o AnyDesk ficou inacessível).
+
+## 2026-10-23 — Curvas de aprendizado dos 250k (TD3, seed 0, recompensa v1, env v1)
+
+- Dados: resumo por blocos de 5k gerado no PC do lab (mesmo cálculo de `tools/curvas_aprendizado.py --exportar`,
+  digitado pelo AnyDesk) e trazido pela área de transferência (25 136 bytes, 417 linhas, conferido com `wc`).
+  Salvo em `treinos/cluster/saida_250k/blocos.csv`; figura `treinos/cluster/saida_250k/curvas_250k.png`.
+- Comando: `python tools/curvas_aprendizado.py --blocos treinos/cluster/saida_250k/blocos.csv --png ...`
+
+| Ambiente | R aleatória (0–25k) | R final (225–250k) | Passos/ep (aleat. → final) | Eval 0 → 250k |
+|---|---|---|---|---|
+| BlueROV2Nav | −194 | −18,8 | 124 → 28 | −46,8 → −18,8 |
+| DjiMatriceLand | −196 | −64,9 | 40 → 75 | −34,7 → −48,7 |
+| BlueROV2TrajectoryFollower | −121 | −31,2 | 127 → 80 | 25,5 → −30,8 |
+| DjiMatriceNav | −103 | −16,9 | 50 → 27 | −38,9 → −16,4 |
+| DjiMatriceTrajectoryFollower | −60,9 | −10,3 | 49 → 22 | −14,7 → −10,0 |
+| BlueBoatNav | −26,5 | −23,7 | 400 → 59 | −215 → −23,4 |
+| BlueROV2Dock | −211 | −341 | 123 → 129 | −299 → −337 |
+| BlueBoatTrajectoryFollower | 56,4 | −155 | 507 → 590 | −175 → −184 |
+
+- Leitura: em 5/8 a recompensa de treino sobe muito acima da fase aleatória logo após os 25k e fica plana; mas a faixa
+  p25–p75 quase some e o tamanho do episódio fica constante (27, 22, 28, 80, 75 passos), o que sugere política
+  convergida para um comportamento fixo (mesmo fim em todo episódio), não necessariamente dirigida ao alvo.
+  Dock: bom entre 30k e 50k (−25, 28 passos) e depois cai para −340. BlueBoatTrajectory: pior que o aleatório.
+  BlueBoatNav (v1): parou de girar (eval −215 → −23), mas a recompensa de treino fica no nível do aleatório.
+- Limitação: as curvas não registram sucesso nem motivo de término. Próximo passo proposto: `diag_politica.py` com o
+  `actor_last` de cada run no PC do lab (motivo de término, distância final), antes de afirmar aprendizado no artigo.
+
+## 2026-10-23 — Avaliação das políticas dos 250k (preparação)
+
+- Autorizado pelo usuário: `diag_politica` e gráficos úteis. O `diag_politica.py` do lab fixa `reward_version='v0'`
+  (os 250k usaram v1), então foi criado `tools/avaliar_politica.py`: TD3 (`actor_last.pt`) × aleatória nos mesmos
+  alvos (rng do alvo refeito por episódio), 10 episódios cada, com motivo de término, passos, retorno, distância ao alvo
+  (início/mínima/fim), progresso (Trajectory), saturação e variação da ação entre episódios, trajetória XYZ.
+  `tools/graficos_avaliacao.py` gera `tabela.md`, `motivos.png`, `distancias.png` e `trajetorias.png`.
+- Teste no notebook: `avaliar_politica.py DjiMatriceNav-v0 treinos/100k/.../actor_last.pt ... 2 v0 v0` → ok, 0
+  simuladores no fim. O ator dos 100k do DjiMatriceNav dá ação constante `[0, 592, 592, 592]` (desvio 0) e tomba em 3
+  passos (tilt) — confirma a suspeita de comportamento fixo.
+- Commit `bb16fac` enviado ao origin (`testes-ambientes`) para o `git pull` no PC do lab (fila terminada).
+- Pendente: rodar no PC do lab (o notebook bloqueou a tela às 21:39).
+
+## 2026-10-25 — Avaliação das políticas dos 250k (TD3 × aleatória, 10 episódios, mesmos alvos)
+
+- Rodada no PC do lab em 2026-10-23 21:44 (`tools/avaliar_politica.py`, `actor_last.pt`, `reward_version=v1`,
+  `env_version=v1`, 3 em paralelo); 8/8 JSON, 0 simuladores no fim. Trazida pelo AnyDesk (tar.xz + base64 na área de
+  transferência, 19 276 bytes, md5 `4f787535…` conferido). Em `treinos/cluster/saida_250k/aval/` e `aval/graficos/`
+  (`tabela.md`, `motivos.png`, `distancias.png`, `trajetorias.png`).
+- Resultado: **0% de sucesso em todos os ambientes, nas duas políticas.** A ação do TD3 é 100% saturada e idêntica em
+  todos os episódios (variação entre episódios 0,000): a política ignora a observação.
+
+| Ambiente | TD3: término (passos) | Aleatória: término | Por onde o TD3 sai | Ação do TD3 |
+|---|---|---|---|---|
+| BlueBoatNav | out_of_bounds 10/10 (57) | timeout 10/10 | x > 110 (reta) | [288, 288] |
+| BlueBoatTraj | timeout 10/10 (600) | timeout 8, oob 2 | não sai (gira parado) | [288, −296] |
+| BlueROV2Dock | out_of_bounds 10/10 (127) | tilt 6, oob 3, timeout 1 | z (fundo) | constante saturada |
+| BlueROV2Nav | out_of_bounds 10/10 (28) | tilt 6, oob 3, timeout 1 | z > −0,1 (superfície) | constante saturada |
+| BlueROV2Traj | out_of_bounds 10/10 (78) | tilt 7, oob 3 | z (fundo) | constante saturada |
+| DjiMatriceLand | out_of_bounds 10/10 (63) | hard_landing 7, tilt 3 | z > 10 (sobe) | [0, 592, 0, 592] |
+| DjiMatriceNav | out_of_bounds 10/10 (27) | oob 6, tilt 4 | z < 0 (motores desligados, cai) | [0, 0, 0, 0] |
+| DjiMatriceTraj | out_of_bounds 10/10 (21) | oob 6, tilt 4 | z > 10 (sobe) | [592 ×4] |
+
+- Leitura: a "melhora" das curvas de treino é o TD3 encontrando o jeito mais barato de encerrar o episódio (sair da área
+  custa a penalidade fixa de −10 da v1, menos que acumular a recompensa negativa de forma). Não há evidência de
+  aprendizado dirigido ao alvo; as tarefas não ficam demonstradas como aprendíveis por esses runs. Mesmo padrão do
+  colapso do BlueBoatNav (spec `colapso-blueboat`): ação crua em rad/s + ator saturado num canto.
+- A conferir: no BlueROV2Dock, `_bounds` em z aparece como [−0,1, −10] (mínimo > máximo).
+
+## 2026-10-25 — Figura de recompensa dos 250k (para o artigo)
+
+- Pedido do usuário: só mostrar que a recompensa média sobe no treino (não é preciso aprender a tarefa). A taxa de
+  sucesso não é gravada no treino e foi 0% na avaliação, então a métrica é a recompensa média por episódio.
+- Arquivo novo: `tools/figura_recompensa.py` (lê `blocos.csv`; um painel por ambiente; média e p25–p75 por bloco de 5k;
+  faixa cinza = 25k passos de ações aleatórias; tracejado = média da fase aleatória).
+- Saída: `treinos/cluster/saida_250k/recompensa_250k.png` e `.pdf`.
+- Sobem: BlueROV2Nav (−194 → −19), DjiMatriceLand (−196 → −65), BlueROV2Trajectory (−121 → −31), DjiMatriceNav
+  (−103 → −17), DjiMatriceTrajectory (−61 → −10). Não sobem: BlueBoatNav (−27 → −24, igual ao aleatório),
+  BlueROV2Dock (−211 → −341), BlueBoatTrajectory (56 → −155).
