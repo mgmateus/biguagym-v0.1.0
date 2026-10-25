@@ -135,3 +135,17 @@
 - Testes: `tests/test_colapso_blueboat.py` +3. `pytest tests/` → 93 passed.
 - T13 autorizada no mesmo pedido, para rodar no PC do lab (pilotos dos dois barcos), junto com os seeds 1 e 2 do
   BlueROV2Dock (v2 = v1 fora do barco).
+
+## 2026-10-25 — T13 no PC do lab (em andamento)
+
+- PC do lab em `spec/colapso-blueboat` (`361dfc9`, submódulo `e73d85d`); a pasta `saida_250k/aval` gerada lá foi
+  renomeada para `aval_lab` antes do checkout (os mesmos JSONs estão versionados).
+- 01:24 — fila do BlueROV2Dock seeds 1 e 2 (`runs_dock_seeds.csv`, `OUT=saida_250k`, `STEPS=250000`,
+  `EXTRA='eval_freq=250000 +env_kwargs.env_version=v1'`, `WORKERS=1`): seed 1 iniciado.
+- 01:24 — 1ª tentativa dos pilotos falhou em 2 s: `OSError: Cannot save file into a non-existent directory:
+  .../piloto_v2/curves` (o script não criava `curves/` e `logs/`; e o `exit=$?` saía sempre 0 porque o `$(date)` o
+  sobrescrevia). Corrigido em `361dfc9`; pasta da tentativa guardada como `piloto_v2_falhou`.
+- 01:27 — pilotos relançados (`bash treinos/cluster/pilotos_v2.sh`, 15k, `learning_starts=1000`, v2). 3 treinos e 6
+  simuladores na GPU; ~12 passos/s.
+- 01:33 — BlueBoatNav passo 4790: episódios de ~57 passos, R −15 a −37 (mesmo tamanho do "sai em linha reta" da v1).
+  BlueBoatTrajectoryFollower passo 3689: episódios de ~59 passos, R ≈ +465 (v1: aleatória +56, TD3 −155).
