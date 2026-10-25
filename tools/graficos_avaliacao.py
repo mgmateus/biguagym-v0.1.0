@@ -55,7 +55,7 @@ def graf_motivos(dados, saida, plt):
     xs, rot = [], []
     for i, d in enumerate(dados):
         for j, pol in enumerate(('td3', 'aleatoria')):
-            x = i * 3 + j; xs.append(x); rot.append(f"{nome(d['env'])}\n{'TD3' if pol == 'td3' else 'aleat.'}")
+            x = i * 3 + j; xs.append(x); rot.append(f"{nome(d['env'])} {'TD3' if pol == 'td3' else 'aleat.'}")
             base = 0
             for m in motivos:
                 v = sum(e['motivo'] == m for e in d[pol]) / len(d[pol])
@@ -66,7 +66,7 @@ def graf_motivos(dados, saida, plt):
         ax.bar(0, 0, color=CORES.get(m, '#bbbbbb'), label=str(m))
     h, l = ax.get_legend_handles_labels(); u = dict(zip(l, h))
     ax.legend(u.values(), u.keys(), fontsize=7, ncol=len(u), loc='upper center', bbox_to_anchor=(.5, 1.15))
-    ax.set_xticks(xs); ax.set_xticklabels(rot, fontsize=6.5); ax.set_ylabel('fração dos episódios')
+    ax.set_xticks(xs); ax.set_xticklabels(rot, fontsize=7, rotation=45, ha='right'); ax.set_ylabel('fração dos episódios')
     ax.set_ylim(0, 1)
     fig.tight_layout(); fig.savefig(os.path.join(saida, 'motivos.png'), dpi=140); plt.close(fig)
 

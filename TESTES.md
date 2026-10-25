@@ -1796,3 +1796,29 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   passos (tilt) — confirma a suspeita de comportamento fixo.
 - Commit `bb16fac` enviado ao origin (`testes-ambientes`) para o `git pull` no PC do lab (fila terminada).
 - Pendente: rodar no PC do lab (o notebook bloqueou a tela às 21:39).
+
+## 2026-10-25 — Avaliação das políticas dos 250k (TD3 × aleatória, 10 episódios, mesmos alvos)
+
+- Rodada no PC do lab em 2026-10-23 21:44 (`tools/avaliar_politica.py`, `actor_last.pt`, `reward_version=v1`,
+  `env_version=v1`, 3 em paralelo); 8/8 JSON, 0 simuladores no fim. Trazida pelo AnyDesk (tar.xz + base64 na área de
+  transferência, 19 276 bytes, md5 `4f787535…` conferido). Em `treinos/cluster/saida_250k/aval/` e `aval/graficos/`
+  (`tabela.md`, `motivos.png`, `distancias.png`, `trajetorias.png`).
+- Resultado: **0% de sucesso em todos os ambientes, nas duas políticas.** A ação do TD3 é 100% saturada e idêntica em
+  todos os episódios (variação entre episódios 0,000): a política ignora a observação.
+
+| Ambiente | TD3: término (passos) | Aleatória: término | Por onde o TD3 sai | Ação do TD3 |
+|---|---|---|---|---|
+| BlueBoatNav | out_of_bounds 10/10 (57) | timeout 10/10 | x > 110 (reta) | [288, 288] |
+| BlueBoatTraj | timeout 10/10 (600) | timeout 8, oob 2 | não sai (gira parado) | [288, −296] |
+| BlueROV2Dock | out_of_bounds 10/10 (127) | tilt 6, oob 3, timeout 1 | z (fundo) | constante saturada |
+| BlueROV2Nav | out_of_bounds 10/10 (28) | tilt 6, oob 3, timeout 1 | z > −0,1 (superfície) | constante saturada |
+| BlueROV2Traj | out_of_bounds 10/10 (78) | tilt 7, oob 3 | z (fundo) | constante saturada |
+| DjiMatriceLand | out_of_bounds 10/10 (63) | hard_landing 7, tilt 3 | z > 10 (sobe) | [0, 592, 0, 592] |
+| DjiMatriceNav | out_of_bounds 10/10 (27) | oob 6, tilt 4 | z < 0 (motores desligados, cai) | [0, 0, 0, 0] |
+| DjiMatriceTraj | out_of_bounds 10/10 (21) | oob 6, tilt 4 | z > 10 (sobe) | [592 ×4] |
+
+- Leitura: a "melhora" das curvas de treino é o TD3 encontrando o jeito mais barato de encerrar o episódio (sair da área
+  custa a penalidade fixa de −10 da v1, menos que acumular a recompensa negativa de forma). Não há evidência de
+  aprendizado dirigido ao alvo; as tarefas não ficam demonstradas como aprendíveis por esses runs. Mesmo padrão do
+  colapso do BlueBoatNav (spec `colapso-blueboat`): ação crua em rad/s + ator saturado num canto.
+- A conferir: no BlueROV2Dock, `_bounds` em z aparece como [−0,1, −10] (mínimo > máximo).
