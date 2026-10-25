@@ -149,3 +149,17 @@
   simuladores na GPU; ~12 passos/s.
 - 01:33 — BlueBoatNav passo 4790: episódios de ~57 passos, R −15 a −37 (mesmo tamanho do "sai em linha reta" da v1).
   BlueBoatTrajectoryFollower passo 3689: episódios de ~59 passos, R ≈ +465 (v1: aleatória +56, TD3 −155).
+
+## 2026-10-25 — Resultado da T13 (pilotos de 15k, v2, PC do lab) e próximos runs
+
+- Pilotos terminaram 01:48/01:50 (`exit=0`); avaliação (TD3 × aleatória, 10 episódios, mesmos alvos, v1/v2):
+  - **BlueBoatTrajectoryFollower: TD3 success 10/10 em ~56 passos, retorno 449,1** (aleatória: timeout 8, oob 2; +25,2).
+    Na v1 (250k) o TD3 girava parado (timeout 10/10, −183,8). A ação normalizada resolveu o colapso.
+  - **BlueBoatNav: TD3 out_of_bounds 10/10 em ~55 passos, retorno −16,1** (aleatória: timeout 9, success 1; −21,8).
+    Ainda sai da área (mesmo padrão "linha reta" da v1); só um pouco melhor que a aleatória.
+- BlueROV2Dock seed 1 (v1): `exit=0`, 525 min (01:24 → 10:09). Recompensa média por bloco de 25k: −185 (aleatória) →
+  −50 e estável em −52 até 250k (seed 0 tinha desabado para −342). Seed 2 começou 10:09.
+- 16:25 — fila dos 250k dos dois barcos na v2 (`runs_250k_v2.csv`, `OUT=saida_250k_v2`, `EXTRA='eval_freq=250000
+  +env_kwargs.env_version=v2'`, `WORKERS=2`): BlueBoatTrajectoryFollower iniciado; BlueBoatNav esperando VRAM.
+- T13: critério parcial — o Trajectory atende (não colapsa, sucesso 10/10); o BlueBoatNav não (sai da área). O 250k dirá
+  se o Nav melhora com mais passos; se não, volta para a etapa de design (ex.: penalidade de saída/bônus de sucesso).

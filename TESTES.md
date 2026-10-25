@@ -1844,3 +1844,12 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
 - Sobem: BlueROV2Nav (−194 → −19), DjiMatriceLand (−196 → −65), BlueROV2Trajectory (−121 → −31), DjiMatriceNav
   (−103 → −17), DjiMatriceTrajectory (−61 → −10). Não sobem: BlueBoatNav (−27 → −24, igual ao aleatório),
   BlueROV2Dock (−211 → −341), BlueBoatTrajectory (56 → −155).
+
+## 2026-10-25 — Pilotos v2 dos barcos, Dock seed 1 e 250k v2 (PC do lab)
+
+- Detalhes no `specs/colapso-blueboat/log.md` (T13, T15). Resumo: com a ação normalizada (v2) o
+  BlueBoatTrajectoryFollower passou de girar parado (v1) para **sucesso 10/10** no piloto de 15k; o BlueBoatNav ainda
+  sai da área 10/10. BlueROV2Dock seed 1 (v1) sobe de −185 para −52 e se mantém. Seed 2 do Dock e os 250k v2 dos dois
+  barcos (`treinos/cluster/saida_250k_v2`) rodando desde 10:09 e 16:25.
+- Notebook: aviso do KDE às 03:59 de que o SSD `/dev/nvme0n1` (SM2P41C8-512GC5) "provavelmente vai falhar em breve";
+  memória livre ~1,3 GB de 15,7 GB (o Claude Code cancelou esperas em segundo plano por falta de memória).
