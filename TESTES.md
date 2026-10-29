@@ -1853,3 +1853,15 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   barcos (`treinos/cluster/saida_250k_v2`) rodando desde 10:09 e 16:25.
 - Notebook: aviso do KDE às 03:59 de que o SSD `/dev/nvme0n1` (SM2P41C8-512GC5) "provavelmente vai falhar em breve";
   memória livre ~1,3 GB de 15,7 GB (o Claude Code cancelou esperas em segundo plano por falta de memória).
+
+## 2026-10-29 — Curvas dos 250k v2 dos barcos e do Dock (3 seeds); figura atualizada
+
+- Trazidas do PC do lab pelo AnyDesk (tar.xz + base64 na área de transferência, 465 976 bytes, md5 `d25ae54b…`
+  conferido): `treinos/cluster/saida_250k_v2/curves/` (barcos, v2) e
+  `treinos/cluster/saida_250k/curves_dock_3seeds/td3-state-BlueROV2Dock_v0.csv` (seeds 0, 1, 2 até 249 999).
+- Recompensa média por bloco de 25k (aleatória → últimos 25k):
+  - BlueBoatTrajectoryFollower v2: 68 → 419 (v1: 56 → −155).
+  - BlueBoatNav v2: −27 → −24 (plano, igual ao aleatório; v1: −27 → −24).
+  - BlueROV2Dock: seed 0 −211 → −342 (desaba); seeds 1 e 2 −185/−218 → −52 (sobem e ficam). Média dos 3: −204 → −78.
+- Figura nova: `treinos/cluster/saida_250k/recompensa_250k_atual.png/.pdf` (`blocos_atual.csv`): 5 ambientes com o seed
+  0 de antes, os 2 barcos na v2 e o Dock com os 3 seeds juntos (sem escolher seed). **7/8 sobem**; só o BlueBoatNav não.
