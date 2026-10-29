@@ -163,3 +163,12 @@
   +env_kwargs.env_version=v2'`, `WORKERS=2`): BlueBoatTrajectoryFollower iniciado; BlueBoatNav esperando VRAM.
 - T13: critério parcial — o Trajectory atende (não colapsa, sucesso 10/10); o BlueBoatNav não (sai da área). O 250k dirá
   se o Nav melhora com mais passos; se não, volta para a etapa de design (ex.: penalidade de saída/bônus de sucesso).
+
+## 2026-10-29 — Conferência no PC do lab
+
+- Nenhum `run.py` nem simulador vivo (18:00). Todos `exit=0`, `sims_ao_fim=0`:
+  - `saida_250k_v2`: BlueBoatTrajectoryFollower-v0 s0 (25/10 16:25 → 22:09, 344 min) e BlueBoatNav-v0 s0
+    (16:26 → 22:22, 356 min); "fila concluída" 22:23.
+  - `saida_250k`: BlueROV2Dock-v0 s2 (25/10 10:09 → 18:52, 523 min); "fila concluída" 18:52.
+- Curvas ainda não trazidas: a sessão do AnyDesk (licença gratuita) caiu durante o resumo; o texto digitado foi para o
+  Chrome, sem efeito visível. Pendente: trazer `saida_250k_v2/curves`, o Dock s2 e gerar a figura.
