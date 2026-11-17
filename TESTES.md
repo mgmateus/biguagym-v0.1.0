@@ -1900,3 +1900,20 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   (`~/biguasim-treino`): rotores 0–3 aéreos [0; 592,4], 4–7 aquáticos [−278,9; 278,9].
 - Arquivo criado: `specs/hydrone-limites-motor/requirements.md` (R1–R5). Pergunta em aberto principal: criar a branch da spec a
   partir da `spec/colapso-blueboat` (o que o lab roda) em vez da `testes-ambientes`.
+
+### 2026-11-17 — Pedido do coorientador: Goto do Hydrone no dique inundado (levantamento, sem código)
+
+- Pedido (repassado pelo usuário): treinar o Hydrone em Goto com velocidades lineares/angulares no dique inundado do Pier-Harbor,
+  com 4 pilares (como a Fig. 6a de arXiv 2206.15211, Depth-CUPRL), depois o dique inteiro; dois trabalhos com a mesma recompensa
+  dos autores: Dranaju (RGB + Depth) e Ricardo (LiDAR + sonar).
+- Levantamento (somente leitura):
+  - paper Depth-CUPRL lido; código dos autores clonado no scratchpad (`dranaju/curl_navigation`): recompensa
+    0,1·Δdistância, −1 colisão (< 0,625 m), +1 chegada (< 0,4 m), ajustes perto da superfície; ação [v, ω, vz] ±0,3;
+    pose de 9 dims; imagens 100×100.
+  - BiguaSim 1.1.0: Hydrone tem `cmd_vel`/`cmd_vel_yaw`/`cmd_pos_yaw` (`dynamics/hauv.py:389`), sensores `RGBDCamera`,
+    `RaycastLidar`, sonares e `spawn_prop`.
+  - biguagym da hydrone-furg sem mudanças desde julho (`a05e14b`); os "ambientes base" são `HydroneNav-v1` (pixels, `NavPixelEnv`)
+    e `-v2` (RangeFinder + ProfilingSonar, `NavRangeEnv`), em `cmd_motor_speeds`, spawn em (100, 100, z), recompensa
+    exp(−2·d) + termos de estabilidade (não a dos papers); pixels ainda com `np.resize` (`base_env.py:142`).
+  - Harness: `src/agents/cuprl.py` (`CurlPriorSacAgent`, RGB-D + pose, PER) já existe.
+- Memória: `hydrone-goto-dique.md`. Nenhum arquivo do código alterado.
