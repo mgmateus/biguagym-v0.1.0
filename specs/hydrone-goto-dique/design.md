@@ -75,7 +75,8 @@ calcula a recompensa, sorteia o alvo novo se chegou, monta a observação; `trun
 - Sinal ou escala da guinada do `hauv` diferente da do `RPYDynamicsSensor` → ⏱ teste com ω constante no lab antes de treinar.
 - Pivô ou escala do cilindro diferente do esperado → conferir nos quadros do smoke; ajustar `base_z`/`altura` no JSON.
 - O nível da água do dique pode não ser z = 0 (o mundo não tem o bloco de superfície; a dinâmica usa 0) → o usuário confere ao
-  explorar; `nivel_agua` fica no JSON, mas a física continua em 0 enquanto o mundo não exportar a superfície.
+  explorar; `nivel_agua` fica no JSON e é passado à física em `agents[robot].dynamics.water_level` (aceito pelo
+  `biguasim.make` da 1.1.0; mudança de 2026-11-17 durante a execução, ver `log.md`).
 - Coordenadas provisórias → o cenário marca `provisorio: true` e o ambiente avisa (`warnings.warn`) ao ser criado.
 - Velocidade máxima de 0,31 m/s com 1000 passos (50 s) → ~15 m por episódio; suficiente para o tanque, talvez não para o dique
   inteiro → revisar no cenário `dique`.

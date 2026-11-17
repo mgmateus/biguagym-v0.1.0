@@ -274,5 +274,20 @@ def test_registro_ids():
         assert spec.kwargs['control_abstraction'] == 'cmd_vel_yaw' and spec.kwargs['cenario'] == cena
 
 
+def test_nivel_da_agua_vai_para_a_dinamica(monkeypatch):
+    import core.environments as E
+    env = object.__new__(GotoEnv)
+    env._cena = dict(carregar_cenario('pilares'), nivel_agua=-0.4)
+    env._cenario = 'pilares'
+    env._agent_type, env._control_abstraction = 'Hydrone', 'cmd_vel_yaw'
+    env._location, env._rotation, env._batch_size = [103.6, 97.4, 2.0], [0, 0, 0], 1
+    env._env_version, env._observation_type = 'v2', 'DynamicsSensor'
+    env_params, _ = env._build_params()
+    robo = env_params['agents'][0]
+    assert robo['dynamics']['water_level'] == -0.4
+    assert any(s['sensor_type'] == 'CollisionSensor' for s in robo['sensors'])
+    assert env._bounds[0, 2] == pytest.approx(-0.4 - 1.1)
+
+
 def test_modulo_sem_simulador():
     assert G.GotoEnv.MAX_PASSOS == 1000 and G.GotoEnv.DIST_COLISAO == 0.625
