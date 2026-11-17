@@ -1952,3 +1952,14 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   - CUPRL com `HydroneGotoPilares-v1` (simulador falso): 60 passos + 1 atualização sem erro.
 - Pendente no lab (⏱, depois da exploração do usuário): `diag_goto.py` (sinal/taxa da guinada), smokes `-v0/-v1/-v2`,
   posição das câmeras e do sonar sem socket, passos/s do sonar e coordenadas reais do dique no `goto_dique.json`.
+
+### 2026-11-17 (cont.) — Goto do Hydrone no PC do lab
+
+- Pedido: "Mande os códigos para o lab e teste os ambientes e veja se está tudo correto". Push das 3 branches (origin e
+  `ttszin/biguagym`); lab em `spec/sensores-goto` (2 CSVs dos 250k não rastreados, idênticos aos versionados, em
+  `~/backup_checkout_goto/`).
+- Ok: pytest 162; `HydroneGotoPilares-v0/-v1/-v2` abrem e rodam 200 passos (12,1 / 9,6 / 11,8 passos/s), sem NaN, 0 órfãos;
+  Hydrone nasce parado no ar e na água com `explorar_mapa.py` (o `WaterCollisionSensor` trava o spawn e saiu do padrão).
+- **Bloqueio:** o BiguaSim 1.1.0 não aplica a aceleração angular de guinada ao Hydrone (dinâmica devolve 3–14 rad/s², sensor
+  mede w = 0, yaw anda 0,17° em 3 s); com o DjiMatrice, no mesmo ambiente, gira 82–89°. Causa no simulador; não alterado.
+  Detalhes em `specs/hydrone-goto-dique/log.md` (branch `spec/sensores-goto`).
