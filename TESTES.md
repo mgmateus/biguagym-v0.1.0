@@ -1853,3 +1853,40 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   `https://10.228.0.40:8000/`), acessível só pela rede da universidade. O teste de conexão foi negado pelo modo automático.
 - Cuidado: a 1.1.0 sugere `packagemanager.prune()` por causa da 1.0.0. Não rodar: apagaria os mundos do TCC.
 - Para voltar à 1.0.0: `git -C ~/biguasim-treino checkout testes-biguagym && git -C ~/biguasim-treino stash pop`.
+
+### 2026-11-17 (cont.) — BiguaSim 1.1.0 no PC do lab
+
+- Pedido do usuário: fazer no PC do lab, que está na rede da universidade. Feito por um terminal novo, aberto com
+  Ctrl+Alt+T (o terminal em `~/drone_controller`, com jobs `aval_qcs`, é de outro trabalho e não foi usado).
+- Levantamento: `~/venv-biguagym` (Python 3.12.15) usa `~/biguasim` (fork ttszin, branch `testes-biguagym`).
+  `~/biguasim_gold` (branch `gold`, v1.0.2, com `agents.py` e `ardubridge/` modificados) é de outro trabalho: **não tocado**.
+  Os mundos da 1.1.0 já existiam desde 2026-07-08 (`Hydrone`, `SkyDive`, `SubHydroneOffshore`, `Linux.zip`).
+- No `~/biguasim` do lab: `git remote add upstream https://github.com/hydrone-furg/biguasim.git`, `git fetch upstream --tags`,
+  `git stash push -m "egg-info antes da 1.1.0" -- src/biguasim.egg-info`, `git checkout -b biguasim-1.1.0 v1.1.0` → `743c6d90`.
+  `biguasim.__version__` = 1.1.0 no venv. Servidor dos autores acessível: `available_packages()` = ['SkyDive'].
+- Smoke `HydroneHover-v0` (200 passos) com o SkyDive de julho → **erro na criação do ambiente** (log em `~/smoke_hydrone_110.log` no lab):
+  ```
+  File ".../biguagym/core/environments.py", line 260, in _init_spaces
+    self._motor_lo = float(dyn_params['rotor_speed_min'])
+  TypeError: only length-1 arrays can be converted to Python scalars
+  ```
+  Causa: na 1.1.0 o Hydrone tem `rotor_speed_min = [0, -278.9]` e `rotor_speed_max = [592.4, 278.9]` (4 motores aéreos e
+  4 aquáticos), e o biguagym supõe um escalar. Aviso também: "this world's DynamicsSensor has no water surface block
+  (packaged before ExportWaterSurface)… Repackage the world" → o SkyDive de julho é anterior à release.
+  Nenhum processo do simulador ficou aberto (`ps` vazio depois do teste).
+- Mundo: o SkyDive 1.1.0 de julho foi movido para `~/biguasim_worlds_backup/SkyDive-1.1.0-20260708` (fora de
+  `~/.local/share/biguasim`, para o `prune()` não o ver) e o SkyDive foi reinstalado do servidor com `biguasim.install("SkyDive")`
+  (log em `~/install_skydive_110.log` no lab).
+- Correção proposta (não aplicada; precisa de spec): em `_init_spaces`, quando `rotor_speed_min/max` forem vetores de 2
+  (aéreo, aquático), montar os limites por motor (4 + 4) para o `Box` e para `_motor_lo/_motor_hi`.
+- Instalação do SkyDive do servidor: rc=0 ("Unpacking worlds… Finished"), `1.1.0/worlds/SkyDive` com data de 2026-11-17.
+- Smoke `DjiMatriceLand-v0` 200 passos na 1.1.0 com o mundo novo (log `~/smoke_land_110.log` no lab): **ok**, 19,95 passos/s,
+  obs 22, ação 4, 0 processos do simulador depois.
+- O SkyDive do servidor também não tem o bloco de superfície da água (mesmo aviso). Sem ele, a 1.1.0 usa
+  `DEFAULT_WATER_LEVEL`: 0,0 em `marine.py` (barco/ROV) e `hauv.py` (Hydrone), ou seja, superfície plana em z = 0 como antes;
+  None no drone (sem água, irrelevante). O aviso é inofensivo para os ambientes atuais.
+- Atenção: com o `~/biguasim` do lab na 1.1.0, os próximos treinos usam a física nova (sem os patches da `testes-biguagym`
+  no BlueBoat); os resultados não são diretamente comparáveis com os 250k. Voltar: `git -C ~/biguasim checkout testes-biguagym
+  && git -C ~/biguasim stash pop`.
+- Notebook: código na 1.1.0, mas sem mundos da 1.1.0 (o servidor só é acessível pela rede da universidade).
+- Pendente: o Hydrone não abre por causa do `float(rotor_speed_min)` no biguagym; corrigir via spec.
