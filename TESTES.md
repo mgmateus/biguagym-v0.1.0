@@ -1833,3 +1833,23 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
 - Sobem: BlueROV2Nav (−194 → −19), DjiMatriceLand (−196 → −65), BlueROV2Trajectory (−121 → −31), DjiMatriceNav
   (−103 → −17), DjiMatriceTrajectory (−61 → −10). Não sobem: BlueBoatNav (−27 → −24, igual ao aleatório),
   BlueROV2Dock (−211 → −341), BlueBoatTrajectory (56 → −155).
+
+## 2026-11-17 — BiguaSim 1.1.0 (com Hydrone) só para os treinos
+
+- Pedido do usuário: puxar a atualização do BiguaSim (Hydrone incluído) só para os treinos, sem mexer no BiguaSim do TCC.
+- Upstream: tag `v1.1.0` de `hydrone-furg/biguasim` (`743c6d90`, 2026-11-16: ArduPilot/ArduHydrone, câmeras IR e
+  normais, sensor de cobertura, superfície da água). Traz `agents.Hydrone` e `dynamics.agents.Hydrone`, que a 1.0.0 não tinha.
+- Feito só em `~/biguasim-treino` (clone editável usado pelo `~/venv-biguagym`):
+  - `git remote add upstream https://github.com/hydrone-furg/biguasim.git` + `git fetch upstream --tags` (só leitura);
+  - `git stash` do `src/biguasim.egg-info/PKG-INFO` modificado ("egg-info antes da 1.1.0");
+  - `git checkout -b biguasim-1.1.0 v1.1.0`. A branch `testes-biguagym` (patches da 1.0.0) foi mantida.
+- Não tocados: `~/biguasim` (`sitl-test`, usado pelo `~/venv-ardupilot`) e os mundos em `~/.local/share/biguasim/1.0.0/`.
+- Sem `pip install`: a `pyproject` da 1.1.0 exige `python == 3.11` e o venv é 3.12. A instalação editável já aponta para
+  `~/biguasim-treino/src`, então `biguasim.__version__` = 1.1.0 no venv (o metadado do pip continua 1.0.0).
+- Resultado: `import biguasim` ok, `Hydrone` presente; `installed_packages()` = [] (pasta `~/.local/share/biguasim/1.1.0/`
+  ainda não existe).
+- Bloqueio: o binário do SkyDive da 1.0.0 não tem o veículo Hydrone (0 ocorrências de "Hydrone", ASCII ou UTF-16; tem
+  DjiMatrice e BlueBoat). O mundo da 1.1.0 vem do servidor interno dos autores (`BS_WORLDS_URL`, padrão
+  `https://10.228.0.40:8000/`), acessível só pela rede da universidade. O teste de conexão foi negado pelo modo automático.
+- Cuidado: a 1.1.0 sugere `packagemanager.prune()` por causa da 1.0.0. Não rodar: apagaria os mundos do TCC.
+- Para voltar à 1.0.0: `git -C ~/biguasim-treino checkout testes-biguagym && git -C ~/biguasim-treino stash pop`.
