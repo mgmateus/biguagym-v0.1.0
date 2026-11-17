@@ -1917,3 +1917,38 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
     exp(−2·d) + termos de estabilidade (não a dos papers); pixels ainda com `np.resize` (`base_env.py:142`).
   - Harness: `src/agents/cuprl.py` (`CurlPriorSacAgent`, RGB-D + pose, PER) já existe.
 - Memória: `hydrone-goto-dique.md`. Nenhum arquivo do código alterado.
+
+### 2026-11-17 — Specs pipeline-pixels, hydrone-goto-dique e sensores-goto (código, sem simulador)
+
+- Pedido do usuário: o artigo do biguagym tem 8 ambientes; faltam os 2 do Hydrone (Goto RGB+Depth do Dranaju e Goto
+  LiDAR+sonar do Ricardo), com a recompensa do Dranaju; `cmd_vel_yaw` recebendo velocidade; imagens 100×100 com o bug
+  corrigido; "aplique o pipeline-pixels, o hydrone-goto-dique e a configuração dos sensores" (tratado como aprovação das
+  três specs; fases escritas e registradas). Depois: "faça um script de exploração com spawn configurável e câmera do veículo
+  salva em PNG. E certifique-se de que o hydrone seja spawnado sem erros".
+- Onde: worktree `.claude/worktrees/goto`, branches em cadeia a partir da `spec/colapso-blueboat` (o código que o lab roda):
+  `spec/pipeline-pixels` → `spec/hydrone-goto-dique` → `spec/sensores-goto` (mesmos nomes no submódulo). Detalhes nos
+  `specs/<nome>/log.md` dessas branches.
+- **pipeline-pixels:** `PixelStack` com `cv2.resize(INTER_AREA)` + `transpose` (antes `np.resize`, ~0,8% da imagem); profundidade
+  em escala fixa de 5 m (Depth-CUPRL); `frame_size` padrão 100×100; `random_crop` sem recorte no tamanho igual (antes
+  `ValueError`); CUPRL `image_size: 100`; encoder do CUPRL calcula a saída convolucional (a tabela fixa só valia para 84×84:
+  com 100×100 o treino quebraria no 1º passo).
+- **hydrone-goto-dique:** `biguagym/core/goto.py` (`GotoEnv`) e `config/goto_dique.json` (cenários `pilares` e `dique`,
+  **provisórios**: tanque de 10 × 10 m em (100, 100)); ação [−1, 1]³ → v ∈ [0,01; 0,31] m/s, ω ±0,3 rad/s, v_z ±0,3 m/s;
+  a guinada é integrada no biguagym e enviada ao `cmd_vel_yaw` como desvio (o BiguaSim não foi alterado); pilares recriados a
+  cada reset; recompensa e término do Dranaju; nível da água do cenário passado à física (`dynamics.water_level`).
+  Ids `HydroneGotoPilares-v0`, `HydroneGotoDique-v0`.
+- **sensores-goto:** `-v1` = RGB + profundidade embarcadas (256×256 → 100×100, 3 quadros, `state` = pose de 9);
+  `-v2` = 20 leituras do LiDAR no ar (160 lasers, ±128,25° a cada 13,5°, 10 m) ou do sonar frontal na água (90° × 15°,
+  20 feixes, 20 m, sem multipath) + 3 ações + 3 do alvo = 26, como no paper do Ricardo (arXiv 2209.06332). Pergunta do usuário:
+  as mensagens do coorientador **não exigem** sensores iguais aos do Ricardo (só "lidar e sonar"); reproduzi o paper dele.
+- **tools/explorar_mapa.py:** BiguaSim direto, Hydrone em `cmd_vel_yaw` parado, `--ponto x,y,z[,yaw]`/`--grade`/`--giro`/
+  `--viewer`, PNG das câmeras da frente, de baixo e em terceira pessoa, `pontos.csv` com posição, colisão, água, obstáculo mais
+  próximo e distância até embaixo; recua para menos sensores se o BiguaSim recusar a configuração; `--dry-run` sem simulador.
+- Verificações (notebook, sem os mundos da 1.1.0):
+  - `~/venv-biguagym/bin/python -m pytest -q tests` → **162 passed** (93 anteriores + 69 novos).
+  - `explorar_mapa.py ... --dry-run` → 11 pontos (ar e água), aceleração 0 com comando zero, 0 erros.
+  - Os 6 ids `HydroneGoto*` criados pelo `gym.make` com o construtor real e um simulador falso: reset e passo ok, observações
+    dentro do espaço, 4 pilares pedidos no cenário `pilares`.
+  - CUPRL com `HydroneGotoPilares-v1` (simulador falso): 60 passos + 1 atualização sem erro.
+- Pendente no lab (⏱, depois da exploração do usuário): `diag_goto.py` (sinal/taxa da guinada), smokes `-v0/-v1/-v2`,
+  posição das câmeras e do sonar sem socket, passos/s do sonar e coordenadas reais do dique no `goto_dique.json`.
