@@ -6,6 +6,8 @@ Uso: python tools/diag_goto.py [env_id] [segundos]
 1. Guinada: ω = +0,3 rad/s por N segundos e depois -0,3 rad/s, com a menor velocidade para a frente e vz = 0.
    Esperado: a guinada muda ~±0,3·N rad em cada fase (sinal e taxa do cmd_vel_yaw com a referência integrada).
 2. Altura: vz = +0,3 m/s por N segundos (esperado: z sobe ~0,3·N m).
+3. Avanço: velocidade máxima para a frente (0,31 m/s) por N segundos (esperado: anda ~0,31·N m na direção do nariz).
+4. Direto: desvio fixo de 20° no cmd_vel_yaw, pela integração angular do GotoEnv (spec rotacao-hydrone).
 Imprime também os motivos de término e os alvos atingidos.
 """
 import math
@@ -21,6 +23,7 @@ sys.path.insert(0, os.path.join(REPO, 'biguagym'))
 def fase(env, acao, passos, rastro=0):
     u = env.unwrapped
     yaw0, z0 = float(u._dynamics[17]), float(u._dynamics[8])
+    xy0 = np.asarray(u._dynamics[6:8], dtype=np.float64).copy()
     yaw_acc, yaw_ant, motivo = 0.0, yaw0, None
     for i in range(passos):
         _, _, term, trunc, info = env.step(np.asarray(acao, dtype=np.float32))
@@ -34,7 +37,9 @@ def fase(env, acao, passos, rastro=0):
         if term or trunc:
             motivo = info['termination_reason']
             break
-    return yaw_acc, float(u._dynamics[8]) - z0, motivo
+    dxy = np.asarray(u._dynamics[6:8], dtype=np.float64) - xy0
+    frente = float(dxy @ [math.cos(yaw0), math.sin(yaw0)])
+    return yaw_acc, float(u._dynamics[8]) - z0, frente, motivo
 
 
 def main():
@@ -49,19 +54,20 @@ def main():
         env.reset()
         for nome, acao, esperado in (('guinada +', [-1, 1, 0], ('yaw', 0.3 * seg)),
                                      ('guinada -', [-1, -1, 0], ('yaw', -0.3 * seg)),
-                                     ('subida', [-1, 0, 1], ('z', 0.3 * seg))):
-            dyaw, dz, motivo = fase(env, acao, passos, rastro=40 if nome == 'guinada +' else 0)
-            medido = dyaw if esperado[0] == 'yaw' else dz
-            print(f"{nome:10s} Δyaw = {dyaw:+.3f} rad  Δz = {dz:+.3f} m  "
+                                     ('subida', [-1, 0, 1], ('z', 0.3 * seg)),
+                                     ('avanço', [1, 0, 0], ('frente', 0.31 * seg))):
+            dyaw, dz, frente, motivo = fase(env, acao, passos, rastro=40 if nome == 'guinada +' else 0)
+            medido = {'yaw': dyaw, 'z': dz, 'frente': frente}[esperado[0]]
+            print(f"{nome:10s} Δyaw = {dyaw:+.3f} rad  Δz = {dz:+.3f} m  frente = {frente:+.3f} m  "
                   f"(esperado {esperado[0]} ≈ {esperado[1]:+.2f}; medido {medido:+.3f}; término: {motivo})", flush=True)
             if motivo is not None:
                 env.reset()
-        # Sem o GotoEnv: desvio fixo de 20° direto no cmd_vel_yaw do BiguaSim (separa simulador e wrapper)
+        # Sem a ação do GotoEnv: desvio fixo de 20° direto no cmd_vel_yaw, pela integração angular (_passo_sim)
         u = env.unwrapped
         env.reset()
         yaw_ant, acc = float(u._dynamics[17]), 0.0
         for i in range(passos):
-            st = u._unwrap_state(u._env.step([0.0, 0.0, 0.0, 20.0], action_repeat=1))
+            st = u._unwrap_state(u._passo_sim([0.0, 0.0, 0.0, 20.0]))
             u._set_dynamics(st)
             yaw = float(u._dynamics[17])
             acc += (yaw - yaw_ant + math.pi) % (2 * math.pi) - math.pi

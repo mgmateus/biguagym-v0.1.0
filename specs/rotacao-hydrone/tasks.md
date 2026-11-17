@@ -10,7 +10,7 @@ Status: aprovado
   - Verificação: `pytest tests/test_rotacao_hydrone.py` → passa
 - [x] T3 — Suíte inteira sem regressão
   - Verificação: `pytest tests` → anteriores + novos passando
-- [ ] T4 — `diag_goto.py` (direto pela integração, fase de avanço) e modo `goto` do `diag_rotacao_hydrone.py`
+- [x] T4 — `diag_goto.py` (direto pela integração, fase de avanço) e modo `goto` do `diag_rotacao_hydrone.py`
   - Verificação: `python -m py_compile tools/diag_goto.py tools/diag_rotacao_hydrone.py` → ok
 - [ ] T5 — ⏱ Lab: `diag_rotacao_hydrone.py goto`, `diag_goto.py` e `testar_goto_lab.sh`; critérios R4 e R5
   - Verificação: tabela de critérios preenchida no log.md

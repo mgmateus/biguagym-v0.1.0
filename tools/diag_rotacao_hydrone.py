@@ -12,6 +12,8 @@ exatamente o que mandamos. Para cada agente o script mede:
 Entre os testes o agente volta à pose inicial (atitude zero, parado).
 
 Uso: python tools/diag_rotacao_hydrone.py [agente ...]   (padrão: Hydrone DjiMatrice)
+     python tools/diag_rotacao_hydrone.py goto            (com a integração angular do GotoEnv, spec rotacao-hydrone:
+                                                           ω medido × previsto e guinada no ar e na água)
 """
 import os
 import sys
@@ -125,6 +127,57 @@ def rodar(agente):
             sim.__on_exit__()
 
 
+def rodar_goto(ticks=60):
+    """cmd_vel_yaw de 20° pela integração do GotoEnv, no ar (z = 2) e na água (z = -0,5).
+
+    A cada tick compara a ω medida com a prevista pela dinâmica (ω anterior + ω̇·dt): a razão perto de 1 confirma o
+    amortecimento do motor usado na compensação (AMORTECIMENTO_ANGULAR_MOTOR).
+    """
+    import gymnasium as gym
+    import register  # noqa: F401
+
+    env = gym.make('HydroneGotoPilares-v0')
+    u = env.unwrapped
+    try:
+        for meio, z in (('ar', 2.0), ('água', -0.5)):
+            env.reset()
+            robo = u._env.agents['robot-id0']
+            robo.set_physics_state([PONTO[0], PONTO[1], z], [0, 0, 0], [0, 0, 0], [0, 0, 0])
+            for _ in range(20):                                   # assenta (no ar, segura a altura; na água, a profundidade)
+                st = u._unwrap_state(u._passo_sim([0.0, 0.0, 0.0, 0.0]))
+            d0 = np.asarray(st['DynamicsSensor'], dtype=float).ravel()
+            u._set_dynamics(st)
+            yaw0, yaw_ant, acc = float(u._dynamics[17]), float(u._dynamics[17]), 0.0
+            w_ant, wd_ant, razoes = d0[12:15].copy(), u._w_dot.copy(), []
+            print(f"== goto, {meio}: z0 = {d0[8]:+.2f}", flush=True)
+            for i in range(ticks):
+                st = u._unwrap_state(u._passo_sim([0.0, 0.0, 0.0, 20.0]))
+                d = np.asarray(st['DynamicsSensor'], dtype=float).ravel()
+                u._set_dynamics(st)
+                previsto = w_ant[2] + wd_ant[2] / u.TICKS_POR_S
+                if abs(previsto) > 1e-3:
+                    razoes.append(d[14] / previsto)
+                yaw = float(u._dynamics[17])
+                acc += (yaw - yaw_ant + np.pi) % (2 * np.pi) - np.pi
+                yaw_ant = yaw
+                if i % 10 == 0 or i == ticks - 1:
+                    print(f"  tick {i:3d}: yaw {np.degrees(yaw):+8.2f}°  w_z medido {d[14]:+.3f} previsto {previsto:+.3f}  "
+                          f"ω̇ {np.round(u._w_dot, 2)}  rpy {np.round(rpy(d), 1)}  pos {np.round(d[6:9], 2)}", flush=True)
+                w_ant, wd_ant = d[12:15].copy(), u._w_dot.copy()
+            r = np.asarray(razoes)
+            print(f"  {meio}: Δyaw = {np.degrees(acc):+.1f}° em {ticks} ticks; w medido/previsto: mediana "
+                  f"{np.median(r) if r.size else float('nan'):.3f} (min {r.min() if r.size else float('nan'):.3f}, "
+                  f"max {r.max() if r.size else float('nan'):.3f})", flush=True)
+    finally:
+        sim = getattr(u, '_env', None)
+        env.close()
+        if sim is not None and hasattr(sim, '__on_exit__'):
+            sim.__on_exit__()
+
+
 if __name__ == '__main__':
-    for agente in sys.argv[1:] or ['Hydrone', 'DjiMatrice']:
-        rodar(agente)
+    if sys.argv[1:] == ['goto']:
+        rodar_goto()
+    else:
+        for agente in sys.argv[1:] or ['Hydrone', 'DjiMatrice']:
+            rodar(agente)
