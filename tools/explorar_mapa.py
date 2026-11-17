@@ -41,7 +41,18 @@ STATE_JSON = os.path.join(REPO, 'biguagym', 'config', 'state.json')
 N_LASERS = 36   # obstáculo mais próximo: 1 laser a cada 10°
 
 
-def sensores(nivel: str, largura: int, altura: int) -> list:
+EXTRAS = {
+    'colisao': {'sensor_type': 'CollisionSensor', 'location': [0, 0, 0], 'rotation': [0, 0, 0]},
+    'agua': {'sensor_type': 'WaterCollisionSensor', 'location': [0, 0, 0], 'rotation': [0, 0, 0]},
+    'distancias': {'sensor_name': 'Distancias', 'sensor_type': 'RangeFinderSensor', 'socket': 'IMUSocket',
+                   'configuration': {'LaserMaxDistance': 30, 'LaserCount': N_LASERS, 'LaserAngle': 0, 'LaserDebug': False}},
+    'fundo': {'sensor_name': 'Fundo', 'sensor_type': 'RangeFinderSensor', 'socket': 'IMUSocket',
+              'configuration': {'LaserMaxDistance': 50, 'LaserCount': 1, 'LaserAngle': -90, 'LaserDebug': False}},
+}
+EXTRAS_PADRAO = 'colisao,distancias,fundo'
+
+
+def sensores(nivel: str, largura: int, altura: int, extras: str = EXTRAS_PADRAO) -> list:
     """Sensores do Hydrone. ``minimo`` = os do state.json do biguagym (já abriram o Hydrone no lab)."""
     base = [
         {'sensor_type': 'DynamicsSensor', 'socket': 'IMUSocket',
@@ -62,14 +73,7 @@ def sensores(nivel: str, largura: int, altura: int) -> list:
     ]
     if nivel == 'sem_medidas':
         return base
-    return base + [
-        {'sensor_type': 'CollisionSensor', 'location': [0, 0, 0], 'rotation': [0, 0, 0]},
-        {'sensor_type': 'WaterCollisionSensor', 'location': [0, 0, 0], 'rotation': [0, 0, 0]},
-        {'sensor_name': 'Distancias', 'sensor_type': 'RangeFinderSensor', 'socket': 'IMUSocket',
-         'configuration': {'LaserMaxDistance': 30, 'LaserCount': N_LASERS, 'LaserAngle': 0, 'LaserDebug': False}},
-        {'sensor_name': 'Fundo', 'sensor_type': 'RangeFinderSensor', 'socket': 'IMUSocket',
-         'configuration': {'LaserMaxDistance': 50, 'LaserCount': 1, 'LaserAngle': -90, 'LaserDebug': False}},
-    ]
+    return base + [EXTRAS[e] for e in extras.split(',') if e]
 
 
 NIVEIS = ('completo', 'sem_medidas', 'minimo')
@@ -90,7 +94,7 @@ def cenario(nivel, ponto, args) -> dict:
         'dynamics': {'batch_size': 1, 'water_level': float(args.agua)},
         'location': [float(v) for v in ponto[:3]],
         'rotation': [0.0, 0.0, float(ponto[3])],
-        'sensors': sensores(nivel, args.largura, args.altura),
+        'sensors': sensores(nivel, args.largura, args.altura, args.extras),
     }]
     return cfg
 
@@ -213,6 +217,9 @@ def main():
     ap.add_argument('--ponto', action='append', default=[], help='x,y,z[,yaw] (repetível)')
     ap.add_argument('--grade', help='x0,x1,y0,y1,passo,z')
     ap.add_argument('--giro', action='store_true', help='4 guinadas por ponto (0, 90, 180, 270° a mais)')
+    ap.add_argument('--extras', default=EXTRAS_PADRAO,
+                    help=f"sensores de medida do nível completo, entre {sorted(EXTRAS)} (padrão: {EXTRAS_PADRAO}; "
+                         "o WaterCollisionSensor ficou fora porque travou o spawn no lab)")
     ap.add_argument('--espera', type=int, default=20, help='ticks para assentar em cada ponto (20 = 1 s)')
     ap.add_argument('--agua', type=float, default=0.0, help='nível da água para a dinâmica (m)')
     ap.add_argument('--largura', type=int, default=640)

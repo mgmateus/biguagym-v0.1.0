@@ -12,6 +12,14 @@ etapa "processos do simulador antes: $(procs)"
 
 etapa "pytest"; $PY -m pytest -q tests 2>&1 | tail -2
 
+for ex in colisao,distancias,fundo agua; do
+    etapa "explorar_mapa: qual sensor trava o spawn? extras=$ex"
+    timeout 300 $PY tools/explorar_mapa.py --ponto 103.6,97.4,2 --extras $ex --espera 5 \
+        --saida explorar_mapa/teste_extras_$ex 2>&1 | grep -E "recusou|criado com|Error|processos" | head -8
+    echo "processos: $(procs)"
+done
+[ "${SO_DIAG:-0}" = 1 ] && { etapa "diag_goto"; timeout 600 $PY tools/diag_goto.py HydroneGotoPilares-v0 5 2>&1 | grep -v -i warn | tail -40; echo "processos: $(procs)"; exit 0; }
+
 etapa "explorar_mapa: spawn do cenário pilares (ar e água), 4 guinadas"
 timeout 600 $PY tools/explorar_mapa.py --ponto 103.6,97.4,2 --ponto 103.6,97.4,-0.5 --giro \
     --saida explorar_mapa/teste_spawn 2>&1 | grep -v -i "warn" | tail -30
