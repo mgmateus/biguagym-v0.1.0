@@ -625,6 +625,8 @@ def random_crop(imgs, output_size):
     n = imgs.shape[0]
     img_size = imgs.shape[-1]
     crop_max = img_size - output_size
+    if crop_max <= 0:  # spec pipeline-pixels: sem recorte (100×100 com image_size 100, como o Depth-CUPRL)
+        return imgs
     imgs = np.transpose(imgs, (0, 2, 3, 1))
     w1 = np.random.randint(0, crop_max, n)
     h1 = np.random.randint(0, crop_max, n)

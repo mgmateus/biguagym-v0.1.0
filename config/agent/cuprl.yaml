@@ -5,7 +5,7 @@ name: cuprl
 family: cuprl
 
 hidden_dim: 1024
-image_size: 84
+image_size: 100  # spec pipeline-pixels: quadros 100×100 sem recorte, como o Depth-CUPRL
 # PER stores RAW frames (rgb uint8 + depth float32) for obs and next_obs, so the
 # buffer is memory-heavy: ~ buffer_size * frame_pixels * (1+1+4) bytes. Keep this
 # modest and scale to available RAM.
