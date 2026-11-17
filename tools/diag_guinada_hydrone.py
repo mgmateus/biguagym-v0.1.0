@@ -4,7 +4,7 @@ No lab, cmd_vel_yaw com desvio fixo de 20° não girou o Hydrone (Δyaw ≈ 0 em
 simulador, devolva ~22 rad/s² de aceleração angular. Este script registra, dentro do simulador, o que a dinâmica
 devolve a cada tick (aceleração linear e angular) e o estado do DynamicsSensor, e testa cmd_pos_yaw com guinada de 90°.
 
-Uso: python tools/diag_guinada_hydrone.py
+Uso: python tools/diag_guinada_hydrone.py [agente ...]   (padrão: Hydrone; ex.: DjiMatrice para comparar)
 """
 import os
 import sys
@@ -15,11 +15,11 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, 'biguagym'))
 
 
-def rodar(abstracao, comando, ticks=60):
+def rodar(abstracao, comando, ticks=60, agente='Hydrone'):
     import gymnasium as gym
     import register  # noqa: F401
 
-    env = gym.make('HydroneGotoPilares-v0', control_abstraction=abstracao)
+    env = gym.make('HydroneGotoPilares-v0', control_abstraction=abstracao, agent_type=agente)
     u = env.unwrapped
     try:
         env.reset()
@@ -33,7 +33,7 @@ def rodar(abstracao, comando, ticks=60):
             return r
 
         modelo.step = gravar
-        print(f"== {abstracao} {comando}", flush=True)
+        print(f"== {agente} {abstracao} {comando}", flush=True)
         for i in range(ticks):
             st = u._unwrap_state(u._env.step(list(comando), action_repeat=1))
             u._set_dynamics(st)
@@ -51,5 +51,7 @@ def rodar(abstracao, comando, ticks=60):
 
 
 if __name__ == '__main__':
-    rodar('cmd_vel_yaw', [0.0, 0.0, 0.0, 20.0])
-    rodar('cmd_pos_yaw', [103.6, 97.4, 2.0, 90.0])
+    agentes = sys.argv[1:] or ['Hydrone']
+    for agente in agentes:
+        rodar('cmd_vel_yaw', [0.0, 0.0, 0.0, 20.0], agente=agente)
+        rodar('cmd_pos_yaw', [103.6, 97.4, 2.0, 90.0], agente=agente)
