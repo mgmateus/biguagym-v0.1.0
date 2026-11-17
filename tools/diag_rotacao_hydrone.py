@@ -5,7 +5,10 @@ exatamente o que mandamos. Para cada agente o script mede:
   A. aceleração angular pura de 1 rad/s² em x, y e z (20 ticks) e linear de 1 m/s² em x, para comparar;
   B. set_physics_state com velocidade angular de 30°/s em z, sem aceleração depois (20 ticks);
   C. set_physics_state com velocidade angular de 30°/s em z reimposta a cada tick (20 ticks);
-  D. teleporte para guinada de 45° (3 ticks).
+  D. teleporte para guinada de 45° (3 ticks);
+  E. aceleração angular em z de 1, 3,35 e 10 rad/s² (20 ticks cada);
+  F. cmd_vel_yaw com desvio de 20° (30 ticks), gravando o que a dinâmica manda, e depois as mesmas acelerações
+     reenviadas em modo accel a partir da pose inicial.
 Entre os testes o agente volta à pose inicial (atitude zero, parado).
 
 Uso: python tools/diag_rotacao_hydrone.py [agente ...]   (padrão: Hydrone DjiMatrice)
@@ -79,6 +82,42 @@ def rodar(agente):
         for _ in range(3):
             d1 = passo(zero)
         linha("D teleporte yaw 45°, 3 ticks", d0, d1)
+
+        for mag in (1.0, 3.35, 10.0):
+            d0 = repor()
+            for _ in range(20):
+                d1 = passo([0, 0, 0, 0, 0, mag])
+            linha(f"E ang z {mag} rad/s², 20 ticks", d0, d1)
+
+        modelo = sim._dynamics_dict['robot']
+        saidas = []
+        original = modelo.step
+
+        def gravar(*a, **k):
+            r = original(*a, **k)
+            saidas.append(list(np.asarray(r, dtype=float).ravel()))
+            return r
+
+        def abstracao(nome):
+            modelo.control_abstraction = nome
+            if hasattr(modelo, '_control_abstraction'):
+                modelo._control_abstraction = nome
+
+        d0 = repor()
+        abstracao('cmd_vel_yaw')
+        modelo.step = gravar
+        d1 = d0
+        for _ in range(30):
+            d1 = passo([0, 0, 0, 20])
+        modelo.step = original
+        abstracao('accel')
+        linha("F1 cmd_vel_yaw 20°, 30 ticks", d0, d1)
+        print(f"     acelerações enviadas (ticks 0, 1, 2, 15, 29): "
+              f"{[np.round(saidas[i], 2).tolist() for i in (0, 1, 2, 15, 29)]}", flush=True)
+        d0 = repor()
+        for cmd in saidas:
+            d1 = passo(cmd)
+        linha("F2 as mesmas em accel, 30 ticks", d0, d1)
     finally:
         sim = getattr(u, '_env', None)          # o close() do biguagym só faz del self._env (Etapa 5)
         env.close()
