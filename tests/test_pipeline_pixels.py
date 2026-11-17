@@ -93,3 +93,11 @@ def test_cuprl_image_size_100():
     with open(os.path.join(REPO, 'config', 'agent', 'cuprl.yaml')) as f:
         linhas = [ln for ln in f if ln.startswith('image_size:')]
     assert linhas and linhas[0].split()[1] == '100'
+
+
+@pytest.mark.parametrize('lado,camadas', [(100, 4), (84, 4), (64, 4), (84, 2), (84, 6)])
+def test_encoder_cuprl_aceita_o_tamanho(lado, camadas):
+    import torch
+    from src.agents.cuprl import PixelEncoder
+    enc = PixelEncoder((9, lado, lado), feature_dim=50, num_layers=camadas, num_filters=32, output_logits=False)
+    assert enc(torch.zeros(2, 9, lado, lado)).shape == (2, 50)
