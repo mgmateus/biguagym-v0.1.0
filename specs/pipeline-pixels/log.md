@@ -21,3 +21,9 @@
 - Testes: `tests/test_pipeline_pixels.py` (14). Comando: `~/venv-biguagym/bin/python -m pytest -q tests` →
   **107 passed** (93 anteriores + 14).
 - Pendente: T6 (⏱, simulador no lab), depois da `hydrone-goto-dique`.
+
+## 2026-11-17 — Correção achada na sensores-goto: encoder do CUPRL em 100×100
+- Problema: `PixelEncoder` (`src/agents/cuprl.py`) usava a tabela `OUT_DIM[4] = 35`, válida só para 84×84; com 100×100 a
+  saída convolucional tem 43 de lado e a `nn.Linear` falharia no 1º passo do treino (o Dranaju trocou para 43 à mão no código dele).
+- Correção (R5): `out_dim = (lado − 3)//2 + 1 − 2·(camadas − 1)` (84 → 35, 64 → 25, 100 → 43). As tabelas ficaram sem uso.
+- Teste novo `test_encoder_cuprl_aceita_o_tamanho` (5 casos). `pytest tests` → 112 passed nesta branch.

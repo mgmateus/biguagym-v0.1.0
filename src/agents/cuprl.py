@@ -80,7 +80,9 @@ class PixelEncoder(nn.Module):
         for i in range(num_layers - 1):
             self.convs.append(nn.Conv2d(num_filters, num_filters, 3, stride=1))
 
-        out_dim = OUT_DIM_64[num_layers] if obs_shape[-1] == 64 else OUT_DIM[num_layers]
+        # spec pipeline-pixels: lado da saída convolucional calculado do tamanho da imagem (a tabela OUT_DIM só vale para
+        # 84×84; com 100×100 são 43, não 35). Conv 3×3 com stride 2 e depois stride 1: 84 → 35, 64 → 25, 100 → 43.
+        out_dim = (obs_shape[-1] - 3) // 2 + 1 - 2 * (num_layers - 1)
         self.fc = nn.Linear(num_filters * out_dim * out_dim, self.feature_dim)
         self.ln = nn.LayerNorm(self.feature_dim)
 
