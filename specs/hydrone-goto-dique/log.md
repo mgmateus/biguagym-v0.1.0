@@ -45,3 +45,23 @@
   `python tools/explorar_mapa.py --ponto 100,100,2 --ponto 103.6,97.4,-0.5,90 --grade 90,110,90,110,10,1.5 --dry-run` →
   11 pontos, aceleração 0 com comando zero no ar e na água, 0 erros; tipos de sensor registrados na 1.1.0 e `socket` opcional.
 - A confirmar no lab: o spawn de verdade, a orientação das câmeras do corpo e o sentido dos lasers.
+
+## 2026-11-17 — T7 no PC do lab (autorizado: "Mande os códigos para o lab e teste os ambientes")
+- Push: `spec/{pipeline-pixels,hydrone-goto-dique,sensores-goto}` no origin e no `ttszin/biguagym` (o remote HTTPS do
+  submódulo não tem credencial; push pelo SSH). Lab: `~/biguagym-v0.1.0` passou da `spec/colapso-blueboat` para a
+  `spec/sensores-goto` (que a contém); dois CSVs dos 250k não rastreados no lab bloqueavam o checkout: movidos para
+  `~/backup_checkout_goto/` e idênticos (`cmp`) aos versionados.
+- `tools/testar_goto_lab.sh` (logs `~/testar_goto_lab.log`, `~/testar_goto_lab2.log`): pytest 162 passed; smokes de 200 passos
+  `HydroneGotoPilares-v0` ok 12,1 passos/s (obs 12), `-v1` ok 9,6 (rgb/depth 9×100×100 + state 9), `-v2` ok 11,8 (26);
+  sem NaN/inf, obs no espaço, 0 processos do simulador depois de cada teste.
+- `explorar_mapa.py`: Hydrone nasce parado nos pontos pedidos (ar z = 2 e água z = −0,5; 4 guinadas, fotos salvas). O
+  `WaterCollisionSensor` trava o spawn (`posix_ipc.BusyError: Semaphore is busy` no 1º tick); colisão + distâncias + fundo
+  abrem normalmente → `WaterCollisionSensor` fora do padrão (`--extras`).
+- **Guinada do Hydrone não responde no simulador** (`diag_goto.py`, `diag_guinada_hydrone.py`, log `~/diag_guinada.log`):
+  - ω = ±0,3 rad/s por 5 s → Δyaw +0,005 / −0,001 rad (esperado ±1,5); o `GotoEnv` envia o desvio certo (cresce de 0,9° a 30,8°);
+  - direto no BiguaSim, `cmd_vel_yaw` com desvio fixo de 20°: a dinâmica devolve acc_ang z = 3,14 rad/s² em todo tick, mas o
+    `DynamicsSensor` mede w = 0 e o yaw anda 0,17° em 60 ticks; `cmd_pos_yaw` com 90°: acc_ang z = 14,1 rad/s², yaw 0,17°;
+  - mesmo teste com o `DjiMatrice`: yaw +82° (`cmd_vel_yaw`) e +89° (`cmd_pos_yaw` 90°) → a cadeia biguagym → BiguaSim está
+    certa; **o simulador não aplica a aceleração angular de guinada ao Hydrone** (a linear, sim: subida de 1,1 m).
+  - Causa fora do biguagym (BiguaSim 1.1.0, provavelmente o ator do Hydrone no Unreal); não alterei o BiguaSim. Precisa ir
+    para os autores (hydrone-furg). Sem guinada, o agente não consegue apontar para o alvo nem virar a câmera.

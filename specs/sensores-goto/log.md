@@ -25,3 +25,8 @@
 - Observação: `smoke_test.py --list/--all` só mostra ids de `core.environments`; `--env HydroneGoto...` funciona (não alterei o
   `smoke_test.py`, que é arquivo de apoio).
 - Pendente: T6 (⏱ lab).
+
+## 2026-11-17 — T6 no PC do lab (parcial)
+- Smokes de 200 passos: `HydroneGotoPilares-v1` ok (9,6 passos/s; rgb/depth 9×100×100 + state 9) e `-v2` ok (11,8 passos/s;
+  26 valores; o sonar sem multipath não deixou o passo lento). 0 processos órfãos. Falta: conferir os quadros das câmeras e as
+  leituras perto dos pilares (os pilares aparecem? o LiDAR os vê?) — depende da guinada do Hydrone (ver hydrone-goto-dique).
