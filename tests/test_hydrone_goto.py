@@ -52,6 +52,8 @@ def montar(cenario='pilares', inicio=None, seed=0):
     env._action_repeat = 1
     env._batch_size = 1
     env._on_target_buf = 0
+    env._integrar_rotacao = False                    # o SimFalso não tem dinâmica (integração: test_rotacao_hydrone.py)
+    env._w_dot = np.zeros(3)
     env.rng = np.random.default_rng(seed)
     (x0, y0), (x1, y1) = env._cena['area']
     z0, z1 = env._cena['z_limites']
