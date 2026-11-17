@@ -1890,3 +1890,13 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   && git -C ~/biguasim stash pop`.
 - Notebook: código na 1.1.0, mas sem mundos da 1.1.0 (o servidor só é acessível pela rede da universidade).
 - Pendente: o Hydrone não abre por causa do `float(rotor_speed_min)` no biguagym; corrigir via spec.
+
+### 2026-11-17 — Spec `hydrone-limites-motor` (requisitos, rascunho)
+
+- Pedido do usuário: `/spec-requisitos faça a alteração necessária para o biguasim abrir no pc do lab`. A 1ª palavra ("faça")
+  não serve de nome; a spec foi nomeada `hydrone-limites-motor`, pelo único erro que impede abrir no lab (Hydrone).
+- Leitura (sem alterar código): `_init_spaces`/`_to_motor_speeds` em `biguagym/core/environments.py` (commit `e73d85d`, branch
+  `spec/colapso-blueboat`, a que o lab roda); `dynamics/agents.py:411` e `dynamics/hauv.py:873` do BiguaSim 1.1.0
+  (`~/biguasim-treino`): rotores 0–3 aéreos [0; 592,4], 4–7 aquáticos [−278,9; 278,9].
+- Arquivo criado: `specs/hydrone-limites-motor/requirements.md` (R1–R5). Pergunta em aberto principal: criar a branch da spec a
+  partir da `spec/colapso-blueboat` (o que o lab roda) em vez da `testes-ambientes`.
