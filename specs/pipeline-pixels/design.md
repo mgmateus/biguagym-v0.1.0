@@ -70,4 +70,4 @@ if crop_max <= 0:          # sem recorte (ex.: 100×100 com image_size 100, como
 | R3 | teste de `_depth_to_gray` com NaN, inf, 0, 2,5 e 10 m |
 | R4 | teste do `random_crop` com tamanho igual e menor |
 | R5 | leitura do `cuprl.yaml` no teste |
-| R1–R3 | ⏱ smoke no lab do `HydroneGotoDique-v1`, comparando `cam_*` e `obs_rgb_*` |
+| R1–R3 | ⏱ smoke no lab do `HydroneGotoPilares-v1`, comparando `cam_*` e `obs_rgb_*` |

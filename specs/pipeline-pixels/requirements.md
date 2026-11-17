@@ -47,7 +47,7 @@ e permitir treinar o CUPRL sem recorte.
 | R3 | idem (mapa com NaN, inf, 0, 2,5 m e 10 m) | 255, 255, 0, 127,5 e 255 |
 | R4 | idem | `random_crop(x, 100)` com x de 100×100 devolve x |
 | R5 | `grep image_size config/agent/cuprl.yaml` | `image_size: 100` |
-| R1–R3 | ⏱ no lab: `python smoke_test.py --env HydroneGotoDique-v1 --steps 100 --frame-every 25` (depois da `hydrone-goto-dique`) | `obs_rgb_*.png` mostra a mesma cena de `cam_*.png`, em 100×100 |
+| R1–R3 | ⏱ no lab: `python smoke_test.py --env HydroneGotoPilares-v1 --steps 100 --frame-every 25` (depois da `hydrone-goto-dique`) | `obs_rgb_*.png` mostra a mesma cena de `cam_*.png`, em 100×100 |
 | — | `pytest tests` | os 93 testes anteriores continuam passando |
 
 ## Impacto nos experimentos
