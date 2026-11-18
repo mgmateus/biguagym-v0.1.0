@@ -2,8 +2,8 @@
 
 Para cada cenário (``--cenario``, padrão os dois):
 1. Abre o ``GotoEnv`` com câmeras, LiDAR de 360 lasers e câmera de profundidade a mais no Hydrone e faz o reset (que
-   posiciona os torpedos): tempo do reset, torpedos fora do lugar e a diferença medida − imposto por orientação (o
-   deslocamento da origem do ator, 0,861 m sem sinal no teste de 2026-11-18).
+   posiciona os torpedos): tempo do reset, torpedos fora do lugar e a diferença medida (centro de massa) − imposto por
+   orientação.
 2. Varredura vertical do LiDAR a 1,5 m de um pilar: onde o laser na direção do pilar bate dá a extensão real da coluna;
    comparada com a geométrica, sugere ``origem_eixo`` para o ``goto_dique.json``.
 3. Fotos (RGB e profundidade) do spawn olhando para o centro, no ar e na água, e uma de cima do centro.
@@ -136,15 +136,13 @@ def conferir(cenario, args, saida):
         env.reset()
         res['reset_s'] = round(time.time() - t0, 2)
         res['fora_do_lugar'] = env._fora_do_lugar().tolist()
-        rpy = np.asarray(env._estado_obst['RPYDynamicsSensor'], dtype=np.float64).reshape(len(geo['centro']), -1)
-        dif = rpy[:, 6:9] - geo['imposto']
+        dif = env._posicoes_obstaculos() - geo['imposto']
         grupos = {}
         for j, e in enumerate(np.round(geo['eixo'], 3)):
             grupos.setdefault(str(e.tolist()), []).append(j)
         res['dif_medido_imposto'] = {
             k: {'n': len(v), 'mediana': np.round(np.median(dif[v], axis=0), 3).tolist(),
-                'ao_longo_do_eixo': round(float(np.median(dif[v] @ np.asarray(json.loads(k)))), 3),
-                'atitude_graus': np.round(np.median(rpy[v, 15:18], axis=0), 1).tolist()}
+                'ao_longo_do_eixo': round(float(np.median(dif[v] @ np.asarray(json.loads(k)))), 3)}
             for k, v in grupos.items()}
         print(f"[{cenario}] reset {res['reset_s']} s; fora do lugar: {res['fora_do_lugar']}; "
               f"medido − imposto: {res['dif_medido_imposto']}", flush=True)

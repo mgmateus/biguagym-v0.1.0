@@ -20,9 +20,9 @@ def geo(nome='pilares'):
 
 def test_raio_bate_no_feixe_do_pilar():
     g = geo()
-    # do lado +x do pilar (129,4; −152), a 1,5 m do eixo: a face do torpedo mais perto fica em 129,52 + 0,095
-    t, j = C.raio_capsulas(g, [130.9, -151.88, 1.5], [-1, 0, 0], 40.0)
-    assert t == pytest.approx(130.9 - 129.615, abs=2e-3) and g['obstaculo'][j] == 0
+    # do lado +x do pilar (129,4; −152), a 1,5 m do eixo: a face do torpedo mais perto fica em 129,56 + 0,095
+    t, j = C.raio_capsulas(g, [130.9, -151.84, 1.5], [-1, 0, 0], 40.0)
+    assert t == pytest.approx(130.9 - 129.655, abs=2e-3) and g['obstaculo'][j] == 0
 
 
 def test_raio_sem_obstaculo_e_infinito():

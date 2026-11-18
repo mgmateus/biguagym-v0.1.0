@@ -62,7 +62,9 @@ class SimFalso:
         self.locais_por_tick.append(np.array(locais))
         tick = len(self.locais_por_tick) - 1
         medidos = [self.medir(j, l, tick) if self.medir else l for j, l in enumerate(locais)]
-        return {'robot': robo, 'obstaculo': {'RPYDynamicsSensor': [dyn(m) for m in medidos]}, 't': 0.0}
+        # formato do _get_full_state do BiguaSim: por agente, cada sensor numa lista (um elemento por clone)
+        return {'robot': {k: [v] for k, v in robo.items()},
+                'obstaculo': {'DynamicsSensor': [dyn(m) for m in medidos]}, 't': 0.0}
 
     def draw_point(self, *a, **k):
         pass
@@ -156,8 +158,8 @@ def test_geometria_pilares_2x2_tres_niveis():
     assert len(geo['centro']) == 48 and set(geo['tipo']) == {'pilar'}
     sel = geo['obstaculo'] == 0                                   # pilar em (129,4; −152)
     c = geo['centro'][sel]
-    assert np.allclose(sorted(set(np.round(c[:, 0], 3))), [129.28, 129.52])        # ±(0,19 + 0,05)/2
-    assert np.allclose(sorted(set(np.round(c[:, 1], 3))), [-152.12, -151.88])
+    assert np.allclose(sorted(set(np.round(c[:, 0], 3))), [129.24, 129.56])        # ±(0,19 + 0,13)/2: aletas livres
+    assert np.allclose(sorted(set(np.round(c[:, 1], 3))), [-152.16, -151.84])
     assert np.allclose(sorted(set(np.round(c[:, 2], 3))), [-0.15, 2.1, 4.35])      # −1,2 + 1,05; + 2,25 por nível
     assert np.allclose(geo['rotacao'][sel], [0, 90, 0]) and np.allclose(geo['eixo'][sel], [0, 0, 1])
     assert np.allclose(geo['imposto'], geo['centro'])                               # origem_eixo = 0
@@ -235,7 +237,8 @@ def test_agente_obstaculo_no_cenario_do_simulador():
     assert ob['agent_name'] == 'obstaculo' and ob['agent_type'] == 'TorpedoAUV'
     assert ob['control_abstraction'] == 'accel' and ob['dynamics']['batch_size'] == 48
     assert ob['location'] == [133.88, -152.6, GotoEnv.ALTURA_ESPERA]
-    assert {s.get('sensor_name', s['sensor_type']) for s in ob['sensors']} == {'DynamicsSensor', 'RPYDynamicsSensor'}
+    (sensor,) = ob['sensors']                                     # só o que a dinâmica exige, no centro de massa
+    assert sensor['sensor_type'] == 'DynamicsSensor' and sensor['configuration']['UseCOM'] is True
 
 
 def test_reset_desce_um_nivel_por_tick_e_termina_no_lugar():
@@ -286,6 +289,40 @@ def test_deslocamento_por_orientacao_nao_e_fora_do_lugar():
     env._reset()
     n_niveis = len(np.unique(np.round(env._geo['centro'][:, 2], 3)))                 # 6: 3 dos pilares + 3 das vigas
     assert len(env._env.locais_por_tick) == n_niveis + 2 and not len(env._fora_do_lugar())
+
+
+def test_estado_por_agente_tira_o_robo_da_lista():
+    env = montar()
+    prof = {'depth_map': np.ones((4, 4))}
+    st = env._unwrap_state({'robot': {'DepthCamera': [prof], 'RPYDynamicsSensor': [dyn([1, 2, 3])]},
+                            'obstaculo': {'DynamicsSensor': [dyn([0, 0, 0])] * 48}, 't': 0.0})
+    assert st['DepthCamera'] is prof and np.allclose(st['RPYDynamicsSensor'][6:9], [1, 2, 3])
+    assert len(env._estado_obst['DynamicsSensor']) == 48
+
+
+def test_sobe_limite_de_arquivos(monkeypatch):
+    chamadas = []
+    monkeypatch.setattr(G.resource, 'getrlimit', lambda r: (1024, 1048576))
+    monkeypatch.setattr(G.resource, 'setrlimit', lambda r, lim: chamadas.append(lim))
+    GotoEnv._subir_limite_arquivos()
+    assert chamadas == [(GotoEnv.LIMITE_ARQUIVOS, 1048576)]
+    monkeypatch.setattr(G.resource, 'getrlimit', lambda r: (1024, 4096))
+    GotoEnv._subir_limite_arquivos()
+    assert chamadas[-1] == (4096, 4096)                           # nunca acima do rígido
+    monkeypatch.setattr(G.resource, 'getrlimit', lambda r: (100000, 1048576))
+    GotoEnv._subir_limite_arquivos()
+    assert len(chamadas) == 2                                     # já basta: não mexe
+
+
+def test_dinamica_dos_obstaculos_devolve_zero():
+    env = montar()
+
+    class Modelo:
+        def step(self, estados, cmds):
+            raise AssertionError("a dinâmica original não deve rodar")
+    env._env._dynamics_dict = {'obstaculo': Modelo()}
+    env._dinamica_parada()
+    assert env._env._dynamics_dict['obstaculo'].step([None] * 48, [[1.0] * 6] * 48) == [[0.0] * 6] * 48
 
 
 def test_passo_segura_obstaculos_e_manda_aceleracao_zero():
@@ -351,9 +388,9 @@ def test_recompensa_dranaju(d_ant, d, z, col, ch, esperado):
     ('pilares', [127.5, -150.0, 2.0], False, "parede"),       # 0,5 m da borda
     ('pilares', [134.0, -146.0, 5.0], False, "altura"),       # acima de 4,8
     ('pilares', [134.0, -146.0, -1.2], False, "altura"),
-    ('pilares', [133.4, -152.0, 1.5], False, "pilar"),        # 0,595 m do torpedo mais perto do feixe (132,72; −152±0,12)
-    ('pilares', [133.5, -152.0, 1.5], False, None),           # 0,694 m
-    ('pilares', [133.4, -152.0, 5.5], False, "altura"),       # acima do pilar: altura
+    ('pilares', [133.45, -152.0, 1.5], False, "pilar"),       # 0,605 m do torpedo mais perto do feixe (132,76; −152±0,16)
+    ('pilares', [133.55, -152.0, 1.5], False, None),          # 0,701 m
+    ('pilares', [133.45, -152.0, 5.5], False, "altura"),      # acima do pilar: altura
     ('dique', [129.0, -153.7, 0.55], False, "viga"),          # 0,505 m acima da viga sul (eixo em −0,05, raio 0,095)
     ('dique', [129.0, -153.7, 0.75], False, None),            # 0,705 m
     ('pilares', [129.0, -153.7, 0.55], False, None),          # sem vigas no cenário dos 4 pilares

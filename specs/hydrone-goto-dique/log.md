@@ -191,3 +191,29 @@ aviso de SpawnProp recusado, câmera com pitch +90°; Hydrone em `accel` com ace
   `HydroneGotoDique-v0` (200 passos), processos do simulador a cada etapa.
 - `tests/test_conferir_obstaculos.py` (8 testes: raio nas cápsulas, extensão da coluna, índice do laser, anel). `pytest tests`
   → 217 passed.
+
+## 2026-11-18 — T11, 1ª rodada no lab (19:59–20:05, `e78a387`/`4867883`, `tools/testar_obstaculos_lab.sh`)
+Combinado com a sessão "tcc" (o treino `teste_5m_rotrc_1` dela seguiu rodando; não foi tocado).
+
+| Item | Resultado |
+|---|---|
+| pytest no lab | 217 passed |
+| `pilares`, reset (posiciona 48 torpedos) | 7,7 s; 45 de 48 fora do lugar (mediana 4,12 m acima do ponto, atitude certa: pitch 90) |
+| varredura vertical do LiDAR | nenhuma batida (pilares fora do lugar) |
+| passos/s (Hydrone com 3 câmeras 960², profundidade e LiDAR 360) | 3,96 |
+| smoke `HydroneGotoPilares-v0` | ok: 5,41 passos/s (6,1 h por 100k), reset 7,1 s, 2 episódios, sem NaN, obs no espaço |
+| smoke `HydroneGotoPilares-v1` | `TypeError: float() argument must be a string or a real number, not 'dict'` |
+| `dique` (66 torpedos) | `OSError: [Errno 24] Too many open files` (`/dev/shm/...obstaculo-id42...`); limite do lab: 1024 (rígido 1048576) |
+
+Causas e correções (sem simulador; `pytest tests` → 220 passed):
+- **Fora do lugar:** as aletas do TorpedoAUV têm ~0,27 m de envergadura (vista de cima na documentação,
+  `biguasim_docs/.../torpedo-top.png`), mais que os 0,24 m entre eixos do feixe: os vizinhos se esbarram ao descer e o
+  teleporte para no primeiro obstáculo. `folga_feixe` 0,05 → 0,13 (0,32 m entre eixos).
+- **0,861 m:** é o `IMUSocket` (no nariz, ~0,89 m do centro na mesma figura), onde estavam os sensores dos torpedos; a origem
+  do ator é o centro. `origem_eixo` fica 0 e os torpedos passam a ter só o DynamicsSensor com `UseCOM` (centro de massa).
+- **`-v1`:** com mais de um agente, o BiguaSim devolve cada sensor do robô numa lista de um elemento (a DepthCamera vinha
+  como `[dict]`); `GotoEnv._unwrap_state` tira da lista. O simulador falso dos testes passou a imitar esse formato.
+- **Arquivos abertos:** `GotoEnv._subir_limite_arquivos` sobe o limite flexível do processo até 65536 (sem passar do rígido)
+  quando há obstáculos.
+- **Passos/s:** um sensor a menos por torpedo e a dinâmica em Python dos torpedos trocada por uma que devolve zero
+  (`_dinamica_parada`); `tools/perfil_obstaculos.py` mede 0/12/48 torpedos e faz o cProfile para ver o que sobra.
