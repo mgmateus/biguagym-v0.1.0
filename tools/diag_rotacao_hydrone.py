@@ -9,7 +9,10 @@ exatamente o que mandamos. Para cada agente o script mede:
   E. aceleração angular em z de 1, 3,35 e 10 rad/s² (20 ticks cada);
   F. cmd_vel_yaw com desvio de 20° (30 ticks), gravando o que a dinâmica manda, e depois as mesmas acelerações
      reenviadas em modo accel a partir da pose inicial;
-  G. roll e pitch: ω de 30°/s em x e em y reimposta a cada tick (20 ticks) e teleporte para roll/pitch de 10° (3 ticks).
+  G. roll e pitch: ω de 30°/s em x e em y reimposta a cada tick (20 ticks) e teleporte para roll/pitch de 10° (3 ticks);
+  H. linear: aceleração de 0,035 e 0,2 m/s² em x (100 ticks) e velocidade de 0,3 m/s em x imposta uma vez (20 ticks).
+
+Uso: python tools/diag_rotacao_hydrone.py linear [agente]   (só o H)
 Entre os testes o agente volta à pose inicial (atitude zero, parado).
 
 Uso: python tools/diag_rotacao_hydrone.py [agente ...]   (padrão: Hydrone DjiMatrice)
@@ -25,6 +28,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, 'biguagym'))
 
 PONTO = np.array([103.6, 97.4, 2.0])
+SO_LINEAR = False
 
 
 def rpy(dyn):
@@ -60,6 +64,21 @@ def rodar(agente):
                   f"w {np.round(d1[12:15], 3)}  pos {np.round(d0[6:9], 2)} -> {np.round(d1[6:9], 2)}", flush=True)
 
         print(f"== {agente}", flush=True)
+        for mag in (0.035, 0.2):
+            d0 = repor()
+            for _ in range(100):
+                d1 = passo([mag, 0, 0, 0, 0, 0])
+            linha(f"H lin x {mag} m/s², 100 ticks", d0, d1)
+            print(f"     esperado: Δx ≈ {0.5 * mag * (99 / 20) ** 2:.2f} m, v ≈ {mag * 99 / 20:.3f} m/s; "
+                  f"medido v {np.round(d1[3:6], 3)}", flush=True)
+        d0 = repor()
+        robo.set_physics_state(d0[6:9], [0, 0, 0], [0.3, 0, 0], [0, 0, 0])
+        for i in range(20):
+            d1 = passo(zero)
+            if i in (0, 9, 19):
+                print(f"  H v_x 0,3 m/s uma vez, tick {i:2d}: v {np.round(d1[3:6], 3)}  pos {np.round(d1[6:9], 3)}", flush=True)
+        if SO_LINEAR:
+            return
         for eixo, cmd in (('ang x 1 rad/s²', [0, 0, 0, 1, 0, 0]), ('ang y 1 rad/s²', [0, 0, 0, 0, 1, 0]),
                           ('ang z 1 rad/s²', [0, 0, 0, 0, 0, 1]), ('lin x 1 m/s²', [1, 0, 0, 0, 0, 0])):
             d0 = repor()
@@ -193,6 +212,10 @@ def rodar_goto(ticks=60):
 if __name__ == '__main__':
     if sys.argv[1:] == ['goto']:
         rodar_goto()
+    elif sys.argv[1:2] == ['linear']:
+        SO_LINEAR = True
+        for agente in sys.argv[2:] or ['Hydrone']:
+            rodar(agente)
     else:
         for agente in sys.argv[1:] or ['Hydrone', 'DjiMatrice']:
             rodar(agente)
