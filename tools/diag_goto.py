@@ -2,7 +2,7 @@
 
 Uso: python tools/diag_goto.py [env_id] [segundos]
      (padrão: HydroneGotoPilares-v0, 5 s)
-     python tools/diag_goto.py [env_id] [segundos] avanco   (só o avanço, com a integração angular desligada e ligada:
+     python tools/diag_goto.py [env_id] [segundos] avanco   (só o avanço, com a integração da dinâmica desligada e ligada:
                                                              deslocamento, roll/pitch/yaw e velocidade a cada segundo)
 
 1. Guinada: ω = +0,3 rad/s por N segundos e depois -0,3 rad/s, com a menor velocidade para a frente e vz = 0.
@@ -58,7 +58,8 @@ def avanco(env_id, passos):
                 env.step(np.asarray([1, 0, 0], dtype=np.float32))
                 if i % 20 == 19:
                     print(f"   passo {i:3d}: Δpos {np.round(u._dynamics[6:9] - p0, 2)}  "
-                          f"rpy {np.round(np.degrees(u._dynamics[15:18]), 1)}°  v {np.round(u._dynamics[3:6], 2)}", flush=True)
+                          f"rpy {np.round(np.degrees(u._dynamics[15:18]), 1)}°  v {np.round(u._dynamics[3:6], 2)}  "
+                          f"v integrado {np.round(u._v, 3)}", flush=True)
         finally:
             sim = getattr(u, '_env', None)
             env.close()

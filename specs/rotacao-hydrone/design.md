@@ -93,3 +93,45 @@ dá sozinha), subida e guinada como hoje.
 continua sendo do motor; se o motor aplicar o teleporte depois da física, o resultado seria o mesmo de hoje (a verificação
 pega). O avanço continuará lento (é o controlador dos autores: 0,16 m/s depois de 5 s para 0,31 pedidos); ajustar ganhos
 seria alterar a dinâmica do BiguaSim, fora do escopo.
+
+---
+
+## Ajuste — integrador com estado próprio (aprovado pelo usuário em 2026-11-18: "Sim")
+
+**Por quê:** no lab (T7, log), com o Hydrone em movimento a velocidade imposta é respeitada 1:1, mas a partir do repouso o
+corpo "dorme" no motor: partindo da velocidade **medida** a cada tick (0 + 0,03·0,05 = 0,0015 m/s), a velocidade imposta é
+pequena demais para acordá-lo, o motor devolve 0 e a integração recomeça do zero. Avanço a partir do reset: 0 m.
+
+**O que muda (só `biguagym/core/goto.py`):**
+- O `GotoEnv` guarda `_v` e `_w` (mundo): a leitura esperada do `DynamicsSensor` no próximo tick (v + v̇·dt, ω + ω̇·dt),
+  zeradas no reset.
+- No envoltório da dinâmica, antes de chamar o `step` original, `_conciliar(v_medido, ω_medido)` decide qual v/ω vale
+  neste tick:
+  - **corpo dormindo** — o motor mede v = ω = 0 (|·| < 1e-4) e o integrado ainda está abaixo do limiar em que o corpo
+    acorda (`VEL_DORMINDO = 0,1` m/s e `VEL_ANG_DORMINDO = 0,1` rad/s; medido: 0,05 m/s por tick acorda, 0,01 não):
+    valem os integrados;
+  - **qualquer outro caso** (motor respeitou a velocidade imposta, colisão, contato com o chão): valem os medidos, como hoje.
+- A dinâmica recebe uma **cópia** do `DynamicsSensor` com esse v/ω (o estado do motor e a observação não mudam).
+- `_impor_estado` impõe `(v + v̇·dt)·e^(c·dt)` e `(ω + ω̇·dt)·e^(c·dt)` a partir de `_v`/`_w` (não mais da medida) e
+  guarda `v + v̇·dt` e `ω + ω̇·dt` como a leitura esperada.
+
+```python
+def _conciliar(self, v_med, w_med):
+    dormindo = (np.allclose(v_med, 0, atol=1e-4) and np.allclose(w_med, 0, atol=1e-4)
+                and np.linalg.norm(self._v) < self.VEL_DORMINDO and np.linalg.norm(self._w) < self.VEL_ANG_DORMINDO)
+    if not dormindo:
+        self._v, self._w = np.array(v_med, np.float64), np.array(w_med, np.float64)
+    return self._v, self._w
+```
+
+**Alternativas:** detectar colisão comparando medido × esperado com uma tolerância (mais regras e um limiar a mais, sem
+ganho: acordado, o medido é igual ao esperado); impor sempre o integrado (sem a medida, o Hydrone atravessaria o chão e as
+paredes depois de um contato). Descartadas.
+
+**Riscos:** o limiar de 1e-4 supõe que o motor mede zero exato (ou quase) com o corpo dormindo; se medir resíduos maiores, o
+ajuste não ativa (fica como hoje) e o `diag_goto.py ... avanco` mostra. Parado no chão com aceleração para baixo, o
+integrado cresce até 0,1 m/s, o motor resolve o contato e a medida (0) volta a valer: sem atravessar o chão.
+
+**Verificação:** testes sem simulador (motor medindo zero: v imposta cresce a·dt por tick e a dinâmica recebe o integrado;
+acima do limiar ou com o motor medindo velocidade, vale a medida; reset zera); no lab, `diag_goto.py ... avanco` andando a
+partir do repouso (~0,4 m em 5 s), `diag_rotacao_hydrone.py goto` com as razões ≈ 1 e `testar_goto_lab.sh` (R4, R5).
