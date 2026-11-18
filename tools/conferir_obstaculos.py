@@ -136,7 +136,11 @@ def conferir(cenario, args, saida):
         env.reset()
         res['reset_s'] = round(time.time() - t0, 2)
         res['fora_do_lugar'] = env._fora_do_lugar().tolist()
-        dif = env._posicoes_obstaculos() - geo['imposto']
+        medido = env._posicoes_obstaculos()
+        res['posicoes_fora'] = {int(j): {'medido': np.round(medido[j], 2).tolist(),
+                                         'imposto': np.round(geo['imposto'][j], 2).tolist()}
+                                for j in res['fora_do_lugar']}
+        dif = medido - geo['imposto']
         grupos = {}
         for j, e in enumerate(np.round(geo['eixo'], 3)):
             grupos.setdefault(str(e.tolist()), []).append(j)
@@ -146,6 +150,8 @@ def conferir(cenario, args, saida):
             for k, v in grupos.items()}
         print(f"[{cenario}] reset {res['reset_s']} s; fora do lugar: {res['fora_do_lugar']}; "
               f"medido − imposto: {res['dif_medido_imposto']}", flush=True)
+        for j, p in list(res['posicoes_fora'].items())[:12]:
+            print(f"    torpedo {j}: medido {p['medido']}, imposto {p['imposto']}", flush=True)
 
         # 2. varredura vertical junto ao primeiro pilar (Hydrone a +x, nariz para −x)
         pil = next(o for o in cena['obstaculos'] if o['tipo'] == 'pilar')

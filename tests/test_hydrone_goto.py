@@ -30,10 +30,15 @@ class Clone:
     """Torpedo dos obstáculos: guarda cada set_physics_state (o último antes do tick é o que vale no BiguaSim)."""
 
     def __init__(self):
-        self.locais = []
+        self.locais, self.comandos = [], []
 
     def set_physics_state(self, location, rotation, velocity, angular_velocity):
         self.locais.append(np.array(location, dtype=np.float64))
+        self.comandos.append('fisica')
+
+    def teleport(self, location=None, rotation=None):
+        self.locais.append(np.array(location, dtype=np.float64))
+        self.comandos.append('teleporte')
 
 
 class SimFalso:
@@ -256,6 +261,16 @@ def test_reset_desce_um_nivel_por_tick_e_termina_no_lugar():
     assert np.allclose(ticks[1][~nivel0], espera[~nivel0])
     assert np.allclose(ticks[3], geo['imposto']) and len(ticks) == 5                # 3 níveis + espera + medição
     assert env._env.resets == 1
+
+
+def test_posiciona_com_teleporte_e_segura_com_fisica():
+    env = montar()
+    env._reset()
+    cmds = env._env.clones[0].comandos
+    assert cmds == ['teleporte'] * 4 + ['fisica']                 # espera + 3 níveis; o último zera a velocidade
+    env._env.fila.append(estado(env._cena['spawn']))
+    env._step(np.zeros(3, np.float32))
+    assert cmds[-1] == 'fisica'
 
 
 def test_reset_repete_quem_nao_chegou():

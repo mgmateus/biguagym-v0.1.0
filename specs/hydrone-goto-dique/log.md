@@ -217,3 +217,19 @@ Causas e correções (sem simulador; `pytest tests` → 220 passed):
   quando há obstáculos.
 - **Passos/s:** um sensor a menos por torpedo e a dinâmica em Python dos torpedos trocada por uma que devolve zero
   (`_dinamica_parada`); `tools/perfil_obstaculos.py` mede 0/12/48 torpedos e faz o cProfile para ver o que sobra.
+
+## 2026-11-18 — T11, 2ª rodada no lab (20:08–20:20, `9574158`/`b855d92`)
+- `perfil_obstaculos.py` (GotoEnv -v0 sem câmeras, 100 passos): sem obstáculos 5,02 passos/s; 12 torpedos 5,03 (5,12 segurando
+  a cada 10 ticks); 48 torpedos 5,31 (5,57). **Os obstáculos quase não custam:** o passo é lento por causa da dinâmica do
+  Hydrone em Python (cProfile: `hauv.step` ~180 ms por tick, `_s_dot_fn` 20× por tick com `roma`/torch) e da CPU dividida
+  com o treino da sessão "tcc" (52% de CPU no momento). Os 17,96 passos/s do `pilares_agentes.py` eram com o Hydrone em
+  `accel` (sem o modelo `hauv`).
+- Posicionamento ainda falha: 12 torpedos → 2 fora do lugar; 48 → 36; `pilares` na conferência → 35 de 48; `dique` → ~40 de
+  66. Hipótese: os clones nascem sobrepostos no mesmo ponto e o `set_physics_state` varre o caminho e para no primeiro
+  obstáculo (inclusive na sobreposição). Mudança: no posicionamento os torpedos andam com `teleport` (outro comando do
+  BiguaSim; testar no lab se não varre) e o último tick do posicionamento e os seguintes usam `set_physics_state` (zera a
+  velocidade). `conferir_obstaculos.py` passa a imprimir as posições dos torpedos fora do lugar.
+- Smokes: `HydroneGotoPilares-v0` ok; `HydroneGotoPilares-v1` ok (2 episódios, sem NaN, obs no espaço) depois da correção do
+  estado por agente. `dique` abriu com 66 torpedos (limite de arquivos resolvido). LiDAR no ar mediu o pilar 0 (no lugar)
+  com mediana 0,057 m de diferença para o raio traçado nas cápsulas.
+- `pytest tests` → 221 passed.
