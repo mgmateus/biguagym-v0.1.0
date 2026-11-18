@@ -1963,3 +1963,24 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
 - **Bloqueio:** o BiguaSim 1.1.0 não aplica a aceleração angular de guinada ao Hydrone (dinâmica devolve 3–14 rad/s², sensor
   mede w = 0, yaw anda 0,17° em 3 s); com o DjiMatrice, no mesmo ambiente, gira 82–89°. Causa no simulador; não alterado.
   Detalhes em `specs/hydrone-goto-dique/log.md` (branch `spec/sensores-goto`).
+
+### 2026-11-17 (cont.) — Giro do Hydrone (spec `rotacao-hydrone`)
+
+- Pedido: "Resolva isso do giro". Spec `rotacao-hydrone` (branches `spec/rotacao-hydrone` a partir da `spec/sensores-goto`;
+  principal `4c9bc24`, submódulo `7ceeb25`); requisitos, design, tarefas e log em `specs/rotacao-hydrone/` (nessa branch).
+- Causa (lab, `tools/diag_rotacao_hydrone.py`, modo `accel`): o motor do BiguaSim 1.1.0 **não aplica a aceleração angular ao
+  Hydrone** (nenhum eixo, até 10 rad/s²) e, no DJI, só às vezes; também **descarta acelerações lineares pequenas** (0,035 e
+  0,2 m/s² por 5 s → 0 m; 1 m/s² → 0,34 m) e **amortece velocidades a 1 s⁻¹** (linear e angular). Velocidade angular e
+  atitude impostas por `set_physics_state`/teleporte são respeitadas em x, y e z. O BiguaSim não foi alterado.
+- Correção (`biguagym/core/goto.py`, `integrar_rotacao=True`): o `GotoEnv` guarda a aceleração angular calculada pela dinâmica
+  dos autores, manda ao motor só a linear e impõe ω + ω̇·dt (compensada por e^(dt)) a cada tick. 7 testes novos;
+  `pytest tests` → 169 passed.
+- Lab (`tools/testar_goto_lab.sh`, `~/testar_rotacao.log`; treino de outra sessão rodando junto):
+  - ω medido / previsto = 1,000 no ar e na água;
+  - guinada pelo `GotoEnv` (±0,3 rad/s, 5 s): **+1,514 / −1,527 rad** (esperado ±1,50; antes 0,003 rad);
+  - subida +1,11 m (como antes); smokes `HydroneGotoPilares-v0/-v1/-v2` ok (7,65 / 6,43 / 7,51 passos/s, mais lentos pelo
+    treino concorrente), sem NaN; 0 processos órfãos meus.
+- **Pendente:** o avanço a partir do repouso continua 0 m (com ou sem a correção): o controlador de velocidade dos autores
+  pede só ~0,03 m/s² (pitch de 0,2°; em Python puro, `tools/avanco_offline_hydrone.py`, anda 0,44 m em 5 s) e o motor
+  descarta essa aceleração. Proposta, aguardando aprovação: integrar também a parte linear (impor v + a·dt e mandar
+  aceleração zero ao motor). Detalhes em `specs/rotacao-hydrone/design.md` ("Extensão proposta").
