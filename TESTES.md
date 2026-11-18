@@ -1984,3 +1984,18 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   pede só ~0,03 m/s² (pitch de 0,2°; em Python puro, `tools/avanco_offline_hydrone.py`, anda 0,44 m em 5 s) e o motor
   descarta essa aceleração. Proposta, aguardando aprovação: integrar também a parte linear (impor v + a·dt e mandar
   aceleração zero ao motor). Detalhes em `specs/rotacao-hydrone/design.md` ("Extensão proposta").
+
+### 2026-11-17 (cont.) — Integração linear do Hydrone (extensão aprovada: "pode seguir sim")
+
+- `biguagym/core/goto.py` (submódulo `f27fe79`, principal `16b1f71`/`38ed831`, branch `spec/rotacao-hydrone`): o `GotoEnv`
+  guarda as 6 acelerações da dinâmica, manda **zero** ao motor e impõe v + v̇·dt e ω + ω̇·dt (compensadas pelo amortecimento
+  de 1 s⁻¹ do motor) a cada tick; `integrar_rotacao` → `integrar_dinamica`. Motivo: o motor descarta acelerações lineares
+  pequenas. `pytest tests` → 169 passed.
+- Lab (`~/testar_linear.log`; treino de outra sessão rodando junto): v e ω medidas/previstas = 1,000 no ar e na água;
+  guinada ±1,51 rad; subida **1,485 m** (antes 1,11); avanço em movimento **0,509 m** (antes 0,175); smokes
+  `HydroneGotoPilares-v0/-v1/-v2` ok (4,9 / 4,6 / 5,1 passos/s), sem NaN; 0 processos órfãos meus.
+- **Pendente:** a partir do repouso (logo depois do reset) o avanço continua 0 m: parado, o corpo "dorme" no motor e a
+  velocidade imposta a partir da medida (0,0017 m/s por tick) não o acorda. Ajuste proposto (aguardando aprovação):
+  integrar v e ω no próprio `GotoEnv` em vez de partir da medida a cada tick (detalhes em `specs/rotacao-hydrone/log.md`).
+- Observação: no ar, um desvio de guinada **fixo** no `cmd_vel_yaw` (alvo sempre N° à frente) faz o controlador dos autores
+  acelerar a guinada até divergir; o `GotoEnv` não manda isso (referência integrada, |ω| ≤ 0,3 rad/s).
