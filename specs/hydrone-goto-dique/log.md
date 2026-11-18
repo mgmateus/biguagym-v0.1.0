@@ -121,3 +121,14 @@ aviso de SpawnProp recusado, câmera com pitch +90°; Hydrone em `accel` com ace
   Corrigido (só faixas de até 2 m que tocam a borda são ignoradas); falta rodar de novo com `--mapa` para o cenário `dique`.
 - `goto_dique.json` **não** foi alterado (os pilares não aparecem no simulador; ver acima).
 - Testes: `tests/test_mapear_dique.py` com 10 testes; `pytest tests` → 183 passed.
+
+## 2026-11-18 — Pilares que aparecem: estruturas já existentes no mapa (`tools/achar_pilares.py`)
+- Usuário: "os pilares tem que aparecer no mapa, pode usar estruturas já existentes no mundo parecidas ou algo assim".
+- O motor do mundo SkyDive (binário 1.0.0 do notebook; o 1.1.0 do lab recusa igual) só registra os comandos SpawnAgent,
+  DebugDraw, TeleportCamera, AddSensor, RemoveSensor, RotateSensor, RenderViewport, RGBCameraRate, AdjustRenderQuality,
+  CustomCommand, SendAcousticMessage e SendOpticalMessage (`strings` do binário): não há como criar objeto estático.
+- `tools/achar_pilares.py`: mapa de alturas do porto inteiro, fatias de LiDAR (360 lasers) abaixo e acima da água em pontos
+  de água perto de estruturas, sentido dos lasers escolhido pela nuvem mais nítida, pilares = grupos pequenos e isolados
+  presentes nas duas fatias, grupos de pilares; fotos dos grupos e teste do DebugDraw (caixas nas coordenadas do dique,
+  fotografadas com RGB e profundidade). `mapear_dique.sensores/abrir` aceitam sensores extras.
+- `tests/test_achar_pilares.py` (7 testes, cenário sintético com traçado de raios).

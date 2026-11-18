@@ -289,7 +289,7 @@ def desenhar(caminho, topo, xs, ys, agua, nivel_agua, bacia=None, pilares_cfg=No
 # ----------------------------------------------------------------------------------------------------------------------
 # Simulador
 # ----------------------------------------------------------------------------------------------------------------------
-def sensores(com_cameras, largura=1024, altura=1024):
+def sensores(com_cameras, largura=1024, altura=1024, extras=()):
     s = [
         {'sensor_type': 'DynamicsSensor', 'socket': 'IMUSocket',
          'configuration': {'UseCOM': True, 'UseRPY': False}, 'location': [0, 0, 0], 'rotation': [0, 0, 0]},
@@ -300,7 +300,7 @@ def sensores(com_cameras, largura=1024, altura=1024):
          'configuration': {'LaserMaxDistance': 30, 'LaserCount': N_LASERS, 'LaserAngle': 0, 'LaserDebug': False}},
         {'sensor_name': 'Fundo', 'sensor_type': 'RangeFinderSensor', 'socket': 'IMUSocket',
          'configuration': {'LaserMaxDistance': LASER_FUNDO_MAX, 'LaserCount': 1, 'LaserAngle': -90, 'LaserDebug': False}},
-    ]
+    ] + list(extras)
     if com_cameras:
         s += [
             {'sensor_name': 'CameraTerceira', 'sensor_type': 'RGBCamera', 'socket': 'Viewport',
@@ -314,7 +314,7 @@ def sensores(com_cameras, largura=1024, altura=1024):
     return s
 
 
-def abrir(ponto, args, com_cameras):
+def abrir(ponto, args, com_cameras, extras=()):
     import biguasim
     with open(STATE_JSON) as f:
         base = json.load(f)
@@ -323,7 +323,7 @@ def abrir(ponto, args, com_cameras):
         'agent_name': 'robot', 'agent_type': 'Hydrone', 'control_abstraction': 'accel',
         'dynamics': {'batch_size': 1, 'water_level': float(args.agua)},
         'location': [float(v) for v in ponto], 'rotation': [0.0, 0.0, 0.0],
-        'sensors': sensores(com_cameras),
+        'sensors': sensores(com_cameras, extras=extras),
     }]
     env = biguasim.make(scenario_cfg=cfg, show_viewport=False)
     env.reset()
