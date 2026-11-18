@@ -13,8 +13,9 @@ Fases:
    não é cercado (o laser chega na borda da região sem achar nada), o dique é (paredes e navio). ``--semente x,y`` escolhe
    a bacia à mão.
 3. **Posição**: distância de cada célula da bacia até o sólido mais próximo (transformada de distância); o quadrado da
-   área do Goto (``--lado``) vai onde a menor folga dentro dele é máxima; 4 pilares em centro ± ``--afastamento``, como
-   o cenário provisório; o navio (sólido cercado pela bacia) vira caixa de exclusão do cenário ``dique``.
+   área do Goto vai onde a menor folga dentro dele é máxima: o maior retângulo de ``--lado-min`` a ``--lado`` com folga
+   de pelo menos ``--folga`` até parede/navio (a 1 m da parede o Hydrone já colidiu no ar); 4 pilares e o spawn nas
+   proporções do cenário provisório; o navio (sólido cercado pela bacia) vira caixa de exclusão do cenário ``dique``.
 4. **Conferência** (mesmo lançamento): no centro, nos cantos da área e no spawn, o Hydrone é posto na água e no ar e
    mede o obstáculo mais próximo na horizontal (36 lasers), o fundo e se colidiu.
 5. **Fotos** (segundo lançamento, ``--sem-fotos`` pula): pilares criados com ``spawn_prop`` nas posições sugeridas, fotos
@@ -120,14 +121,29 @@ def folga(bacia, passo):
     return np.where(bacia, np.maximum(d, 0.0), 0.0)
 
 
-def posicionar(bacia, xs, ys, passo, lado):
-    """Centro do quadrado de lado ``lado`` cuja menor folga interna é máxima; devolve (x, y, menor folga)."""
+def posicionar(bacia, xs, ys, passo, lado, lado_min=None, folga_min=0.0, razao_max=2.0):
+    """Retângulo da área do Goto: o maior (lados de ``lado_min`` a ``lado``, razão até ``razao_max``) cuja menor folga
+    interna até o sólido chega a ``folga_min``, no lugar onde essa folga é máxima. Sem ``lado_min``, só o quadrado de
+    ``lado``. Se nenhum tamanho tem a folga pedida, fica o de ``lado_min`` com a maior folga possível.
+    Devolve (x, y, menor folga, largura em x, altura em y)."""
     from scipy import ndimage
     f = folga(bacia, passo)
-    k = 2 * int(round(lado / 2.0 / passo)) + 1
-    minimo = ndimage.minimum_filter(f, size=k, mode='constant', cval=0.0)
-    iy, ix = np.unravel_index(int(np.argmax(minimo)), minimo.shape)
-    return float(xs[ix]), float(ys[iy]), float(minimo[iy, ix])
+    lados = [lado] if lado_min is None else list(np.arange(lado, lado_min - 1e-9, -passo))
+    melhor, reserva = None, None
+    for w in lados:
+        for h in lados:
+            if max(w, h) / min(w, h) > razao_max:
+                continue
+            kx, ky = 2 * int(round(w / 2.0 / passo)) + 1, 2 * int(round(h / 2.0 / passo)) + 1
+            minimo = ndimage.minimum_filter(f, size=(ky, kx), mode='constant', cval=0.0)
+            iy, ix = np.unravel_index(int(np.argmax(minimo)), minimo.shape)
+            cand = (float(xs[ix]), float(ys[iy]), float(minimo[iy, ix]), (kx - 1) * passo, (ky - 1) * passo)
+            if cand[2] >= folga_min and (melhor is None or (cand[3] * cand[4], min(cand[3:]), cand[2]) >
+                                         (melhor[3] * melhor[4], min(melhor[3:]), melhor[2])):
+                melhor = cand
+            if reserva is None or cand[2] > reserva[2]:
+                reserva = cand
+    return melhor or reserva
 
 
 def caixas_exclusao(bacia, agua, topo, xs, ys, passo, nivel_agua, margem=0.5, z_min=-5.0):
@@ -155,18 +171,21 @@ def caixas_exclusao(bacia, agua, topo, xs, ys, passo, nivel_agua, margem=0.5, z_
     return caixas, fora
 
 
-def montar_cenarios(bacia, agua, topo, xs, ys, passo, nivel_agua, lado, afastamento, base=None):
-    """Cenários ``pilares`` e ``dique`` sugeridos, no formato do goto_dique.json (mantém os outros parâmetros de ``base``)."""
+def montar_cenarios(bacia, agua, topo, xs, ys, passo, nivel_agua, lado, afastamento=0.2, base=None, lado_min=None,
+                    folga_min=0.0):
+    """Cenários ``pilares`` e ``dique`` sugeridos, no formato do goto_dique.json (mantém os outros parâmetros de ``base``).
+    Os 4 pilares ficam em centro ± ``afastamento``·lado em cada eixo e o spawn em centro + (0,36; −0,26)·lado, as mesmas
+    proporções do cenário provisório (área de 10 m, pilares a ± 2 m, spawn em + (3,6; −2,6))."""
     base = base or {}
-    cx, cy, f_min = posicionar(bacia, xs, ys, passo, lado)
-    h = lado / 2.0
+    cx, cy, f_min, w, h = posicionar(bacia, xs, ys, passo, lado, lado_min, folga_min)
     p0 = base.get('pilares', {})
     pilar = (p0.get('pilares') or [{'raio': 0.5, 'base_z': -3.0, 'altura': 8.0}])[0]
-    pilares = [{'xy': [round(cx + sx * afastamento, 2), round(cy + sy * afastamento, 2)], 'raio': pilar['raio'],
+    pilares = [{'xy': [round(cx + sx * afastamento * w, 2), round(cy + sy * afastamento * h, 2)], 'raio': pilar['raio'],
                 'base_z': pilar['base_z'], 'altura': pilar['altura']} for sx in (-1, 1) for sy in (-1, 1)]
-    spawn = [round(cx + SPAWN_REL[0], 2), round(cy + SPAWN_REL[1], 2), (p0.get('spawn') or [0, 0, 2.0])[2]]
+    spawn = [round(cx + SPAWN_REL[0] / 10.0 * w, 2), round(cy + SPAWN_REL[1] / 10.0 * h, 2),
+             (p0.get('spawn') or [0, 0, 2.0])[2]]
     pilares_cfg = {**p0, 'provisorio': False, 'nivel_agua': nivel_agua, 'origem': [round(cx, 2), round(cy, 2)],
-                   'area': [[round(cx - h, 2), round(cy - h, 2)], [round(cx + h, 2), round(cy + h, 2)]],
+                   'area': [[round(cx - w / 2, 2), round(cy - h / 2, 2)], [round(cx + w / 2, 2), round(cy + h / 2, 2)]],
                    'spawn': spawn, 'pilares': pilares, 'exclusao': []}
     iy, ix = np.nonzero(bacia)
     bx0, bx1 = float(xs[ix.min()]) - passo / 2, float(xs[ix.max()]) + passo / 2
@@ -178,7 +197,7 @@ def montar_cenarios(bacia, agua, topo, xs, ys, passo, nivel_agua, lado, afastame
                  'area': [[round(bx0, 2), round(by0, 2)], [round(bx1, 2), round(by1, 2)]],
                  'spawn': spawn, 'pilares': [],
                  'exclusao': [{'min': c['min'], 'max': c['max']} for c in caixas]}
-    medidas = {'folga_min_area_m': round(f_min, 2), 'bacia_m2': round(float(bacia.sum()) * passo * passo, 1),
+    medidas = {'folga_min_area_m': round(f_min, 2), 'area_lados_m': [w, h], 'bacia_m2': round(float(bacia.sum()) * passo * passo, 1),
                'bacia_retangulo': [[bx0, by0], [bx1, by1]], 'caixas': caixas,
                'solido_nas_bordas_do_retangulo_m2': round(fora, 1), 'passo_m': passo}
     return pilares_cfg, dique_cfg, medidas
@@ -289,7 +308,7 @@ def sensores(com_cameras, largura=1024, altura=1024):
              'configuration': {'CaptureWidth': 960, 'CaptureHeight': 540}, 'location': [0.35, 0, 0.05], 'rotation': [0, 0, 0]},
             {'sensor_name': 'CameraBaixo', 'sensor_type': 'RGBCamera',
              'configuration': {'CaptureWidth': largura, 'CaptureHeight': altura}, 'location': [0, 0, -0.1],
-             'rotation': [0, -90, 0]},
+             'rotation': [0, 90, 0]},   # pitch +90 olha para baixo (−90 olhou para cima no lab)
         ]
     return s
 
@@ -391,6 +410,19 @@ def conferir(env, agente, pilares_cfg, folga_mapa, xs, ys, nivel_agua, zs):
     return linhas
 
 
+LOG_MOTOR = os.path.expanduser('~/.local/share/biguasim/*/worlds/*/Linux/*/Saved/Logs/HolodeckLog.txt')
+
+
+def spawnprop_recusado() -> int:
+    """Quantos SpawnProp o motor recusou no log mais recente (no lab, o mundo SkyDive 1.1.0 não conhece o comando)."""
+    import glob
+    logs = sorted(glob.glob(LOG_MOTOR), key=os.path.getmtime)
+    if not logs:
+        return 0
+    with open(logs[-1], errors='replace') as f:
+        return sum('failed to make command:  SpawnProp' in ln for ln in f)
+
+
 def fotos(args, pilares_cfg, saida):
     import cv2
     from explorar_mapa import imagem, plano
@@ -438,8 +470,11 @@ def main():
     ap.add_argument('--agua', type=float, default=0.0, help='nível da água (m)')
     ap.add_argument('--limiar-agua', type=float, default=0.5, help='topo até nível + limiar conta como água (m)')
     ap.add_argument('--semente', default=None, help='x,y dentro da bacia (escolhe a bacia à mão)')
-    ap.add_argument('--lado', type=float, default=10.0, help='lado da área quadrada do cenário pilares (m)')
-    ap.add_argument('--afastamento', type=float, default=2.0, help='pilares em centro ± afastamento (m)')
+    ap.add_argument('--lado', type=float, default=10.0, help='maior lado da área do cenário pilares (m)')
+    ap.add_argument('--lado-min', type=float, default=4.0, help='menor lado aceito para a área (m)')
+    ap.add_argument('--folga', type=float, default=1.5, help='folga mínima da área até parede/navio (m)')
+    ap.add_argument('--afastamento', type=float, default=0.2, help='pilares em centro ± afastamento·lado')
+    ap.add_argument('--mapa', default=None, help='pasta de uma rodada anterior: usa o mapa.npz dela (sem varrer)')
     ap.add_argument('--z-conferencia', default='-0.7,2.0,4.5', help='alturas da conferência, relativas à água')
     ap.add_argument('--sem-fotos', action='store_true')
     ap.add_argument('--saida', default=None)
@@ -457,54 +492,65 @@ def main():
 
     env = None
     try:
-        # 1–2. passada grossa e bacia
-        if args.dry_run:
-            xs, ys, topo = mapa_sintetico(regiao, args.passo)
-        else:
-            env, agente = abrir([regiao[0], regiao[2], args.z_varredura], args, com_cameras=False)
-            print("== passada grossa", flush=True)
-            xs, ys, topo = (*grade(regiao, args.passo), None)
-            topo, _ = varrer(env, agente, xs, ys, args.z_varredura, 'grossa')
-        agua, bacia = analisar(topo, xs, ys, args, saida, '_grosso', semente)
-        if bacia is None:
-            raise SystemExit(f"nenhuma água cercada nas 4 direções na região {regiao}; veja {saida}/mapa_grosso.png e "
-                             f"passe --semente x,y dentro do dique")
-        f = folga(bacia, args.passo)
-        iy, ix = np.unravel_index(int(np.argmax(f)), f.shape)
-        semente_fina = (float(xs[ix]), float(ys[iy]))
-        jy, jx = np.nonzero(bacia)
-        print(f"bacia (grossa): {bacia.sum() * args.passo ** 2:.0f} m², x {xs[jx.min()]:.0f}–{xs[jx.max()]:.0f}, "
-              f"y {ys[jy.min()]:.0f}–{ys[jy.max()]:.0f}; ponto mais folgado {semente_fina}", flush=True)
-
-        # passada fina na bacia e bordas
-        passo = args.passo
-        if args.passo_fino > 0:
-            borda = 2 * args.passo
-            fina = (xs[jx.min()] - borda, xs[jx.max()] + borda, ys[jy.min()] - borda, ys[jy.max()] + borda)
-            if args.dry_run:
-                xs, ys, topo = mapa_sintetico(regiao, args.passo_fino)
-                sel_x = (xs >= fina[0]) & (xs <= fina[1])
-                sel_y = (ys >= fina[2]) & (ys <= fina[3])
-                xs, ys, topo = xs[sel_x], ys[sel_y], topo[np.ix_(sel_y, sel_x)]
-            else:
-                print(f"== passada fina em x {fina[0]:.0f}–{fina[1]:.0f}, y {fina[2]:.0f}–{fina[3]:.0f}", flush=True)
-                xs, ys = grade(fina, args.passo_fino)
-                topo, _ = varrer(env, agente, xs, ys, args.z_varredura, 'fina')
-            passo = args.passo_fino
+        if args.mapa:
+            # mapa de uma rodada anterior: sem varrer de novo; o simulador só abre para a conferência
+            d = np.load(os.path.join(args.mapa, 'mapa.npz'))
+            xs, ys, topo = d['xs'], d['ys'], d['topo']
+            passo = float(xs[1] - xs[0])
             agua = classificar(topo, args.agua, args.limiar_agua)
-            bacia = achar_bacia(agua, xs, ys, semente_fina)
+            bacia = d['bacia'] if semente is None else achar_bacia(agua, xs, ys, semente)
+            print(f"mapa de {args.mapa}: {len(xs)} × {len(ys)} pontos, passo {passo} m", flush=True)
+            if not args.dry_run:
+                env, agente = abrir([float(xs[0]), float(ys[0]), args.z_varredura], args, com_cameras=False)
+        else:
+            # 1–2. passada grossa e bacia
+            if args.dry_run:
+                xs, ys, topo = mapa_sintetico(regiao, args.passo)
+            else:
+                env, agente = abrir([regiao[0], regiao[2], args.z_varredura], args, com_cameras=False)
+                print("== passada grossa", flush=True)
+                xs, ys, topo = (*grade(regiao, args.passo), None)
+                topo, _ = varrer(env, agente, xs, ys, args.z_varredura, 'grossa')
+            agua, bacia = analisar(topo, xs, ys, args, saida, '_grosso', semente)
+            if bacia is None:
+                raise SystemExit(f"nenhuma água cercada nas 4 direções na região {regiao}; veja {saida}/mapa_grosso.png e "
+                                 f"passe --semente x,y dentro do dique")
+            f = folga(bacia, args.passo)
+            iy, ix = np.unravel_index(int(np.argmax(f)), f.shape)
+            semente_fina = (float(xs[ix]), float(ys[iy]))
+            jy, jx = np.nonzero(bacia)
+            print(f"bacia (grossa): {bacia.sum() * args.passo ** 2:.0f} m², x {xs[jx.min()]:.0f}–{xs[jx.max()]:.0f}, "
+                  f"y {ys[jy.min()]:.0f}–{ys[jy.max()]:.0f}; ponto mais folgado {semente_fina}", flush=True)
+
+            # passada fina na bacia e bordas
+            passo = args.passo
+            if args.passo_fino > 0:
+                borda = 2 * args.passo
+                fina = (xs[jx.min()] - borda, xs[jx.max()] + borda, ys[jy.min()] - borda, ys[jy.max()] + borda)
+                if args.dry_run:
+                    xs, ys, topo = mapa_sintetico(regiao, args.passo_fino)
+                    sel_x = (xs >= fina[0]) & (xs <= fina[1])
+                    sel_y = (ys >= fina[2]) & (ys <= fina[3])
+                    xs, ys, topo = xs[sel_x], ys[sel_y], topo[np.ix_(sel_y, sel_x)]
+                else:
+                    print(f"== passada fina em x {fina[0]:.0f}–{fina[1]:.0f}, y {fina[2]:.0f}–{fina[3]:.0f}", flush=True)
+                    xs, ys = grade(fina, args.passo_fino)
+                    topo, _ = varrer(env, agente, xs, ys, args.z_varredura, 'fina')
+                passo = args.passo_fino
+                agua = classificar(topo, args.agua, args.limiar_agua)
+                bacia = achar_bacia(agua, xs, ys, semente_fina)
 
         # 3. posição
         pilares_cfg, dique_cfg, medidas = montar_cenarios(bacia, agua, topo, xs, ys, passo, args.agua, args.lado,
-                                                          args.afastamento, base)
+                                                          args.afastamento, base, args.lado_min, args.folga)
         folga_mapa = folga(bacia, passo)
         np.savez_compressed(os.path.join(saida, 'mapa.npz'), xs=xs, ys=ys, topo=topo, agua=agua, bacia=bacia,
                             folga=folga_mapa)
         desenhar(os.path.join(saida, 'mapa.png'), topo, xs, ys, agua, args.agua, bacia, pilares_cfg, dique_cfg)
         erros = checar_cenario(pilares_cfg) + [f"dique: {e}" for e in checar_cenario(dique_cfg)]
-        if medidas['folga_min_area_m'] < 1.0:
-            erros.append(f"a área de {args.lado} m tem só {medidas['folga_min_area_m']} m de folga até o sólido mais "
-                         f"próximo (menos de 1 m): diminua --lado")
+        if medidas['folga_min_area_m'] < args.folga:
+            erros.append(f"nenhuma área de {args.lado_min} a {args.lado} m tem {args.folga} m de folga; a de "
+                         f"{medidas['area_lados_m']} m tem {medidas['folga_min_area_m']} m")
 
         # 4. conferência
         linhas = []
@@ -554,6 +600,10 @@ def main():
     if not args.dry_run and not args.sem_fotos:
         print("== fotos com os pilares", flush=True)
         fotos(args, pilares_cfg, saida)
+        recusados = spawnprop_recusado()
+        if recusados:
+            print(f"ATENÇÃO: o motor recusou {recusados} SpawnProp no último log ({LOG_MOTOR}): os pilares NÃO foram "
+                  "criados no simulador (nem nas fotos, nem no GotoEnv)", flush=True)
     return 1 if erros else 0
 
 

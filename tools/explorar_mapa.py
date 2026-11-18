@@ -69,7 +69,8 @@ def sensores(nivel: str, largura: int, altura: int, extras: str = EXTRAS_PADRAO)
         {'sensor_name': 'CameraFrente', 'sensor_type': 'RGBCamera',
          'configuration': {'CaptureWidth': largura, 'CaptureHeight': altura}, 'location': [0.35, 0, 0.05], 'rotation': [0, 0, 0]},
         {'sensor_name': 'CameraBaixo', 'sensor_type': 'RGBCamera',
-         'configuration': {'CaptureWidth': largura, 'CaptureHeight': altura}, 'location': [0, 0, -0.1], 'rotation': [0, -90, 0]},
+         'configuration': {'CaptureWidth': largura, 'CaptureHeight': altura}, 'location': [0, 0, -0.1], 'rotation': [0, 90, 0]},
+        # pitch +90 olha para baixo (−90 olhou para cima no lab, mapear_dique 2026-11-18)
     ]
     if nivel == 'sem_medidas':
         return base
