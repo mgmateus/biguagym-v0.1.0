@@ -404,6 +404,8 @@ def main():
               f"sentido dos lasers: {sinal:+d} (células ocupadas: {notas})",
               f"pontos de LiDAR: {len(pontos)}; candidatos por altura: { {z: len(c) for z, c in por_z.items()} }",
               f"pilares (abaixo e acima da água): {len(pilares)}",
+              *[f"candidatos z={z:+.1f}: {sorted(c)}" for z, c in por_z.items()],
+              *[f"pilar: {p}" for p in pilares],
               *[f"grupo {k}: {g['n']} pilares, centro {g['centro']}, caixa {g['caixa']}" for k, g in enumerate(grupos[:12])]]
     with open(os.path.join(saida, 'resumo.txt'), 'w') as f:
         f.write('\n'.join(resumo) + '\n')
