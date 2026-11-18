@@ -19,7 +19,7 @@ etapa "pytest"; $PY -m pytest -q tests 2>&1 | tail -2
         --saida explorar_mapa/teste_extras_$ex 2>&1 | grep -E "recusou|criado com|Error|processos" | head -8
     echo "processos: $(procs)"
 done
-etapa "diag_rotacao_hydrone goto (ω medido × previsto, guinada no ar e na água)"
+etapa "diag_rotacao_hydrone goto (v e ω medidos × previstos, avanço e guinada no ar e na água)"
 timeout 600 $PY tools/diag_rotacao_hydrone.py goto 2>&1 | grep -v -i -E "warn|deprecat|torch.cross|linalg.cross|cross    =" | tail -40
 echo "processos: $(procs)"
 

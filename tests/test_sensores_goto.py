@@ -26,7 +26,7 @@ def preparar(cls, cenario='pilares'):
     env.env_cfg, env.obs_cfg = env._build_params()
     env._env = SimFalso(estado(env._cena['spawn']))
     env._acao_ant = np.zeros(3, np.float32)
-    env._integrar_rotacao, env._w_dot = False, np.zeros(3)
+    env._integrar_dinamica, env._acc = False, np.zeros(6)
     return env
 
 

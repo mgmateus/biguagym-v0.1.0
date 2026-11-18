@@ -75,3 +75,14 @@ Investigação do avanço:
 - **Proposta (fora do design aprovado, aguardando aprovação):** estender a integração à parte linear — impor também
   v + a·dt (compensada por e^(dt)) no mesmo `set_physics_state` e mandar aceleração zero ao motor, que fica só com a
   cinemática e as colisões. Ver "Extensão proposta" no `design.md`.
+
+## 2026-11-17 — T6: integração linear (extensão aprovada)
+- Usuário: "pode seguir sim" (aprovação da extensão proposta no design.md).
+- `biguagym/core/goto.py`: o envoltório guarda as 6 acelerações em `_acc` e manda **zero** ao motor; `_impor_rotacao` →
+  `_impor_estado`, que impõe v = (v + v̇·dt)·e^(dt) (v do `DynamicsSensor`, a mesma que a dinâmica lê) e ω como antes;
+  `AMORTECIMENTO_LINEAR_MOTOR = 1.0` (medido: 0,3 → 0,285 m/s em um tick); `integrar_rotacao` → `integrar_dinamica`.
+  Motivo: o motor descarta acelerações lineares pequenas (0,2 m/s² por 5 s → 0 m), e o avanço do controlador dos autores
+  pede ~0,03 m/s².
+- Testes: `test_rotacao_hydrone.py` cobre motor recebendo zeros e v imposta a partir do `DynamicsSensor`; fixtures antigas
+  com os nomes novos. `pytest tests` → 169 passed.
+- `diag_rotacao_hydrone.py goto`: cmd_vel_yaw [0,3, 0, 0, 5°], razão medido/previsto de v_x e de ω_z, no ar e na água.

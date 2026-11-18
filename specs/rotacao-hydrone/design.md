@@ -69,7 +69,7 @@ No `BiguaSim.step`, cada tick faz: `tick()` (aplica a ação anterior e o telepo
 
 ---
 
-## Extensão proposta — integração linear (Status: rascunho, aguardando aprovação)
+## Extensão — integração linear (aprovada pelo usuário em 2026-11-17: "pode seguir sim")
 
 **Por quê:** no lab (log, 2026-11-17), o motor também descarta acelerações lineares pequenas (0,035 e 0,2 m/s² por 5 s → 0 m)
 e amortece a velocidade linear a 1 s⁻¹. O controlador de velocidade dos autores no ar pede ~0,03 m/s² para a frente
@@ -82,7 +82,8 @@ avança a partir do repouso.
   `DynamicsSensor` (o mesmo que a dinâmica lê) e `AMORTECIMENTO_LINEAR_MOTOR = 1.0` (medido).
 - O motor fica com a cinemática (integra a posição e a atitude a partir de v e ω) e as colisões; a posição e a atitude
   continuam do motor (não teleportamos para posições integradas por nós).
-- `integrar_rotacao` vira `integrar_dinamica` (mantendo `integrar_rotacao` como sinônimo), com o mesmo padrão `True`.
+- `integrar_rotacao` vira `integrar_dinamica` (padrão `True`); sem sinônimo, porque só as ferramentas e os testes usavam o nome
+  antigo. `_w_dot` vira `_acc` (as 6 acelerações).
 
 **Verificação:** testes sem simulador (v imposta = v + a·dt compensada; motor recebe zeros); no lab, `diag_rotacao_hydrone.py
 goto` com v medido/previsto ≈ 1, e `diag_goto.py` com avanço ≈ 0,4 m em 5 s a partir do repouso (o que a dinâmica dos autores

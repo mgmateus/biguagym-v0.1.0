@@ -53,11 +53,18 @@ motor ignora.
 - **R5** — QUANDO a integração estiver ligada, O SISTEMA NÃO DEVE piorar o resto: subida e avanço continuam funcionando,
   sem NaN, e os smokes `HydroneGotoPilares-v0/-v1/-v2` continuam ok.
 
+- **R6** (extensão aprovada em 2026-11-17: "pode seguir sim") — QUANDO a integração estiver ligada, O SISTEMA DEVE integrar
+  também a aceleração linear da dinâmica (impor v + v̇·dt, compensada pelo amortecimento linear do motor) e mandar
+  aceleração zero ao motor, para que acelerações pequenas (que o motor descarta) não se percam. Com avanço máximo a partir
+  do repouso no ar, o Hydrone deve andar o que a dinâmica dos autores dá sozinha (~0,4 m em 5 s, `tools/avanco_offline_hydrone.py`).
+
 ## Critérios de aceitação
 - R1, R2, R3: `pytest tests/test_rotacao_hydrone.py` → passa (simulador falso: ω̇ capturado, parte angular zerada no
   motor, `set_physics_state` com ω certo, um `step` por tick, integração desligada não chama `set_physics_state`).
 - R4: `python tools/diag_goto.py HydroneGotoPilares-v0 5` no lab → guinada + e − com |Δyaw| > 15° (antes ≈ 0) e o "direto"
   de 20° girando; `python tools/diag_rotacao_hydrone.py` com o modo Goto → idem.
+- R6: `pytest tests/test_rotacao_hydrone.py` (motor recebe zeros; v imposta) e, no lab, `diag_rotacao_hydrone.py goto` com
+  v_x medido/previsto ≈ 1 e `diag_goto.py ... avanco` andando ~0,4 m em 5 s a partir do repouso.
 - R5: `bash tools/testar_goto_lab.sh` no lab → pytest ok, os 3 smokes ok, sem NaN, 0 processos órfãos; no `diag_goto`, a
   subida continua (> 0,5 m) e o avanço move o Hydrone na direção do nariz.
 

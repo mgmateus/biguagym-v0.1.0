@@ -48,12 +48,12 @@ def avanco(env_id, passos):
     import gymnasium as gym
 
     for integrar in (False, True):
-        env = gym.make(env_id, integrar_rotacao=integrar)
+        env = gym.make(env_id, integrar_dinamica=integrar)
         u = env.unwrapped
         try:
             env.reset()
             p0 = np.asarray(u._dynamics[6:9], dtype=np.float64).copy()
-            print(f"== avanço, integrar_rotacao={integrar}", flush=True)
+            print(f"== avanço, integrar_dinamica={integrar}", flush=True)
             for i in range(passos):
                 env.step(np.asarray([1, 0, 0], dtype=np.float32))
                 if i % 20 == 19:

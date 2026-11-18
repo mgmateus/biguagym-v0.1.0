@@ -1,4 +1,4 @@
-"""Spec rotacao-hydrone: o GotoEnv integra a aceleração angular que o motor do BiguaSim 1.1.0 não aplica (sem simulador)."""
+"""Spec rotacao-hydrone: o GotoEnv integra as acelerações que o motor do BiguaSim 1.1.0 não aplica (sem simulador)."""
 import math
 import os
 import sys
@@ -13,14 +13,15 @@ sys.path.insert(0, os.path.join(os.path.dirname(AQUI), 'biguagym'))
 from core.goto import GotoEnv  # noqa: E402
 from test_hydrone_goto import montar  # noqa: E402
 
-ACC = [0.0, 0.0, 1.0, 0.1, 0.2, 3.0]          # o que a dinâmica "calcula": linear (3) + angular (3), mundo
+ACC = [0.03, 0.0, 1.0, 0.1, 0.2, 3.0]         # o que a dinâmica "calcula": linear (3) + angular (3), mundo
 W = np.array([0.01, -0.02, 0.5])                # ω medido pelo DynamicsSensor (mundo, rad/s)
-POS, VEL, RPY = [103.6, 97.4, 2.0], [0.1, -0.2, 0.3], [1.0, -2.0, 30.0]
+V = np.array([0.2, 0.05, -0.1])                 # v medida pelo DynamicsSensor (centro de massa, mundo)
+POS, VEL, RPY = [103.6, 97.4, 2.0], [0.1, -0.2, 0.3], [1.0, -2.0, 30.0]   # RPYDynamicsSensor (ator)
 
 
 def estado():
     din = np.zeros(19)
-    din[6:9], din[12:15], din[18] = POS, W, 1.0
+    din[3:6], din[6:9], din[12:15], din[18] = V, POS, W, 1.0
     rpy = np.zeros(18)
     rpy[3:6], rpy[6:9], rpy[15:18] = VEL, POS, RPY
     return {'DynamicsSensor': din, 'RPYDynamicsSensor': rpy, 'CollisionSensor': np.array([False])}
@@ -77,29 +78,31 @@ class SimDinamica:
 def preparar(integrar=True, repeticoes=1):
     env = montar()
     env._env = SimDinamica()
-    env._integrar_rotacao = integrar
+    env._integrar_dinamica = integrar
     env._action_repeat = repeticoes
     env.reset_count = 0
     env._reset()
     return env
 
 
-# --- R1: só a aceleração linear vai ao motor; ω + ω̇·dt é imposta ------------------------------------------------
-def test_motor_recebe_so_a_aceleracao_linear():
+# --- R1/R6: o motor recebe aceleração zero; v + v̇·dt e ω + ω̇·dt são impostas ---------------------------------
+def test_motor_recebe_aceleracao_zero():
     env = preparar()
     env._step(np.zeros(3, np.float32))
-    assert env._env.agente.acoes == [[0.0, 0.0, 1.0, 0.0, 0.0, 0.0]]
-    assert np.allclose(env._w_dot, ACC[3:])
+    assert env._env.agente.acoes == [[0.0] * 6]
+    assert np.allclose(env._acc, ACC)
 
 
-def test_impoe_velocidade_angular_integrada():
+def test_impoe_velocidades_integradas():
     env = preparar()
     env._step(np.zeros(3, np.float32))
     (loc, rot, vel, w), = env._env.agente.fisica
     dt = 1.0 / GotoEnv.TICKS_POR_S
-    esperado = (W + np.array(ACC[3:]) * dt) * math.exp(GotoEnv.AMORTECIMENTO_ANGULAR_MOTOR * dt)
-    assert np.allclose(loc, POS) and np.allclose(rot, RPY) and np.allclose(vel, VEL)
-    assert np.allclose(w, np.degrees(esperado))                      # set_physics_state recebe graus/s
+    v_esp = (V + np.array(ACC[:3]) * dt) * math.exp(GotoEnv.AMORTECIMENTO_LINEAR_MOTOR * dt)
+    w_esp = (W + np.array(ACC[3:]) * dt) * math.exp(GotoEnv.AMORTECIMENTO_ANGULAR_MOTOR * dt)
+    assert np.allclose(loc, POS) and np.allclose(rot, RPY)            # posição e atitude ficam as do motor
+    assert np.allclose(vel, v_esp)                                    # v do DynamicsSensor, não a do ator
+    assert np.allclose(w, np.degrees(w_esp))                          # set_physics_state recebe graus/s
 
 
 def test_instalar_de_novo_nao_empilha_o_envoltorio():
@@ -107,7 +110,7 @@ def test_instalar_de_novo_nao_empilha_o_envoltorio():
     env._reset()
     env._instalar_integrador()
     modelo = env._env._dynamics_dict['robot']
-    assert modelo.step([None], [[0, 0, 0, 0]]) == [[0.0, 0.0, 1.0, 0.0, 0.0, 0.0]]
+    assert modelo.step([None], [[0, 0, 0, 0]]) == [[0.0] * 6]
     assert modelo._step_original.__self__.chamadas == 1               # um só passo da dinâmica original
 
 
@@ -125,14 +128,14 @@ def test_integracao_desligada():
     env._step(np.zeros(3, np.float32))
     assert env._env.repeticoes == [3]
     assert env._env.agente.fisica == []
-    assert env._env.agente.acoes[0] == ACC                            # a aceleração angular segue para o motor
+    assert env._env.agente.acoes[0] == ACC                            # a aceleração segue inteira para o motor
 
 
-def test_reset_zera_omega_ponto():
+def test_reset_zera_a_aceleracao():
     env = preparar()
     env._step(np.zeros(3, np.float32))
     env._reset()
-    assert np.all(env._w_dot == 0)
+    assert np.all(env._acc == 0)
 
 
 def test_batch_maior_que_1_recusa():

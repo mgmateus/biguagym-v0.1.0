@@ -16,8 +16,8 @@ Uso: python tools/diag_rotacao_hydrone.py linear [agente]   (só o H)
 Entre os testes o agente volta à pose inicial (atitude zero, parado).
 
 Uso: python tools/diag_rotacao_hydrone.py [agente ...]   (padrão: Hydrone DjiMatrice)
-     python tools/diag_rotacao_hydrone.py goto            (com a integração angular do GotoEnv, spec rotacao-hydrone:
-                                                           ω medido × previsto e guinada no ar e na água)
+     python tools/diag_rotacao_hydrone.py goto            (com a integração do GotoEnv, spec rotacao-hydrone: v e ω
+                                                           medidos × previstos, avanço e guinada no ar e na água)
 """
 import os
 import sys
@@ -161,14 +161,18 @@ def rodar(agente):
             sim.__on_exit__()
 
 
-def rodar_goto(ticks=60):
-    """cmd_vel_yaw de 20° pela integração do GotoEnv, no ar (z = 2) e na água (z = -0,5).
+def rodar_goto(ticks=60, comando=(0.3, 0.0, 0.0, 5.0)):
+    """cmd_vel_yaw (0,3 m/s em x e desvio de 5°) pela integração do GotoEnv, no ar (z = 2) e na água (z = -0,5).
 
-    A cada tick compara a ω medida com a prevista pela dinâmica (ω anterior + ω̇·dt): a razão perto de 1 confirma o
-    amortecimento do motor usado na compensação (AMORTECIMENTO_ANGULAR_MOTOR).
+    A cada tick compara v_x e ω_z medidas com as previstas pela dinâmica (valor anterior + aceleração·dt): a razão perto de
+    1 confirma o amortecimento do motor usado na compensação (AMORTECIMENTO_LINEAR_MOTOR, AMORTECIMENTO_ANGULAR_MOTOR).
     """
     import gymnasium as gym
     import register  # noqa: F401
+
+    def resumo(r):
+        r = np.asarray(r)
+        return (f"mediana {np.median(r):.3f} (min {r.min():.3f}, max {r.max():.3f})" if r.size else "sem amostras")
 
     env = gym.make('HydroneGotoPilares-v0')
     u = env.unwrapped
@@ -181,27 +185,28 @@ def rodar_goto(ticks=60):
                 st = u._unwrap_state(u._passo_sim([0.0, 0.0, 0.0, 0.0]))
             d0 = np.asarray(st['DynamicsSensor'], dtype=float).ravel()
             u._set_dynamics(st)
-            yaw0, yaw_ant, acc = float(u._dynamics[17]), float(u._dynamics[17]), 0.0
-            w_ant, wd_ant, razoes = d0[12:15].copy(), u._w_dot.copy(), []
-            print(f"== goto, {meio}: z0 = {d0[8]:+.2f}", flush=True)
+            yaw_ant, dyaw = float(u._dynamics[17]), 0.0
+            ant, acc_ant, rv, rw = d0.copy(), u._acc.copy(), [], []
+            print(f"== goto, {meio}: z0 = {d0[8]:+.2f}, comando {list(comando)}", flush=True)
             for i in range(ticks):
-                st = u._unwrap_state(u._passo_sim([0.0, 0.0, 0.0, 20.0]))
+                st = u._unwrap_state(u._passo_sim(list(comando)))
                 d = np.asarray(st['DynamicsSensor'], dtype=float).ravel()
                 u._set_dynamics(st)
-                previsto = w_ant[2] + wd_ant[2] / u.TICKS_POR_S
-                if abs(previsto) > 1e-3:
-                    razoes.append(d[14] / previsto)
+                v_prev = ant[3] + acc_ant[0] / u.TICKS_POR_S
+                w_prev = ant[14] + acc_ant[5] / u.TICKS_POR_S
+                if abs(v_prev) > 1e-3:
+                    rv.append(d[3] / v_prev)
+                if abs(w_prev) > 1e-3:
+                    rw.append(d[14] / w_prev)
                 yaw = float(u._dynamics[17])
-                acc += (yaw - yaw_ant + np.pi) % (2 * np.pi) - np.pi
+                dyaw += (yaw - yaw_ant + np.pi) % (2 * np.pi) - np.pi
                 yaw_ant = yaw
                 if i % 10 == 0 or i == ticks - 1:
-                    print(f"  tick {i:3d}: yaw {np.degrees(yaw):+8.2f}°  w_z medido {d[14]:+.3f} previsto {previsto:+.3f}  "
-                          f"ω̇ {np.round(u._w_dot, 2)}  rpy {np.round(rpy(d), 1)}  pos {np.round(d[6:9], 2)}", flush=True)
-                w_ant, wd_ant = d[12:15].copy(), u._w_dot.copy()
-            r = np.asarray(razoes)
-            print(f"  {meio}: Δyaw = {np.degrees(acc):+.1f}° em {ticks} ticks; w medido/previsto: mediana "
-                  f"{np.median(r) if r.size else float('nan'):.3f} (min {r.min() if r.size else float('nan'):.3f}, "
-                  f"max {r.max() if r.size else float('nan'):.3f})", flush=True)
+                    print(f"  tick {i:3d}: v_x {d[3]:+.3f} (prev {v_prev:+.3f})  w_z {d[14]:+.3f} (prev {w_prev:+.3f})  "
+                          f"yaw {np.degrees(yaw):+7.2f}°  rpy {np.round(rpy(d), 1)}  pos {np.round(d[6:9], 2)}", flush=True)
+                ant, acc_ant = d.copy(), u._acc.copy()
+            print(f"  {meio}: Δpos = {np.round(d[6:9] - d0[6:9], 2)} m, Δyaw = {np.degrees(dyaw):+.1f}° em {ticks} ticks; "
+                  f"v_x medido/previsto {resumo(rv)}; w_z medido/previsto {resumo(rw)}", flush=True)
     finally:
         sim = getattr(u, '_env', None)
         env.close()
