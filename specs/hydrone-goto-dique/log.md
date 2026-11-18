@@ -65,3 +65,19 @@
     certa; **o simulador não aplica a aceleração angular de guinada ao Hydrone** (a linear, sim: subida de 1,1 m).
   - Causa fora do biguagym (BiguaSim 1.1.0, provavelmente o ator do Hydrone no Unreal); não alterei o BiguaSim. Precisa ir
     para os autores (hydrone-furg). Sem guinada, o agente não consegue apontar para o alvo nem virar a câmera.
+
+## 2026-11-18 — T8: `tools/mapear_dique.py` (ferramenta, sem mudar o ambiente)
+- Pedido do usuário: "Faça um código que mapeie o dique e encontre as coordenadas corretas para colocar os pilares".
+- Onde fica o dique: a documentação do BiguaSim (`biguasim_docs/packages/SkyDive/Pier-Harbor/`) mostra a bacia com o navio
+  cinza no canto inferior direito da vista de cima; com a escala dos eixos da figura, o navio fica em ≈ (150, −183), que
+  bate com o ponto "Moored Vessel" (142, −185) da documentação, e a bacia em x ≈ 126–177, y ≈ −260 a −114. É só uma
+  estimativa: a ferramenta mede.
+- `tools/mapear_dique.py`: varredura com laser para baixo a 40 m de altura (grossa de 3 m na região 110–200 × −275 a −95;
+  fina de 1 m na bacia) → mapa de alturas; água = topo ≤ nível + 0,5 m; bacia = maior grupo de água cercado por sólido
+  nas 4 direções (o mar aberto não é); área quadrada de 10 m onde a folga até parede/navio é máxima (transformada de
+  distância), 4 pilares em centro ± 2 m e spawn em centro + (3,6; −2,6), como o cenário provisório; o navio vira caixa de
+  exclusão do cenário `dique`. Depois confere com o Hydrone (obstáculo horizontal, fundo e colisão no centro, nos cantos
+  e no spawn, na água e no ar) e fotografa com os pilares criados por `spawn_prop`. Sai `cenario_sugerido.json`; o
+  `goto_dique.json` não é alterado. `--dry-run` usa um mapa sintético.
+- `tests/test_mapear_dique.py` (7 testes, mapa sintético): bacia certa (não o mar), área longe do navio e das paredes,
+  caixa do navio, dique aberto para o mar, semente. `pytest tests` → 180 passed.
