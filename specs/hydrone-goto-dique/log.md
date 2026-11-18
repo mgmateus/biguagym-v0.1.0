@@ -180,3 +180,14 @@ aviso de SpawnProp recusado, câmera com pitch +90°; Hydrone em `accel` com ace
   simulador, descida por nível, repetição, aviso, deslocamento por orientação, reimposição a cada tick; coordenadas
   antigas trocadas); `tests/test_sensores_goto.py` e `tests/test_rotacao_hydrone.py` adaptados (`_preparar_cenario`,
   simulador falso com os torpedos; a integração testada sem obstáculos). `pytest tests` → 209 passed.
+
+## 2026-11-18 — T10: ferramenta de conferência no simulador
+- `tools/conferir_obstaculos.py`: reset (tempo, fora do lugar, medido − imposto por orientação), varredura vertical do
+  LiDAR a 1,5 m de um pilar (extensão real da coluna → `origem_eixo` sugerida), fotos RGB/profundidade (spawn no ar e na
+  água, de cima do centro), anel do LiDAR × raio traçado em Python nas cápsulas (por obstáculo), passos/s com ações
+  aleatórias e términos por motivo. Motivo: verificar no lab que os obstáculos existem para todos os sensores e calibrar o
+  deslocamento da origem do ator (sinal desconhecido).
+- `tools/testar_obstaculos_lab.sh`: pytest, conferência dos dois cenários, smokes `HydroneGotoPilares-v0/-v1/-v2` e
+  `HydroneGotoDique-v0` (200 passos), processos do simulador a cada etapa.
+- `tests/test_conferir_obstaculos.py` (8 testes: raio nas cápsulas, extensão da coluna, índice do laser, anel). `pytest tests`
+  → 217 passed.

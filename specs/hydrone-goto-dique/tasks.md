@@ -25,7 +25,7 @@ explorar o mapa (não rodar ao mesmo tempo).
   `agente_obstaculo` e `obstaculos` (coordenadas reais), geometria em cápsulas, agente em lote, posicionamento no reset,
   reimposição a cada tick
   - Verificação: `pytest tests` → anteriores + novos passando
-- [ ] T10 — `tools/conferir_obstaculos.py` (posicionamento, calibração da origem, fotos, LiDAR, passos/s)
+- [x] T10 — `tools/conferir_obstaculos.py` (posicionamento, calibração da origem, fotos, LiDAR, passos/s)
   - Verificação: `python -m py_compile tools/conferir_obstaculos.py` e teste da análise sem simulador
 - [ ] T11 — ⏱ Lab: `conferir_obstaculos.py` nos cenários `pilares` e `dique`; smokes `-v0/-v1/-v2`
   - Verificação: tabela no log.md (torpedos no lugar, origem calibrada, fotos, LiDAR, passos/s, 0 órfãos)
