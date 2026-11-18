@@ -2048,3 +2048,25 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
 - Correção nas ferramentas: a câmera "para baixo" (pitch −90°) olhava para cima, agora usa +90° (`mapear_dique` e
   `explorar_mapa`).
 - Processos: nenhum meu sobrou; só os 4 do treino da outra sessão.
+
+### 2026-11-18 — Pilares que aparecem no simulador (busca de estruturas existentes)
+
+- Pedido: "os pilares tem que aparecer no mapa, pode usar estruturas já existentes no mundo parecidas ou algo assim".
+- Comandos que o motor do mundo SkyDive registra (`strings` do binário): SpawnAgent, DebugDraw, TeleportCamera,
+  Add/Remove/RotateSensor, RenderViewport, RGBCameraRate, AdjustRenderQuality, CustomCommand e as mensagens
+  acústica/óptica. **Não há comando para criar objetos estáticos.**
+- `tools/achar_pilares.py` (branch `spec/rotacao-hydrone`; `f5ba1f4`, `b128b05`, `8ade2c7`): mapa de alturas do porto,
+  fatias de LiDAR abaixo e acima da água e candidatos a pilar (pequenos, isolados, nas duas alturas). Testes: 8.
+  `mapear_dique.ir` agora teleporta por cima, porque o teleporte do motor para no primeiro obstáculo do caminho.
+  `pytest tests` → 192 passed.
+- Lab (combinado com a outra sessão, 13:57–14:24; `~/achar_pilares3.log`):
+  - **só 1 estrutura parecida com pilar** atravessa a superfície no porto inteiro, em (90,5; −229,1), junto à proa
+    do porta-contêineres;
+  - os outros candidatos estão só abaixo da água (apoios sob o cais leste, pedras do quebra-mar) ou só acima (postes
+    do portão do dique, peças do navio);
+  - não há grupo de pilares em água aberta.
+- **DebugDraw:** as caixas aparecem na câmera RGB, mas **não** na de profundidade, e não têm colisão. Não servem como
+  pilar.
+- Processos: nenhum meu sobrou; só os do treino da outra sessão.
+- Aguardando decisão do usuário: pedir aos autores um mundo com SpawnProp, usar agentes parados como obstáculos, ou
+  usar o dique sem pilares (navio e paredes como obstáculos).
