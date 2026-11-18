@@ -8,7 +8,8 @@ exatamente o que mandamos. Para cada agente o script mede:
   D. teleporte para guinada de 45° (3 ticks);
   E. aceleração angular em z de 1, 3,35 e 10 rad/s² (20 ticks cada);
   F. cmd_vel_yaw com desvio de 20° (30 ticks), gravando o que a dinâmica manda, e depois as mesmas acelerações
-     reenviadas em modo accel a partir da pose inicial.
+     reenviadas em modo accel a partir da pose inicial;
+  G. roll e pitch: ω de 30°/s em x e em y reimposta a cada tick (20 ticks) e teleporte para roll/pitch de 10° (3 ticks).
 Entre os testes o agente volta à pose inicial (atitude zero, parado).
 
 Uso: python tools/diag_rotacao_hydrone.py [agente ...]   (padrão: Hydrone DjiMatrice)
@@ -84,6 +85,20 @@ def rodar(agente):
         for _ in range(3):
             d1 = passo(zero)
         linha("D teleporte yaw 45°, 3 ticks", d0, d1)
+
+        for nome, w in (('x', [30, 0, 0]), ('y', [0, 30, 0])):
+            d0 = repor()
+            d1 = d0
+            for _ in range(20):
+                robo.set_physics_state(d1[6:9], rpy(d1), d1[3:6], w)
+                d1 = passo(zero)
+            linha(f"G w_{nome} 30°/s a cada tick, 20 ticks", d0, d1)
+        for nome, rot in (('roll', [10, 0, 0]), ('pitch', [0, 10, 0])):
+            d0 = repor()
+            robo.teleport(rotation=rot)
+            for _ in range(3):
+                d1 = passo(zero)
+            linha(f"G teleporte {nome} 10°, 3 ticks", d0, d1)
 
         for mag in (1.0, 3.35, 10.0):
             d0 = repor()
