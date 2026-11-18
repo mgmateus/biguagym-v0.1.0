@@ -38,6 +38,21 @@ def din():
              'configuration': {'UseCOM': False, 'UseRPY': True}, 'location': [0, 0, 0], 'rotation': [0, 0, 0]}]
 
 
+def estado_clone(estado, j):
+    """Estado do clone j do lote 'pilar', em qualquer dos formatos do BiguaSim (por nome, lista ou dicionário)."""
+    if f'pilar-id{j}' in estado:
+        return estado[f'pilar-id{j}']
+    lote = estado.get('pilar')
+    if isinstance(lote, list):
+        return lote[j]
+    if isinstance(lote, dict):
+        if f'pilar-id{j}' in lote:
+            return lote[f'pilar-id{j}']
+        if 'RPYDynamicsSensor' in lote:                      # sensores empilhados no lote: linha j
+            return {k: np.asarray(v)[j] for k, v in lote.items()}
+    raise KeyError(f"estado do pilar {j} não encontrado; chaves: {list(estado)}")
+
+
 def niveis(empilhar, comprimento, z_baixo=-1.2):
     """Centros (z relativo à água) de ``empilhar`` agentes em pé, encostados, a partir de ``z_baixo``."""
     return [z_baixo + comprimento * (k + 0.5) for k in range(empilhar)]
@@ -95,10 +110,11 @@ def main():
         resultado['passos_por_s'] = round(args.ticks / (time.time() - t0), 2)
 
         # deriva de cada agente-pilar (RPYDynamicsSensor: posição [6:9], atitude em graus [15:18])
-        lote = estado.get('pilar')
+        print(f"chaves do estado: {list(estado)[:6]} ... ({len(estado)}); "
+              f"'pilar': {type(estado.get('pilar')).__name__}", flush=True)
         derivas = []
         for j, (x, y, z) in enumerate(alvos):
-            s = lote[j] if isinstance(lote, list) else estado.get(f'pilar-id{j}')
+            s = estado_clone(estado, j)
             rpy = np.asarray(s['RPYDynamicsSensor'], dtype=float).ravel()
             derivas.append({'agente': j, 'alvo': [x, y, z], 'pos': np.round(rpy[6:9], 2).tolist(),
                             'erro_m': round(float(np.linalg.norm(rpy[6:9] - [x, y, z])), 3),
