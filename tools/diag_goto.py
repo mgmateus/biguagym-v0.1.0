@@ -2,6 +2,8 @@
 
 Uso: python tools/diag_goto.py [env_id] [segundos]
      (padrão: HydroneGotoPilares-v0, 5 s)
+     python tools/diag_goto.py [env_id] [segundos] avanco   (só o avanço, com a integração angular desligada e ligada:
+                                                             deslocamento, roll/pitch/yaw e velocidade a cada segundo)
 
 1. Guinada: ω = +0,3 rad/s por N segundos e depois -0,3 rad/s, com a menor velocidade para a frente e vz = 0.
    Esperado: a guinada muda ~±0,3·N rad em cada fase (sinal e taxa do cmd_vel_yaw com a referência integrada).
@@ -42,6 +44,28 @@ def fase(env, acao, passos, rastro=0):
     return yaw_acc, float(u._dynamics[8]) - z0, frente, motivo
 
 
+def avanco(env_id, passos):
+    import gymnasium as gym
+
+    for integrar in (False, True):
+        env = gym.make(env_id, integrar_rotacao=integrar)
+        u = env.unwrapped
+        try:
+            env.reset()
+            p0 = np.asarray(u._dynamics[6:9], dtype=np.float64).copy()
+            print(f"== avanço, integrar_rotacao={integrar}", flush=True)
+            for i in range(passos):
+                env.step(np.asarray([1, 0, 0], dtype=np.float32))
+                if i % 20 == 19:
+                    print(f"   passo {i:3d}: Δpos {np.round(u._dynamics[6:9] - p0, 2)}  "
+                          f"rpy {np.round(np.degrees(u._dynamics[15:18]), 1)}°  v {np.round(u._dynamics[3:6], 2)}", flush=True)
+        finally:
+            sim = getattr(u, '_env', None)
+            env.close()
+            if sim is not None and hasattr(sim, '__on_exit__'):
+                sim.__on_exit__()
+
+
 def main():
     import gymnasium as gym
     import register  # noqa: F401
@@ -49,6 +73,8 @@ def main():
     env_id = sys.argv[1] if len(sys.argv) > 1 else 'HydroneGotoPilares-v0'
     seg = float(sys.argv[2]) if len(sys.argv) > 2 else 5.0
     passos = int(seg * 20)
+    if sys.argv[3:] == ['avanco']:
+        return avanco(env_id, passos)
     env = gym.make(env_id)
     try:
         env.reset()
