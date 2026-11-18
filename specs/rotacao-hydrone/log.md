@@ -64,7 +64,7 @@ Lab em `spec/rotacao-hydrone` (`2d2228a`/`7ceeb25`; depois `b470983`, `9ef3ad2`,
 Investigação do avanço:
 - `diag_rotacao_hydrone.py Hydrone` (G): ω imposta em x e y → roll/pitch de 29,2° em 20 ticks; teleporte para roll/pitch
   de 10° → 10°. O motor não trava nenhum eixo; a integração angular vale nos três.
-- Dinâmica dos autores integrada só em Python (`scratchpad/avanco_offline.py`, sem o motor): o controlador de velocidade
+- Dinâmica dos autores integrada só em Python (`tools/avanco_offline_hydrone.py`, sem o motor): o controlador de velocidade
   no ar inclina só 0,2° (lento, mas anda: 0,44 m e 0,16 m/s em 5 s). No motor, o mesmo pitch de 0,2° e deslocamento 0.
 - `diag_rotacao_hydrone.py linear` (H, accel, parado a 2 m): aceleração linear de 0,035 m/s² e de 0,2 m/s² em x por 100
   ticks → **0 m** (esperado 0,43 e 2,45 m); v_x de 0,3 m/s imposta uma vez → 0,285 / 0,182 / 0,110 m/s nos ticks 0 / 9 / 19
