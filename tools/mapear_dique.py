@@ -1,6 +1,7 @@
 """Mapeia o dique inundado do Pier-Harbor e sugere onde pôr os 4 pilares do Goto (spec hydrone-goto-dique, T8).
 
-Usa o BiguaSim direto (sem o biguagym), com o Hydrone teleportado e comando zero; nada é alterado no simulador nem no
+Usa o BiguaSim direto (sem o biguagym), com o Hydrone teleportado e aceleração zero (``accel``: sem a dinâmica, que só
+gastaria tempo, ele fica onde é posto); nada é alterado no simulador nem no
 ``goto_dique.json`` (a sugestão sai num arquivo à parte).
 
 Fases:
@@ -49,7 +50,7 @@ STATE_JSON = os.path.join(REPO, 'biguagym', 'config', 'state.json')
 GOTO_JSON = os.path.join(REPO, 'biguagym', 'config', 'goto_dique.json')
 
 REGIAO_PADRAO = (110.0, 200.0, -275.0, -95.0)
-ZERO = [0.0, 0.0, 0.0, 0.0]
+ZERO = [0.0] * 6           # control_abstraction 'accel': [v̇, ω̇] zero
 LASER_FUNDO_MAX = 80.0      # m: da altura da varredura até bem abaixo da água
 N_LASERS = 36               # obstáculo mais próximo na conferência: 1 laser a cada 10°
 DIST_COLISAO = 0.625        # GotoEnv.DIST_COLISAO
@@ -299,7 +300,7 @@ def abrir(ponto, args, com_cameras):
         base = json.load(f)
     cfg = {k: v for k, v in base.items() if k != 'agents'}
     cfg['agents'] = [{
-        'agent_name': 'robot', 'agent_type': 'Hydrone', 'control_abstraction': 'cmd_vel_yaw',
+        'agent_name': 'robot', 'agent_type': 'Hydrone', 'control_abstraction': 'accel',
         'dynamics': {'batch_size': 1, 'water_level': float(args.agua)},
         'location': [float(v) for v in ponto], 'rotation': [0.0, 0.0, 0.0],
         'sensors': sensores(com_cameras),
