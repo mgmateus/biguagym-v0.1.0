@@ -132,3 +132,21 @@ aviso de SpawnProp recusado, câmera com pitch +90°; Hydrone em `accel` com ace
   presentes nas duas fatias, grupos de pilares; fotos dos grupos e teste do DebugDraw (caixas nas coordenadas do dique,
   fotografadas com RGB e profundidade). `mapear_dique.sensores/abrir` aceitam sensores extras.
 - `tests/test_achar_pilares.py` (7 testes, cenário sintético com traçado de raios).
+
+### Lab, 2026-11-18 13:57–14:24 (combinado com a outra sessão; `~/achar_pilares{,2,3}.log`, saídas em `achar_pilares/`)
+- 1ª rodada (`f5ba1f4`, `20261118-135730`): mapa de alturas do porto (4.332 pontos a 20 pontos/s com `accel`), mas
+  **todas** as fatias de LiDAR ficaram presas em (120,41; −242,28): o teleporte do motor varre o caminho e para no
+  primeiro obstáculo (a 40 m de altura nada bloqueia; a −0,7 m, a primeira parede). Corrigido com o teleporte por cima
+  (`mapear_dique.ir(por_cima=...)`: sobe no lugar, vai por cima, desce na vertical; `8ade2c7`).
+- Teste do DebugDraw (`b128b05`, `20261118-140840`, fotografado do spawn do dique): as caixas desenhadas **aparecem na
+  câmera RGB** (barras vermelhas) e **não aparecem na câmera de profundidade**; também não têm colisão (LiDAR/sonar não
+  veem). Não serve como pilar para RGB+Depth nem para LiDAR+sonar.
+- 3ª rodada (`8ade2c7`, `20261118-141438`): 296 pontos de LiDAR, 0 descartados; 37–39% dos lasers com impacto,
+  mediana 15 m; sentido dos lasers +1 (16.290 × 32.324 células). Candidatos: 23 só abaixo da água (fileira a cada
+  ~20 m em x ≈ 247,5 sob o cais leste; pedras do quebra-mar em x ≈ −130 a −80; canto sudeste), 5 só acima (postes do
+  portão entre as bacias do dique em (133,9; −200,5) e (133,9; −207,5); peças da proa do navio) e **1 nas duas alturas**
+  ((90,5; −229,1), junto à proa do porta-contêineres). **Não há grupo de pilares em água aberta no Pier-Harbor.**
+- Agentes disponíveis (alternativa com geometria real): BlueBoat, BlueROV2, BlueROV2Heavy, DjiMatrice, Hydrone,
+  TorpedoAUV; nenhum tem forma de pilar.
+- Aguardando decisão do usuário (opções no relatório): pedir aos autores um mundo com SpawnProp; agentes parados como
+  obstáculos; ou o dique como está (navio e paredes) sem pilares.
