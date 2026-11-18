@@ -123,3 +123,26 @@ def test_spawnprop_recusado_conta_logs_novos(tmp_path, monkeypatch):
     monkeypatch.setattr(M, 'LOG_MOTOR', str(pasta / 'HolodeckLog.txt'))
     assert M.spawnprop_recusado(0.0) == 3
     assert M.spawnprop_recusado(9e12) == 0
+
+
+def test_ir_por_cima_sobe_atravessa_e_desce():
+    class Sim:
+        def __init__(self):
+            self.pos, self.chamadas = [5.0, 6.0, -0.7], []
+
+        def step(self, cmd):
+            rpy = np.zeros(18)
+            rpy[6:9] = self.pos
+            return {'RPYDynamicsSensor': rpy, 'Fundo': [9.0], 'CollisionSensor': [False], 'Distancias': [3.0] * 36}
+
+    class Agente:
+        def __init__(self, sim):
+            self.sim = sim
+
+        def set_physics_state(self, loc, rot, vel, w):
+            self.sim.chamadas.append(list(loc))
+            self.sim.pos = list(loc)
+
+    sim = Sim()
+    m, _, ok = M.ir(sim, Agente(sim), 50.0, 60.0, -0.7, por_cima=40.0)
+    assert ok and sim.chamadas == [[5.0, 6.0, 40.0], [50.0, 60.0, 40.0], [50.0, 60.0, -0.7]]

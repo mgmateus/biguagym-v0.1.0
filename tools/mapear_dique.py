@@ -354,8 +354,17 @@ def ler(s):
     return out, s
 
 
-def ir(env, agente, x, y, z, yaw=0.0, ticks=1, tol=0.3, max_ticks=4):
-    """Teleporta e avança até a leitura estar no ponto pedido (o teleporte vale no tick seguinte)."""
+def ir(env, agente, x, y, z, yaw=0.0, ticks=1, tol=0.3, max_ticks=4, por_cima=None):
+    """Teleporta e avança até a leitura estar no ponto pedido (o teleporte vale no tick seguinte).
+
+    O teleporte do motor varre o caminho: o Hydrone para no primeiro obstáculo entre onde está e o destino (no lab, as
+    fatias de LiDAR a −0,7 m ficaram todas presas numa parede, achar_pilares 2026-11-18). Com ``por_cima``, sobe até essa
+    altura no lugar, vai por cima até acima do destino e desce na vertical."""
+    if por_cima is not None:
+        m, _ = ler(env.step(ZERO))
+        for px, py in ((m['x'], m['y']), (x, y)):
+            agente.set_physics_state([px, py, por_cima], [0.0, 0.0, yaw], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0])
+            env.step(ZERO)
     agente.set_physics_state([x, y, z], [0.0, 0.0, yaw], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0])
     for t in range(max_ticks):
         m, s = ler(env.step(ZERO))
@@ -442,7 +451,7 @@ def fotos(args, pilares_cfg, saida):
         olhar = math.degrees(math.atan2(cy - sy, cx - sx))
         for nome, (x, y, z, yaw) in (('cima_25m', (cx, cy, agua + 25.0, 0.0)), ('cima_60m', (cx, cy, agua + 60.0, 0.0)),
                                      ('spawn_ar', (sx, sy, agua + 2.0, olhar)), ('spawn_agua', (sx, sy, agua - 0.5, olhar))):
-            ir(env, agente, x, y, z, yaw)
+            ir(env, agente, x, y, z, yaw, por_cima=agua + 40.0)
             for _ in range(20):
                 s = plano(env.step(ZERO))
             for sensor in ('CameraBaixo', 'CameraFrente', 'CameraTerceira'):

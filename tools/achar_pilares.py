@@ -197,17 +197,24 @@ def sintetico(sinal=1):
 # ----------------------------------------------------------------------------------------------------------------------
 # Simulador
 # ----------------------------------------------------------------------------------------------------------------------
-def fatias(env, agente, pontos, zs, nivel_agua):
+def fatias(env, agente, pontos, zs, nivel_agua, por_cima):
+    """Leituras do LiDAR em cada ponto e altura; as que não chegaram ao ponto pedido (preso em algo) são descartadas."""
     leituras = {z: [] for z in zs}
-    t0 = time.time()
+    t0, fora = time.time(), 0
     for i, (x, y) in enumerate(pontos):
-        for z in zs:
-            _, s, _ = M.ir(env, agente, x, y, nivel_agua + z, ticks=2)
+        for k, z in enumerate(zs):
+            # o primeiro z de cada ponto chega por cima; os outros sobem/descem na vertical, no mesmo lugar
+            _, s, ok = M.ir(env, agente, x, y, nivel_agua + z, ticks=2, por_cima=por_cima if k == 0 else None)
+            if not ok:
+                fora += 1
+                continue
             rpy = np.asarray(s['RPYDynamicsSensor'], dtype=float).ravel()
             leituras[z].append((float(rpy[6]), float(rpy[7]), math.radians(float(rpy[17])),
                                 np.asarray(s['Lidar'], dtype=float).ravel()))
         if (i + 1) % 50 == 0:
-            print(f"   LiDAR: {i + 1}/{len(pontos)} pontos, {(i + 1) / (time.time() - t0):.1f} pontos/s", flush=True)
+            print(f"   LiDAR: {i + 1}/{len(pontos)} pontos, {(i + 1) / (time.time() - t0):.1f} pontos/s, "
+                  f"{fora} leituras fora do ponto", flush=True)
+    print(f"   LiDAR: {fora} leituras descartadas (fora do ponto pedido)", flush=True)
     return leituras
 
 
@@ -232,7 +239,7 @@ def fotos(args, grupos, pontos, saida):
     try:
         def foto(nome, x, y, z, alvo):
             yaw = math.degrees(math.atan2(alvo[1] - y, alvo[0] - x))
-            M.ir(env, agente, x, y, z, yaw)
+            M.ir(env, agente, x, y, z, yaw, por_cima=agua + 40.0)
             for _ in range(15):
                 s = plano(env.step(M.ZERO))
             for sensor in ('CameraFrente', 'CameraTerceira'):
@@ -371,7 +378,7 @@ def main():
         agua = M.classificar(topo, args.agua, args.limiar_agua)
         pontos = pontos_lidar(agua, xs, ys, args.passo, args.grade)
         print(f"== fatias de LiDAR em {len(pontos)} pontos de água, z = {zs}", flush=True)
-        leituras = fatias(env, agente, pontos, zs, args.agua)
+        leituras = fatias(env, agente, pontos, zs, args.agua, args.agua + args.z_varredura)
     except StopIteration:
         pass
     except Exception:
