@@ -150,3 +150,15 @@ aviso de SpawnProp recusado, câmera com pitch +90°; Hydrone em `accel` com ace
   TorpedoAUV; nenhum tem forma de pilar.
 - Aguardando decisão do usuário (opções no relatório): pedir aos autores um mundo com SpawnProp; agentes parados como
   obstáculos; ou o dique como está (navio e paredes) sem pilares.
+
+## 2026-11-18 — "Dê um jeito de criar os pilares ou quadrado compridos utilizando as paredes"
+- `achar_pilares.py --analisar ... --diam-max 12 --isolamento 1.0` (blocos até 12 m): continua 1 só ((90,5; −229,1)). As
+  paredes do mapa não formam pilares nem blocos dentro da água.
+- `tools/pilares_agentes.py` (`7c4199f`, `41fe862`, `a5c7284`), lab 14:55–15:05:
+  - 1ª rodada: TypeError (o estado do lote vem como dicionário, não lista); corrigido.
+  - 2ª: sem segurar, os torpedos derivaram 0,6–0,9 m e os empilhados encostados foram arremessados 8–19 m.
+  - 3ª (segurando a cada tick, 15 cm entre os empilhados): 17,96 passos/s; 11 de 12 agentes no lugar (atitude exata,
+    0,861 m fixo entre origem do ator e centro); 1 (base do pilar (129,4; −148)) não chegou (6,94 m; o teleporte varre
+    o caminho a partir de onde os clones nascem). LiDAR no ar: 4,28 / 6,24 / 1,20 / 4,61 m medidos × 4,52 / 6,42 /
+    1,41 / 4,77 m geométricos (centro); na água, 3 de 4 (o que não chegou não aparece). Câmera RGB: colunas visíveis.
+- Proposta de mudança no design.md (pilares feitos de agentes no GotoEnv), aguardando aprovação.

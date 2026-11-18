@@ -90,3 +90,30 @@ calcula a recompensa, sorteia o alvo novo se chegou, monta a observação; `trun
 | R6–R8 | testes da função de recompensa e do `_step` com simulador falso (cada motivo de colisão, chegada, truncamento) |
 | R9, R10 | forma e conteúdo da observação; `gym.spec` dos ids; campos do `info` |
 | R1, R4, R7 | ⏱ lab: `tools/diag_goto.py` (ω constante) e smoke de 200 passos |
+
+---
+
+## Proposta de mudança — pilares feitos de agentes (AGUARDANDO APROVAÇÃO; o restante do design segue aprovado)
+
+**Por quê** (detalhes no log.md, 2026-11-18): o mundo SkyDive recusa `SpawnProp`, então os pilares do `_spawn_pilares` nunca
+apareceram. O `DebugDraw` aparece só na câmera RGB (não na profundidade, sem colisão) e o Pier-Harbor não tem pilares nem
+blocos em água aberta (`tools/achar_pilares.py`). O usuário pediu: "Dê um jeito de criar os pilares ou quadrado compridos".
+No lab (`tools/pilares_agentes.py`), colunas de 3 TorpedoAUV em pé (2,1 m cada, 15 cm entre eles), em `accel` e com a
+posição reimposta a cada tick, ficaram paradas (atitude exata; diferença fixa de 0,861 m entre a origem do ator e o
+centro), apareceram na câmera RGB e o LiDAR as mediu onde estavam. A 17,96 passos/s com 12 agentes extras.
+
+**O que muda:**
+- `config/goto_dique.json`: cada pilar ganha `"agente": "TorpedoAUV"` (tipo) e `"feixe"`: 1 (um torpedo por nível; 4 =
+  2 × 2, mais grosso); o `raio` passa a ser o do feixe (0,1 m para 1 torpedo).
+- `GotoEnv`: o cenário do simulador ganha um agente em lote `pilar` (`batch_size` = pilares × níveis × feixe, `accel`,
+  só DynamicsSensor), nascendo alto e indo para o lugar por cima (o teleporte varre o caminho); a cada tick
+  (`_passo_sim`), reimpõe a posição de cada clone (compensando a origem do ator) e manda aceleração zero ao lote
+  (`cmds` vira `{'robot': cmd, 'pilar': [[0]*6]*n}`); o estado do robô é lido de `state['robot']`. `_spawn_pilares`
+  (spawn_prop) sai.
+- A checagem de colisão em Python e a recompensa não mudam (os pilares continuam no JSON); o contato físico com um
+  pilar passa a acontecer de verdade e o `CollisionSensor` do Hydrone o vê.
+
+**Riscos:** passos/s menores (12 agentes: 17,96 passos/s no teste, sem o resto do GotoEnv); o Hydrone empurra o pilar
+num contato (a posição é reimposta no tick seguinte e o episódio termina na colisão); pilares finos (19 cm) com um
+torpedo por nível. **Verificação:** testes sem simulador (cmds e reimposição); no lab, smokes `-v0/-v1/-v2`, fotos RGB e
+profundidade com os pilares, LiDAR medindo os pilares e passos/s.
