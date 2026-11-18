@@ -245,8 +245,9 @@ def fotos(args, grupos, pontos, saida):
         for px, py in DIQUE_PILARES:
             env.draw_box([px, py, agua + 1.0], [0.5, 0.5, 4.0], color=[255, 60, 0], thickness=30.0, lifetime=0)
         centro = (sum(p[0] for p in DIQUE_PILARES) / 4, sum(p[1] for p in DIQUE_PILARES) / 4)
-        foto('debugdraw_dique_ar', DIQUE_SPAWN[0] + 3, DIQUE_SPAWN[1] - 2, agua + 2.0, centro)
-        foto('debugdraw_dique_agua', DIQUE_SPAWN[0] + 3, DIQUE_SPAWN[1] - 2, agua - 0.5, centro)
+        # do spawn, que é livre (a 1ª rodada fotografou de spawn + (3, −2), em cima da proa do navio)
+        foto('debugdraw_dique_ar', DIQUE_SPAWN[0], DIQUE_SPAWN[1], agua + 2.0, centro)
+        foto('debugdraw_dique_agua', DIQUE_SPAWN[0], DIQUE_SPAWN[1], agua - 0.5, centro)
         print("   fotos do teste do DebugDraw no dique", flush=True)
 
         for k, g in enumerate(grupos[:args.fotos_grupos]):
@@ -274,9 +275,7 @@ def desenhar(caminho, topo, xs, ys, agua, nivel_agua, nuvens, pilares, grupos, r
         return (int(m + ((x - xs[0]) / passo + 0.5) * esc), int(m + ((ys[-1] - y) / passo + 0.5) * esc))
     for z, pts, cor in nuvens:
         for x, y in pts[::max(1, len(pts) // 60000)]:
-            p = px(x, y)
-            if 0 <= p[0] < img.shape[1] and 0 <= p[1] < img.shape[0]:
-                img[p[1], p[0]] = cor
+            cv2.circle(img, px(x, y), 1, cor, -1)
     for p in pilares:
         cv2.circle(img, px(p['x'], p['y']), 6, (0, 200, 0), 2)
     for k, g in enumerate(grupos):
@@ -284,12 +283,33 @@ def desenhar(caminho, topo, xs, ys, agua, nivel_agua, nuvens, pilares, grupos, r
             (x0, y0), (x1, y1) = g['caixa']
             cv2.rectangle(img, px(x0 - 2, y0 - 2), px(x1 + 2, y1 + 2), (0, 220, 255), 2)
             cv2.putText(img, f"g{k}:{g['n']}", px(x0 - 2, y1 + 3), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
-    cv2.putText(img, "pontos LiDAR: azul = abaixo da agua, vermelho = acima; verde: pilares; amarelo: grupos >= 4",
+    cv2.putText(img, "pontos LiDAR: magenta = abaixo da agua, vermelho = acima; verde: pilares; amarelo: grupos >= 4",
                 (m, img.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 1)
     cv2.imwrite(caminho, img)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+def estatisticas(leituras):
+    """Por altura: pontos, fração dos lasers com impacto e distância mediana dos impactos."""
+    out = {}
+    for z, ls in leituras.items():
+        d = np.concatenate([np.asarray(l[3], dtype=float) for l in ls]) if ls else np.zeros(0)
+        ok = (d > 0.3) & (d < LIDAR_MAX - 1e-3)
+        out[z] = {'pontos': len(ls), 'lasers': int(d.size), 'com_impacto': round(float(ok.mean()), 3) if d.size else 0.0,
+                  'dist_mediana': round(float(np.median(d[ok])), 2) if ok.any() else None,
+                  'leituras_iguais': int(sum(np.ptp(np.asarray(l[3], dtype=float)) == 0 for l in ls))}
+    return out
+
+
+def carregar(pasta):
+    d = np.load(os.path.join(pasta, 'leituras.npz'))
+    leituras = {}
+    for k in d.files:
+        if k.startswith('z'):
+            leituras[float(k[1:])] = [(r[0], r[1], r[2], r[3:]) for r in d[k]]
+    return d['xs'], d['ys'], d['topo'], [tuple(p) for p in d['pontos']], leituras
+
+
 def analisar(leituras, regiao, args):
     sinal, notas = escolher_sinal([l for z in leituras for l in leituras[z]])
     por_z = {z: candidatos(nuvem(leituras[z], sinal), regiao, args.celula, args.diam_max, args.isolamento)
@@ -316,6 +336,7 @@ def main():
     ap.add_argument('--fotos-grupos', type=int, default=6, help='quantos grupos fotografar')
     ap.add_argument('--sem-fotos', action='store_true')
     ap.add_argument('--saida', default=None)
+    ap.add_argument('--analisar', default=None, help='pasta de uma rodada anterior: refaz a análise e as fotos sem varrer')
     ap.add_argument('--dry-run', action='store_true')
     args = ap.parse_args()
 
@@ -335,7 +356,14 @@ def main():
         return 0
 
     env = None
+    if args.analisar:
+        xs, ys, topo, pontos, leituras = carregar(args.analisar)
+        zs = sorted(leituras)
+        agua = M.classificar(topo, args.agua, args.limiar_agua)
+        print(f"leituras de {args.analisar}: {len(pontos)} pontos, z = {zs}", flush=True)
     try:
+        if args.analisar:
+            raise StopIteration
         env, agente = M.abrir([regiao[0], regiao[2], args.z_varredura], args, com_cameras=False, extras=[LIDAR])
         print("== mapa de alturas", flush=True)
         xs, ys = M.grade(regiao, args.passo)
@@ -344,6 +372,8 @@ def main():
         pontos = pontos_lidar(agua, xs, ys, args.passo, args.grade)
         print(f"== fatias de LiDAR em {len(pontos)} pontos de água, z = {zs}", flush=True)
         leituras = fatias(env, agente, pontos, zs, args.agua)
+    except StopIteration:
+        pass
     except Exception:
         traceback.print_exc()
         raise
@@ -355,7 +385,7 @@ def main():
                         **{f"z{z:+.1f}": np.asarray([np.concatenate([[x, y, p], d]) for x, y, p, d in leituras[z]])
                            for z in zs})
     sinal, notas, por_z, pilares, grupos = analisar(leituras, regiao, args)
-    nuvens = [(z, nuvem(leituras[z], sinal), (200, 80, 0) if z < 0 else (0, 0, 220)) for z in zs]
+    nuvens = [(z, nuvem(leituras[z], sinal), (255, 0, 255) if z < 0 else (0, 0, 255)) for z in zs]
     desenhar(os.path.join(saida, 'mapa.png'), topo, xs, ys, agua, args.agua, nuvens, pilares, grupos, regiao)
     with open(os.path.join(saida, 'pilares.csv'), 'w', newline='') as f:
         w = csv.DictWriter(f, fieldnames=['x', 'y', 'diam_agua', 'diam_ar', 'impactos'])
@@ -363,7 +393,8 @@ def main():
         w.writerows(pilares)
     with open(os.path.join(saida, 'grupos.json'), 'w') as f:
         json.dump({'sentido_lasers': sinal, 'celulas_por_sentido': notas, 'grupos': grupos}, f, indent=2)
-    resumo = [f"sentido dos lasers: {sinal:+d} (células ocupadas: {notas})",
+    resumo = [f"lasers por altura: {estatisticas(leituras)}",
+              f"sentido dos lasers: {sinal:+d} (células ocupadas: {notas})",
               f"pontos de LiDAR: {len(pontos)}; candidatos por altura: { {z: len(c) for z, c in por_z.items()} }",
               f"pilares (abaixo e acima da água): {len(pilares)}",
               *[f"grupo {k}: {g['n']} pilares, centro {g['centro']}, caixa {g['caixa']}" for k, g in enumerate(grupos[:12])]]

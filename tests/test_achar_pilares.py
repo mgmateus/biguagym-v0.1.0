@@ -55,3 +55,10 @@ def test_pontos_lidar_so_na_agua_perto_de_estrutura():
     agua[:, :10] = False                                       # cais à esquerda
     pts = A.pontos_lidar(agua, xs, ys, 1.0, 10.0)
     assert pts and all(x >= 12 and x - 9.5 <= A.LIDAR_MAX - 5 + 1 for x, _ in pts)
+
+
+def test_estatisticas_dos_lasers():
+    leituras, _, _ = A.sintetico(1)
+    e = A.estatisticas(leituras)
+    assert set(e) == {-0.7, 2.0}
+    assert 0 < e[-0.7]['com_impacto'] < 1 and e[-0.7]['pontos'] == 12 and e[-0.7]['leituras_iguais'] == 0
