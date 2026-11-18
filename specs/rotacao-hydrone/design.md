@@ -66,3 +66,29 @@ No `BiguaSim.step`, cada tick faz: `tick()` (aplica a ação anterior e o telepo
 - R1–R3: `tests/test_rotacao_hydrone.py` com simulador falso (modelo que devolve ω̇ conhecido; agente que grava o
   `set_physics_state`).
 - R4, R5: no lab, `tools/diag_goto.py`, `tools/diag_rotacao_hydrone.py goto` e `tools/testar_goto_lab.sh`.
+
+---
+
+## Extensão proposta — integração linear (Status: rascunho, aguardando aprovação)
+
+**Por quê:** no lab (log, 2026-11-17), o motor também descarta acelerações lineares pequenas (0,035 e 0,2 m/s² por 5 s → 0 m)
+e amortece a velocidade linear a 1 s⁻¹. O controlador de velocidade dos autores no ar pede ~0,03 m/s² para a frente
+(pitch de 0,2°): sozinho, em Python, o Hydrone anda 0,44 m em 5 s; no motor, 0 m. Com só a rotação integrada, o Goto não
+avança a partir do repouso.
+
+**O que muda (só `biguagym/core/goto.py`):**
+- O envoltório guarda a aceleração inteira (linear e angular) e manda **zero** ao motor.
+- `_impor_rotacao` vira `_impor_estado`: além de ω, impõe `v_novo = (v + a·dt)·e^(AMORTECIMENTO_LINEAR_MOTOR·dt)`, com `v` do
+  `DynamicsSensor` (o mesmo que a dinâmica lê) e `AMORTECIMENTO_LINEAR_MOTOR = 1.0` (medido).
+- O motor fica com a cinemática (integra a posição e a atitude a partir de v e ω) e as colisões; a posição e a atitude
+  continuam do motor (não teleportamos para posições integradas por nós).
+- `integrar_rotacao` vira `integrar_dinamica` (mantendo `integrar_rotacao` como sinônimo), com o mesmo padrão `True`.
+
+**Verificação:** testes sem simulador (v imposta = v + a·dt compensada; motor recebe zeros); no lab, `diag_rotacao_hydrone.py
+goto` com v medido/previsto ≈ 1, e `diag_goto.py` com avanço ≈ 0,4 m em 5 s a partir do repouso (o que a dinâmica dos autores
+dá sozinha), subida e guinada como hoje.
+
+**Riscos:** depois de uma colisão a velocidade imposta parte da velocidade que o motor deixou (pós-colisão), então o contato
+continua sendo do motor; se o motor aplicar o teleporte depois da física, o resultado seria o mesmo de hoje (a verificação
+pega). O avanço continuará lento (é o controlador dos autores: 0,16 m/s depois de 5 s para 0,31 pedidos); ajustar ganhos
+seria alterar a dinâmica do BiguaSim, fora do escopo.

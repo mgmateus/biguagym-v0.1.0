@@ -12,5 +12,7 @@ Status: aprovado
   - Verificação: `pytest tests` → anteriores + novos passando
 - [x] T4 — `diag_goto.py` (direto pela integração, fase de avanço) e modo `goto` do `diag_rotacao_hydrone.py`
   - Verificação: `python -m py_compile tools/diag_goto.py tools/diag_rotacao_hydrone.py` → ok
-- [ ] T5 — ⏱ Lab: `diag_rotacao_hydrone.py goto`, `diag_goto.py` e `testar_goto_lab.sh`; critérios R4 e R5
+- [~] T5 — ⏱ Lab: `diag_rotacao_hydrone.py goto`, `diag_goto.py` e `testar_goto_lab.sh`; critérios R4 e R5
   - Verificação: tabela de critérios preenchida no log.md
+  - Parcial (2026-11-17): R4 ok (guinada ±1,51 rad), smokes ok, 0 órfãos; R5 falha no avanço (0 m a partir do repouso)
+    porque o motor descarta acelerações lineares pequenas. Extensão proposta no design.md (aguardando aprovação).
