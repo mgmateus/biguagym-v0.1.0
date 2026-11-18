@@ -148,8 +148,8 @@ def posicionar(bacia, xs, ys, passo, lado, lado_min=None, folga_min=0.0, razao_m
 
 def caixas_exclusao(bacia, agua, topo, xs, ys, passo, nivel_agua, margem=0.5, z_min=-5.0):
     """Caixas (formato do goto_dique.json, z relativo à água) dos sólidos dentro do retângulo da bacia: o navio e o que
-    mais estiver cercado pela bacia. Sólidos que tocam a borda do retângulo (paredes) ficam fora: a borda da área já é
-    colisão no GotoEnv."""
+    mais estiver dentro dele. Ficam fora só as faixas estreitas (até 2 m) que tocam a borda do retângulo, que são parede
+    ou degrau: a borda da área já é colisão no GotoEnv. (No dique real o navio encosta na parede sul.)"""
     from scipy import ndimage
     iy, ix = np.nonzero(bacia)
     sub = (slice(iy.min(), iy.max() + 1), slice(ix.min(), ix.max() + 1))
@@ -158,10 +158,11 @@ def caixas_exclusao(bacia, agua, topo, xs, ys, passo, nivel_agua, margem=0.5, z_
     caixas, fora = [], 0.0
     for k in range(1, n + 1):
         m = rot == k
-        if _toca_borda(m):
+        ky, kx = np.nonzero(m)
+        estreito = min(kx.max() - kx.min(), ky.max() - ky.min()) * passo < 2.0
+        if _toca_borda(m) and estreito:
             fora += float(m.sum()) * passo * passo
             continue
-        ky, kx = np.nonzero(m)
         x0, x1 = float(xs[sub[1]][kx.min()]), float(xs[sub[1]][kx.max()])
         y0, y1 = float(ys[sub[0]][ky.min()]), float(ys[sub[0]][ky.max()])
         z_top = float(np.nanmax(topo[sub][m])) - nivel_agua
@@ -413,14 +414,16 @@ def conferir(env, agente, pilares_cfg, folga_mapa, xs, ys, nivel_agua, zs):
 LOG_MOTOR = os.path.expanduser('~/.local/share/biguasim/*/worlds/*/Linux/*/Saved/Logs/HolodeckLog.txt')
 
 
-def spawnprop_recusado() -> int:
-    """Quantos SpawnProp o motor recusou no log mais recente (no lab, o mundo SkyDive 1.1.0 não conhece o comando)."""
+def spawnprop_recusado(desde: float) -> int:
+    """Quantos SpawnProp o motor recusou nos logs escritos desde ``desde`` (o motor renomeia o log da rodada anterior
+    para HolodeckLog-backup-*.txt ao abrir; no lab, o mundo SkyDive 1.1.0 não conhece o comando)."""
     import glob
-    logs = sorted(glob.glob(LOG_MOTOR), key=os.path.getmtime)
-    if not logs:
-        return 0
-    with open(logs[-1], errors='replace') as f:
-        return sum('failed to make command:  SpawnProp' in ln for ln in f)
+    n = 0
+    for log in glob.glob(LOG_MOTOR.replace('HolodeckLog.txt', 'HolodeckLog*.txt')):
+        if os.path.getmtime(log) >= desde:
+            with open(log, errors='replace') as f:
+                n += sum('failed to make command:  SpawnProp' in ln for ln in f)
+    return n
 
 
 def fotos(args, pilares_cfg, saida):
@@ -599,8 +602,9 @@ def main():
     # 5. fotos com os pilares
     if not args.dry_run and not args.sem_fotos:
         print("== fotos com os pilares", flush=True)
+        t_fotos = time.time()
         fotos(args, pilares_cfg, saida)
-        recusados = spawnprop_recusado()
+        recusados = spawnprop_recusado(t_fotos)
         if recusados:
             print(f"ATENÇÃO: o motor recusou {recusados} SpawnProp no último log ({LOG_MOTOR}): os pilares NÃO foram "
                   "criados no simulador (nem nas fotos, nem no GotoEnv)", flush=True)

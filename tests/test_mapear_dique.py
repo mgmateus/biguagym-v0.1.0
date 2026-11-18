@@ -102,3 +102,24 @@ def test_bacia_estreita_encolhe_a_area_para_ter_a_folga():
     assert M.checar_cenario(pil) == []
     (x0, y0), (x1, y1) = pil['area']
     assert x1 - x0 == pytest.approx(w) and y1 - y0 == pytest.approx(h)
+
+
+def test_navio_encostado_na_parede_continua_caixa():
+    def encostado(xs, ys, t):                                 # o navio vai até a parede sul, como no dique real
+        t = t.copy()
+        X, Y = np.meshgrid(xs, ys)
+        t[(X >= 143) & (X <= 157) & (Y >= -262) & (Y <= -140)] = 10.0
+        return t
+    xs, ys, topo, agua, bacia = analisar(encostado)
+    _, dique, med = M.montar_cenarios(bacia, agua, topo, xs, ys, 1.0, 0.0, 10.0, 0.2)
+    assert any(c['min'][0] <= 143 and c['max'][0] >= 157 and c['max'][1] >= -140 for c in dique['exclusao'])
+
+
+def test_spawnprop_recusado_conta_logs_novos(tmp_path, monkeypatch):
+    pasta = tmp_path / 'Logs'
+    pasta.mkdir()
+    (pasta / 'HolodeckLog.txt').write_text("x\nWarning: CommandFactory failed to make command:  SpawnProp\n" * 2)
+    (pasta / 'HolodeckLog-backup-1.txt').write_text("Warning: CommandFactory failed to make command:  SpawnProp\n")
+    monkeypatch.setattr(M, 'LOG_MOTOR', str(pasta / 'HolodeckLog.txt'))
+    assert M.spawnprop_recusado(0.0) == 3
+    assert M.spawnprop_recusado(9e12) == 0

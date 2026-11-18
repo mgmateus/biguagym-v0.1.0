@@ -81,3 +81,43 @@
   `goto_dique.json` não é alterado. `--dry-run` usa um mapa sintético.
 - `tests/test_mapear_dique.py` (7 testes, mapa sintético): bacia certa (não o mar), área longe do navio e das paredes,
   caixa do navio, dique aberto para o mar, semente. `pytest tests` → 180 passed.
+
+## 2026-11-18 — T8 no lab: mapa do dique (`~/mapear_dique.log` e `~/mapear_dique2.log`; saídas em `~/biguagym-v0.1.0/mapear_dique/` no lab)
+Combinado com a outra sessão (TCC), que liberou o lab; o treino dela seguiu rodando.
+
+1ª rodada (12:47–13:01, `1af24b6`, `python tools/mapear_dique.py`, saída `mapear_dique/20261118-124759/`):
+- Passada grossa (3 m, 1.891 pontos, ~4 min, ~8 pontos/s com a dinâmica `cmd_vel_yaw` rodando a cada ponto) e fina (1 m).
+- **O dique tem duas bacias**, uma atrás da outra, separadas por uma faixa sólida em y ≈ −200 a −205, cada uma com um navio:
+  norte em x 125,5–159,5, y −198,5 a −139,5 (a escolhida: maior grupo de água cercada); sul em y ≈ −250 a −208.
+  Fundo em z ≈ −10 m.
+- Na bacia norte o navio ocupa quase tudo: sobram canais de 6–8 m dos lados e dois cantos de ~11 m na frente da proa.
+  Só 1.072 m² de água livre; o quadrado de 10 m ficou a 0,5 m da parede, e a conferência mostrou colisão no ar a 1 m dela
+  (z = 2 e 4,5 no canto sudoeste da área).
+- Erros da ferramenta vistos nas fotos: a câmera "para baixo" com pitch −90° olhava para cima (mesmo erro no
+  `explorar_mapa.py`); corrigido para +90°.
+- **Os pilares não aparecem nas fotos.** O log do motor (`~/.local/share/biguasim/1.1.0/worlds/SkyDive/Linux/Biguasim/
+  Saved/Logs/HolodeckLog*.txt`) tem `Warning: CommandFactory failed to make command:  SpawnProp` para cada pilar, em
+  **todas** as rodadas do Goto no lab (4 ou 8 por log desde 2026-11-18 00:56 UTC, incluindo os smokes do T9 da
+  rotacao-hydrone): o mundo SkyDive 1.1.0 instalado não conhece o comando `SpawnProp` do cliente Python 1.1.0. Os pilares
+  do `GotoEnv` nunca existiram no simulador (nem para as câmeras, nem para os lasers/sonar); só a checagem de colisão em
+  Python sabe deles. Para os autores (não dá para corrigir no biguagym sem alterar o BiguaSim).
+
+Ajustes (`2cbec27`): `--folga` (padrão 1,5 m) e `--lado-min` (maior retângulo com a folga), `--mapa` (reaproveita a varredura),
+aviso de SpawnProp recusado, câmera com pitch +90°; Hydrone em `accel` com aceleração zero (`1e86784`, varredura mais rápida).
+
+2ª rodada (13:17–13:18, `python tools/mapear_dique.py --mapa mapear_dique/20261118-124759/`, saída
+`mapear_dique/20261118-131734/`):
+
+| Item | Resultado |
+|---|---|
+| área do cenário `pilares` | x 127–135, y −155 a −145 (8 × 10 m), centro (131, −150), canto noroeste da bacia norte, na frente da proa |
+| folga até parede/navio | 1,5 m no mapa; conferência: obstáculo horizontal mínimo 1,91 m na água e 1,84 m no ar, 0 colisões |
+| pilares (raio 0,5, base −3, altura 8) | (129,4; −152), (129,4; −148), (132,6; −152), (132,6; −148) |
+| spawn | (133,88; −152,6; 2,0) |
+| fundo | z ≈ −10 m |
+| SpawnProp | 4 recusados no log da rodada das fotos (o aviso da ferramenta não pegou: lia só um log; corrigido para contar os logs desde o início das fotos) |
+
+- A caixa de exclusão do cenário `dique` dessa rodada está incompleta: o navio encosta na parede sul e era tratado como parede.
+  Corrigido (só faixas de até 2 m que tocam a borda são ignoradas); falta rodar de novo com `--mapa` para o cenário `dique`.
+- `goto_dique.json` **não** foi alterado (os pilares não aparecem no simulador; ver acima).
+- Testes: `tests/test_mapear_dique.py` com 10 testes; `pytest tests` → 183 passed.
