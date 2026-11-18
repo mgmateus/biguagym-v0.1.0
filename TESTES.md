@@ -2017,3 +2017,34 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   - processos: só os 4 do treino `teste_5m_rotft_1` da outra sessão; 0 órfãos meus.
 - Spec `rotacao-hydrone` concluída (T1–T9). O avanço continua lento (0,16 m/s depois de 5 s para 0,31 pedidos): é o
   controlador de velocidade dos autores, que não mudamos.
+
+### 2026-11-18 — Mapa do dique e coordenadas dos pilares (`tools/mapear_dique.py`)
+
+- Pedido: "Faça um código que mapeie o dique e encontre as coordenadas corretas para colocar os pilares".
+- `tools/mapear_dique.py` (branch `spec/rotacao-hydrone`, commits `1af24b6`, `1e86784`, `2cbec27`, `3a78098`):
+  - o Hydrone é teleportado numa grade a 40 m de altura com um laser para baixo, o que dá um mapa de alturas;
+  - a bacia do dique é a água cercada por sólido nas 4 direções;
+  - a área dos pilares é o maior retângulo com folga mínima até parede ou navio;
+  - depois a ferramenta confere com o Hydrone na água e no ar, tira fotos e grava a sugestão em `cenario_sugerido.json`;
+  - o `goto_dique.json` não é alterado.
+  - Testes: 10 em `tests/test_mapear_dique.py`; `pytest tests` → 183 passed.
+- Lab (combinado com a outra sessão), `python tools/mapear_dique.py` e depois `--mapa mapear_dique/20261118-124759/`:
+  - **duas bacias** no dique, cada uma com um navio:
+    - a norte vai de x 125,5 a 159,5 e de y −198,5 a −139,5;
+    - a sul vai de y ≈ −250 a −208;
+    - o fundo fica em z ≈ −10 m.
+  - Na norte o navio deixa só canais de 6–8 m e dois cantos de ~11 m na frente da proa. **Uma área de 10 m não cabe**:
+    a 1 m da parede o Hydrone colidiu no ar.
+  - **Sugestão (folga de 1,5 m):**
+    - área x 127–135, y −155 a −145 (8 × 10 m, centro (131, −150));
+    - pilares em (129,4; −152), (129,4; −148), (132,6; −152) e (132,6; −148);
+    - spawn em (133,88; −152,6; 2,0);
+    - conferência: obstáculo mais próximo a 1,91 m na água e 1,84 m no ar, 0 colisões.
+- **Problema achado:** o motor do mundo SkyDive 1.1.0 instalado no lab recusa o `SpawnProp`
+  (`CommandFactory failed to make command:  SpawnProp` no `HolodeckLog`).
+  - **Os pilares nunca foram criados no simulador**, em nenhuma rodada do Goto: não aparecem nas câmeras nem nos
+    lasers. Só a checagem de colisão em Python do `GotoEnv` sabe deles.
+  - Vai para os autores; não dá para corrigir no biguagym sem alterar o BiguaSim.
+- Correção nas ferramentas: a câmera "para baixo" (pitch −90°) olhava para cima, agora usa +90° (`mapear_dique` e
+  `explorar_mapa`).
+- Processos: nenhum meu sobrou; só os 4 do treino da outra sessão.
