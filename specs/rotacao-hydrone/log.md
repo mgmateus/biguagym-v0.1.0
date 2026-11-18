@@ -112,3 +112,18 @@ que descartou as acelerações pequenas.
 reset e reposto pelo valor medido quando o motor mudar a velocidade, por exemplo numa colisão) em vez de partir da medida a
 cada tick, e entregar à dinâmica esse v/ω. Assim a velocidade acumula mesmo enquanto o corpo dorme e, ao passar do limiar,
 o motor passa a mover o Hydrone.
+
+## 2026-11-18 — Ajuste aprovado e T8: integrador com v/ω próprios
+- Usuário: "Sim" (aprovação do ajuste proposto no T7). Ajuste descrito no design.md ("Ajuste — integrador com estado
+  próprio"); tarefas T8 e T9 acrescentadas ao tasks.md.
+- `biguagym/core/goto.py` (submódulo `ac6ff26`): `_v`/`_w` (leitura esperada do `DynamicsSensor` no próximo tick, zeradas no
+  reset e no construtor); `_conciliar` (com o motor medindo v = ω = 0 e o integrado abaixo de `VEL_DORMINDO = 0,1` m/s e
+  `VEL_ANG_DORMINDO = 0,1` rad/s, valem os integrados; senão, os medidos); o envoltório entrega à dinâmica uma cópia do
+  `DynamicsSensor` com esse v/ω; `_impor_estado` parte de `_v`/`_w`. Motivo: parado, o corpo dorme no motor e a integração
+  a partir da medida recomeçava do zero a cada tick (avanço 0 m a partir do repouso).
+- Testes (`53c5854`): 4 novos em `test_rotacao_hydrone.py` (parado: v imposta cresce a·dt por tick; a dinâmica recebe o
+  integrado e o estado do motor não muda; acima do limiar vale a medida; motor medindo velocidade, vale a medida); o reset
+  zera `_v`/`_w`. `~/venv-biguagym/bin/python -m pytest tests` → 173 passed.
+  - Os 3 testes novos falharam na primeira versão por erro do próprio teste: o envoltório captura o `step` original na
+    instalação, então trocar o `_step_original` depois não tinha efeito. A aceleração do modelo falso passou a ser um atributo.
+- `tools/diag_goto.py ... avanco` imprime também o v integrado.

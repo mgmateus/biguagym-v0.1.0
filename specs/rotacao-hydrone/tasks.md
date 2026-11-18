@@ -22,7 +22,7 @@ Status: aprovado
   - Verificação: tabela de critérios preenchida no log.md
   - Parcial (2026-11-17): v/ω medido/previsto = 1,000; subida 1,485 m; avanço 0,509 m em movimento, mas 0 m a partir do
     repouso (corpo dormindo no motor). Ajuste do design proposto no log.md, aguardando aprovação.
-- [ ] T8 — Integrador com estado próprio no `GotoEnv` (`_v`, `_w`, `_conciliar`, dinâmica recebe o v/ω integrado) (R6)
+- [x] T8 — Integrador com estado próprio no `GotoEnv` (`_v`, `_w`, `_conciliar`, dinâmica recebe o v/ω integrado) (R6)
   - Verificação: `pytest tests` → anteriores + novos passando
 - [ ] T9 — ⏱ Lab: `diag_goto.py ... avanco`, `testar_goto_lab.sh`; critérios R4, R5 e R6
   - Verificação: tabela de critérios preenchida no log.md
