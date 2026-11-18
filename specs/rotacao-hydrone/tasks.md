@@ -18,5 +18,7 @@ Status: aprovado
     porque o motor descarta acelerações lineares pequenas. Extensão proposta no design.md (aguardando aprovação).
 - [x] T6 — Integração linear no `GotoEnv` (`_impor_estado`, `_acc`, `integrar_dinamica`, `AMORTECIMENTO_LINEAR_MOTOR`) (R6)
   - Verificação: `pytest tests` → 169 passed
-- [ ] T7 — ⏱ Lab: `testar_goto_lab.sh` e `diag_goto.py ... avanco` com a integração linear; critérios R4, R5 e R6
+- [~] T7 — ⏱ Lab: `testar_goto_lab.sh` e `diag_goto.py ... avanco` com a integração linear; critérios R4, R5 e R6
   - Verificação: tabela de critérios preenchida no log.md
+  - Parcial (2026-11-17): v/ω medido/previsto = 1,000; subida 1,485 m; avanço 0,509 m em movimento, mas 0 m a partir do
+    repouso (corpo dormindo no motor). Ajuste do design proposto no log.md, aguardando aprovação.

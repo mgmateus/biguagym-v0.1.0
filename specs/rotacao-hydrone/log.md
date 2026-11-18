@@ -86,3 +86,29 @@ Investigação do avanço:
 - Testes: `test_rotacao_hydrone.py` cobre motor recebendo zeros e v imposta a partir do `DynamicsSensor`; fixtures antigas
   com os nomes novos. `pytest tests` → 169 passed.
 - `diag_rotacao_hydrone.py goto`: cmd_vel_yaw [0,3, 0, 0, 5°], razão medido/previsto de v_x e de ω_z, no ar e na água.
+
+## 2026-11-17 — T7 no lab: integração linear (`~/testar_linear.log`, 21:49–21:56)
+Lab em `16b1f71`/`f27fe79`; treino de outra sessão rodando junto.
+
+| Critério | Resultado |
+|---|---|
+| pytest | 169 passed |
+| v_x e ω_z medidos / previstos (`diag_rotacao_hydrone.py goto`, ar e água) | mediana 1,000 / 1,000 nos dois meios |
+| água, cmd_vel_yaw [0,3, 0, 0, 5°], 60 ticks | anda 0,36 m e gira 16,7°, estável |
+| ar, mesmo comando | anda e gira, mas o desvio **fixo** de 5° (alvo sempre 5° à frente) acelera a guinada até divergir (ω_z −25 rad/s, sobe a 6 m em 3 s); o `GotoEnv` não manda isso: a referência de guinada é integrada e limitada a 0,3 rad/s |
+| R4 guinada pelo `GotoEnv` | +1,514 / −1,527 rad |
+| R5 subida | **+1,485 m** (esperado 1,5; só com a rotação: 1,11) |
+| R6 avanço no `diag_goto` (depois da subida, em movimento) | **+0,509 m** (só com a rotação: 0,175) |
+| R6 avanço a partir do reset (`diag_goto.py ... avanco`) | **0 m** com a integração ligada ou desligada (pitch 0,2°, v medido 0) |
+| smokes `-v0/-v1/-v2` | ok, 4,91 / 4,58 / 5,11 passos/s (treino concorrente), sem NaN, obs no espaço |
+| processos | só os 4 do treino da outra sessão |
+
+Diagnóstico do avanço a partir do repouso: com o Hydrone em movimento a velocidade imposta é respeitada 1:1, mas parado
+(depois do reset) o corpo fica "dormindo" na física do motor: a velocidade imposta a partir da **medida** (0 + 0,03·0,05 =
+0,0017 m/s por tick) não o acorda, o motor devolve v = 0 e a integração recomeça do zero a cada tick. É o mesmo efeito
+que descartou as acelerações pequenas.
+
+**Ajuste proposto ao design (aguardando aprovação):** integrar v e ω no próprio `GotoEnv` (estado do integrador, zerado no
+reset e reposto pelo valor medido quando o motor mudar a velocidade, por exemplo numa colisão) em vez de partir da medida a
+cada tick, e entregar à dinâmica esse v/ω. Assim a velocidade acumula mesmo enquanto o corpo dorme e, ao passar do limiar,
+o motor passa a mover o Hydrone.
