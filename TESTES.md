@@ -1999,3 +1999,21 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
   integrar v e ω no próprio `GotoEnv` em vez de partir da medida a cada tick (detalhes em `specs/rotacao-hydrone/log.md`).
 - Observação: no ar, um desvio de guinada **fixo** no `cmd_vel_yaw` (alvo sempre N° à frente) faz o controlador dos autores
   acelerar a guinada até divergir; o `GotoEnv` não manda isso (referência integrada, |ω| ≤ 0,3 rad/s).
+
+### 2026-11-18 — Hydrone anda a partir do repouso (ajuste do integrador aprovado: "Sim")
+
+- `biguagym/core/goto.py` (submódulo `ac6ff26`; principal `53c5854`, `01ffa5d`, `aefb2d1`; branch `spec/rotacao-hydrone`):
+  - o `GotoEnv` guarda o próprio v/ω integrado (`_v`, `_w`, zerados no reset);
+  - com o motor medindo v = ω = 0 (corpo dormindo) e o integrado abaixo de 0,1 m/s e 0,1 rad/s, valem os integrados, que
+    também vão para a dinâmica dos autores; nos outros casos (movimento, colisão, contato), valem os medidos, como antes.
+  - Motivo: partindo da medida a cada tick, a velocidade pequena do início não acordava o corpo e recomeçava do zero.
+- Testes: 4 novos em `tests/test_rotacao_hydrone.py`; `~/venv-biguagym/bin/python -m pytest tests` → 173 passed.
+- `tools/diag_goto.py ... avanco` imprime também o v integrado.
+- Lab, depois de combinar com a outra sessão (`bash tools/testar_goto_lab.sh` + `diag_goto.py HydroneGotoPilares-v0 5 avanco`,
+  `~/testar_dormindo.log`, 02:46–02:53):
+  - **avanço a partir do reset: 0,44 m em 5 s, v = 0,16 m/s** (antes 0 m; é o mesmo da dinâmica dos autores em Python puro);
+  - guinada ±1,51 rad, subida 1,485 m, avanço em movimento 0,509 m, v/ω medidos/previstos = 1,000 no ar e na água;
+  - smokes `HydroneGotoPilares-v0/-v1/-v2` ok (6,2 / 6,2 / 7,5 passos/s, com o treino da outra sessão rodando), sem NaN;
+  - processos: só os 4 do treino `teste_5m_rotft_1` da outra sessão; 0 órfãos meus.
+- Spec `rotacao-hydrone` concluída (T1–T9). O avanço continua lento (0,16 m/s depois de 5 s para 0,31 pedidos): é o
+  controlador de velocidade dos autores, que não mudamos.
