@@ -53,9 +53,16 @@ def estado_clone(estado, j):
     raise KeyError(f"estado do pilar {j} não encontrado; chaves: {list(estado)}")
 
 
-def niveis(empilhar, comprimento, z_baixo=-1.2):
-    """Centros (z relativo à água) de ``empilhar`` agentes em pé, encostados, a partir de ``z_baixo``."""
-    return [z_baixo + comprimento * (k + 0.5) for k in range(empilhar)]
+def niveis(empilhar, comprimento, z_baixo=-1.2, folga=0.15):
+    """Centros (z relativo à água) de ``empilhar`` agentes em pé a partir de ``z_baixo``, com ``folga`` entre eles
+    (encostados, a resposta de colisão do motor os arremessa: 8–19 m no lab, 2026-11-18)."""
+    return [z_baixo + (comprimento + folga) * k + comprimento / 2 for k in range(empilhar)]
+
+
+def segurar(clones, alvos):
+    """Reimpõe posição e atitude de cada agente-pilar (parados, no modo accel, eles ainda derivam ~0,7 m em 5 s)."""
+    for c, (x, y, z) in zip(clones, alvos):
+        c.set_physics_state([x, y, z], [0.0, 90.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0])
 
 
 def main():
@@ -68,6 +75,8 @@ def main():
     ap.add_argument('--empilhar', type=int, default=3)
     ap.add_argument('--comprimento', type=float, default=None, help='comprimento do agente (m); padrão pelo tipo')
     ap.add_argument('--ticks', type=int, default=100)
+    ap.add_argument('--sem-segurar', dest='segurar', action='store_false',
+                    help='não reimpor a posição dos pilares a cada tick')
     ap.add_argument('--agua', type=float, default=0.0)
     ap.add_argument('--saida', default=None)
     args = ap.parse_args()
@@ -96,16 +105,16 @@ def main():
          'rotation': [0.0, 90.0, 0.0], 'sensors': din()},
     ]
     zero = {'robot': [0.0] * 6, 'pilar': [[0.0] * 6 for _ in range(n)]}
-    resultado = {'tipo': args.tipo, 'empilhar': args.empilhar, 'comprimento': comp, 'agentes_pilar': n}
+    resultado = {'segurar': args.segurar, 'tipo': args.tipo, 'empilhar': args.empilhar, 'comprimento': comp, 'agentes_pilar': n}
     env = biguasim.make(scenario_cfg=cfg, show_viewport=False)
     try:
         env.reset()
         robo = env.agents['robot-id0']
         clones = [env.agents[f'pilar-id{j}'] for j in range(n)]
-        for c, (x, y, z) in zip(clones, alvos):
-            c.set_physics_state([x, y, z], [0.0, 90.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0])
         t0 = time.time()
         for _ in range(args.ticks):
+            if args.segurar:
+                segurar(clones, alvos)
             estado = env.step(zero)
         resultado['passos_por_s'] = round(args.ticks / (time.time() - t0), 2)
 
@@ -130,6 +139,8 @@ def main():
         for nome, z in (('ar', 2.0), ('agua', -0.5)):
             robo.set_physics_state([sx, sy, args.agua + z], [0.0, 0.0, yaw], [0.0] * 3, [0.0] * 3)
             for _ in range(15):
+                if args.segurar:
+                    segurar(clones, alvos)
                 estado = env.step(zero)
             s = plano(estado)
             for sensor in ('CameraFrente', 'CameraTerceira'):
