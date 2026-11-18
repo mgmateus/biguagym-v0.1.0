@@ -40,10 +40,10 @@ class Perfil(GotoEnv):
         self._obst_ponto = self._geo['imposto'].copy()
         self._ticks_seg = 0
 
-    def _segurar_obstaculos(self):
+    def _segurar_obstaculos(self, teleporte=False):
         self._ticks_seg += 1
-        if self._ticks_seg % self.SEGURAR_CADA == 0:
-            super()._segurar_obstaculos()
+        if teleporte or self._ticks_seg % self.SEGURAR_CADA == 0:      # no posicionamento, sempre
+            super()._segurar_obstaculos(teleporte)
 
 
 def medir(nome, passos, perfil=False, **attrs):

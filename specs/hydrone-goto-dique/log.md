@@ -233,3 +233,7 @@ Causas e correções (sem simulador; `pytest tests` → 220 passed):
   estado por agente. `dique` abriu com 66 torpedos (limite de arquivos resolvido). LiDAR no ar mediu o pilar 0 (no lugar)
   com mediana 0,057 m de diferença para o raio traçado nas cápsulas.
 - `pytest tests` → 221 passed.
+- 3ª rodada (20:29, `c5eef0f`/`3547bcd`): `perfil_obstaculos.py` parou no 2º caso com `TypeError: Perfil._segurar_obstaculos()
+  takes 1 positional argument but 2 were given` (a sobrescrita da ferramenta não recebia o parâmetro `teleporte` novo);
+  corrigido na ferramenta. Antes disso: sem obstáculos 5,74 passos/s. A espera da fila (`pgrep -f testar_obstaculos_lab.sh`)
+  achava o próprio `bash -c` e nunca terminava; o processo (meu) foi morto e a rodada relançada sem a espera.
