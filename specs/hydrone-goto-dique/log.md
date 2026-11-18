@@ -162,3 +162,21 @@ aviso de SpawnProp recusado, câmera com pitch +90°; Hydrone em `accel` com ace
     o caminho a partir de onde os clones nascem). LiDAR no ar: 4,28 / 6,24 / 1,20 / 4,61 m medidos × 4,52 / 6,42 /
     1,41 / 4,77 m geométricos (centro); na água, 3 de 4 (o que não chegou não aparece). Câmera RGB: colunas visíveis.
 - Proposta de mudança no design.md (pilares feitos de agentes no GotoEnv), aguardando aprovação.
+
+## 2026-11-18 — Obstáculos feitos de agentes no GotoEnv (T9)
+- Aprovação do usuário: "Prefiro pilares mais grossos, pode colocar, e também, adicione mais obstácuos". design.md atualizado
+  ("Mudança aprovada — obstáculos feitos de agentes"); tarefas T9–T11 no tasks.md. Trabalho na branch `spec/rotacao-hydrone`
+  (a mesma cadeia em que o Goto já está, principal e submódulo).
+- `config/goto_dique.json`: `agente_obstaculo` (TorpedoAUV 2,1 × 0,19 m, folga 0,15 m, feixe 0,05 m, `origem_eixo` 0 até
+  calibrar); `pilares` → `obstaculos`; coordenadas reais da área conferida (x 127–135, y −155 a −145, `provisorio: false`):
+  `pilares` = 4 pilares 2 × 2 × 3 níveis (48 torpedos); `dique` = esses + pilar central + 2 vigas na linha d'água + 2
+  travessas no ar (66 torpedos). Motivo: os pilares precisam existir no simulador (SpawnProp recusado) e o usuário pediu
+  pilares mais grossos e mais obstáculos.
+- `core/goto.py`: `geometria_obstaculos`, `dist_capsulas`, `carregar_agente_obstaculo`, `_preparar_cenario`; agente em lote
+  `obstaculo` no `_build_params`; `_posicionar_obstaculos` no `_reset` (espera no alto, descida de um nível por tick,
+  repete quem não chegou, até 3 vezes); `_segurar_obstaculos` antes de cada tick em `_passo_sim`; `cmds` em dicionário;
+  `_unwrap_state` lê `state['robot']`; colisão "pilar"/"viga" por cápsulas; `_spawn_pilares` removido.
+- Testes: `tests/test_hydrone_goto.py` (17 novos: geometria, cápsulas, sobreposição, cobertura da faixa de voo, cenário do
+  simulador, descida por nível, repetição, aviso, deslocamento por orientação, reimposição a cada tick; coordenadas
+  antigas trocadas); `tests/test_sensores_goto.py` e `tests/test_rotacao_hydrone.py` adaptados (`_preparar_cenario`,
+  simulador falso com os torpedos; a integração testada sem obstáculos). `pytest tests` → 209 passed.

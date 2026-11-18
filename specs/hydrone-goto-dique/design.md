@@ -93,27 +93,54 @@ calcula a recompensa, sorteia o alvo novo se chegou, monta a observação; `trun
 
 ---
 
-## Proposta de mudança — pilares feitos de agentes (AGUARDANDO APROVAÇÃO; o restante do design segue aprovado)
+## Mudança aprovada — obstáculos feitos de agentes (pilares 2 × 2 e vigas)
+
+> Aprovação: usuário em 2026-11-18 ("Prefiro pilares mais grossos, pode colocar, e também, adicione mais obstácuos").
+> Substitui os pilares por `spawn_prop` (o mundo SkyDive recusa `SpawnProp`; ver log.md).
 
 **Por quê** (detalhes no log.md, 2026-11-18): o mundo SkyDive recusa `SpawnProp`, então os pilares do `_spawn_pilares` nunca
-apareceram. O `DebugDraw` aparece só na câmera RGB (não na profundidade, sem colisão) e o Pier-Harbor não tem pilares nem
-blocos em água aberta (`tools/achar_pilares.py`). O usuário pediu: "Dê um jeito de criar os pilares ou quadrado compridos".
-No lab (`tools/pilares_agentes.py`), colunas de 3 TorpedoAUV em pé (2,1 m cada, 15 cm entre eles), em `accel` e com a
-posição reimposta a cada tick, ficaram paradas (atitude exata; diferença fixa de 0,861 m entre a origem do ator e o
-centro), apareceram na câmera RGB e o LiDAR as mediu onde estavam. A 17,96 passos/s com 12 agentes extras.
+apareceram. O `DebugDraw` aparece só na câmera RGB e o Pier-Harbor não tem pilares em água aberta. No lab
+(`tools/pilares_agentes.py`), colunas de TorpedoAUV em pé, em `accel` e com a posição reimposta a cada tick, ficaram
+paradas, apareceram na câmera RGB e o LiDAR as mediu onde estavam (17,96 passos/s com 12 agentes extras).
 
-**O que muda:**
-- `config/goto_dique.json`: cada pilar ganha `"agente": "TorpedoAUV"` (tipo) e `"feixe"`: 1 (um torpedo por nível; 4 =
-  2 × 2, mais grosso); o `raio` passa a ser o do feixe (0,1 m para 1 torpedo).
-- `GotoEnv`: o cenário do simulador ganha um agente em lote `pilar` (`batch_size` = pilares × níveis × feixe, `accel`,
-  só DynamicsSensor), nascendo alto e indo para o lugar por cima (o teleporte varre o caminho); a cada tick
-  (`_passo_sim`), reimpõe a posição de cada clone (compensando a origem do ator) e manda aceleração zero ao lote
-  (`cmds` vira `{'robot': cmd, 'pilar': [[0]*6]*n}`); o estado do robô é lido de `state['robot']`. `_spawn_pilares`
-  (spawn_prop) sai.
-- A checagem de colisão em Python e a recompensa não mudam (os pilares continuam no JSON); o contato físico com um
-  pilar passa a acontecer de verdade e o `CollisionSensor` do Hydrone o vê.
+**Cenário** (`config/goto_dique.json`):
+- `agente_obstaculo` (comum aos cenários): `tipo` TorpedoAUV, `comprimento` 2,1 m, `diametro` 0,19 m, `folga` 0,15 m entre
+  torpedos empilhados ou em fila (encostados, o motor os arremessa), `folga_feixe` 0,05 m entre os do feixe, `origem_eixo`
+  (deslocamento da origem do ator ao longo do eixo do torpedo; 0 até calibrar no lab, onde se mediu 0,861 m sem sinal).
+- Cada cenário troca `pilares` por `obstaculos`:
+  - `{"tipo": "pilar", "xy": [x, y], "feixe": 2, "niveis": 3, "base_z": -1.2}`: feixe n × n de torpedos em pé (pitch 90°),
+    `niveis` empilhados a partir de `base_z` (3 níveis: −1,2 a 5,4 m, cobre a faixa de voo −1,1 a 4,8 m mesmo com a origem
+    deslocada 0,86 m); 2 × 2 = 0,43 m de lado.
+  - `{"tipo": "viga", "de": [x, y, z], "ate": [x, y, z]}`: torpedos deitados em fila de `de` até `ate` (z igual; quantos
+    couberem, centrados), guinada na direção da fila.
+- Coordenadas reais (área conferida no lab em 2026-11-18: x 127–135, y −155 a −145, folga ≥ 1,8 m até parede e navio, 0
+  colisões); `provisorio: false`:
+  - `pilares` (Fig. 6a do Depth-CUPRL, pedido do coorientador): 4 pilares 2 × 2 em (129,4/132,6; −152/−148), 48 torpedos.
+  - `dique` ("adicione mais obstáculos"): os 4 pilares + 1 pilar no centro (131; −150) + 2 vigas na linha d'água
+    (z = −0,05, ao norte em y = −146,3 e ao sul em y = −153,7, de x = 127,9 a 132,25: o Hydrone passa por cima ou por baixo)
+    + 2 travessas no ar entre pilares (x = 129,4, z = 2,5 e x = 132,6, z = 1,2, de y = −151 a −149): 66 torpedos.
+  - Spawn nos dois: (133,88; −152,6; 2,0).
+  O dique inteiro (bacia norte com o navio) fica para depois de mapear o navio de novo (`mapear_dique.py --mapa`).
 
-**Riscos:** passos/s menores (12 agentes: 17,96 passos/s no teste, sem o resto do GotoEnv); o Hydrone empurra o pilar
-num contato (a posição é reimposta no tick seguinte e o episódio termina na colisão); pilares finos (19 cm) com um
-torpedo por nível. **Verificação:** testes sem simulador (cmds e reimposição); no lab, smokes `-v0/-v1/-v2`, fotos RGB e
-profundidade com os pilares, LiDAR medindo os pilares e passos/s.
+**`GotoEnv`:**
+- `_build_params`: acrescenta o agente em lote `obstaculo` (`batch_size` = nº de torpedos, `accel`, dois DynamicsSensor, nascendo
+  30 m acima do spawn); sem obstáculos no cenário, nada muda.
+- `_reset`: depois do `self._env.reset()`, `_posicionar_obstaculos()`: cada torpedo vai para um ponto de espera no alto, acima do
+  seu lugar (níveis em alturas diferentes), e desce na vertical, um nível por tick, de baixo para cima (o teleporte varre o
+  caminho); depois confere a posição de cada um (diferença para o ponto imposto igual à mediana dos outros, ±0,3 m) e repete
+  subida e descida para os que não chegaram (até 3 vezes; senão `warnings.warn`).
+- `_passo_sim`: um tick por vez quando há obstáculos, reimpondo posição e atitude de todos antes de cada tick; `cmds` vira
+  `{'robot': cmd, 'obstaculo': [[0]*6]*n}`; `_unwrap_state` lê `state['robot']` e guarda `state['obstaculo']`.
+- Colisão em Python: cada torpedo vira uma cápsula (eixo do torpedo, raio 0,095 m); `_dist_obstaculo(pos)` dá a menor
+  distância e o tipo; motivos "pilar" ou "viga" (< 0,625 m), no lugar do antigo cilindro. Alvos sorteados a ≥ `folga_alvo` das
+  cápsulas. `_spawn_pilares` (spawn_prop) sai.
+- A recompensa e o resto do término não mudam.
+
+**Riscos:** passos/s menores (66 torpedos; medir no lab; se ficar < ~12 passos/s, reduzir o `dique`); o Hydrone empurra um
+torpedo num contato (o episódio termina na colisão e a posição é reimposta no tick seguinte); sinal do deslocamento da origem
+do ator (calibrar no lab: varredura vertical do LiDAR junto a um pilar; com 3 níveis a faixa de voo fica coberta nos dois
+sinais, mas as vigas deitadas deslocariam 0,86 m ao longo do eixo).
+
+**Verificação:** testes sem simulador (geometria dos pilares e vigas, cápsulas, colisão, `cmds` em dicionário, reimposição a
+cada tick, posicionamento com repetição); no lab (`tools/conferir_obstaculos.py`): todos os torpedos no lugar, calibração da
+origem, fotos RGB e de profundidade, LiDAR nos obstáculos, passos/s dos `-v0/-v1/-v2` nos dois cenários e 0 órfãos.

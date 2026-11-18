@@ -16,7 +16,7 @@ from test_hydrone_goto import montar  # noqa: E402
 ACC = [0.03, 0.0, 1.0, 0.1, 0.2, 3.0]         # o que a dinâmica "calcula": linear (3) + angular (3), mundo
 W = np.array([0.01, -0.02, 0.5])                # ω medido pelo DynamicsSensor (mundo, rad/s)
 V = np.array([0.2, 0.05, -0.1])                 # v medida pelo DynamicsSensor (centro de massa, mundo)
-POS, VEL, RPY = [103.6, 97.4, 2.0], [0.1, -0.2, 0.3], [1.0, -2.0, 30.0]   # RPYDynamicsSensor (ator)
+POS, VEL, RPY = [133.88, -152.6, 2.0], [0.1, -0.2, 0.3], [1.0, -2.0, 30.0]   # RPYDynamicsSensor (ator)
 
 
 def estado(v=V, w=W):
@@ -78,7 +78,7 @@ class SimDinamica:
 
 
 def preparar(integrar=True, repeticoes=1):
-    env = montar()
+    env = montar(obstaculos=False)                  # a integração do robô sozinha (obstáculos: test_hydrone_goto.py)
     env._env = SimDinamica()
     env._integrar_dinamica = integrar
     env._action_repeat = repeticoes

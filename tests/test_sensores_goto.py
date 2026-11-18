@@ -16,15 +16,14 @@ from test_hydrone_goto import SimFalso, dyn, estado  # noqa: E402
 
 def preparar(cls, cenario='pilares'):
     env = object.__new__(cls)
-    env._cena = carregar_cenario(cenario)
-    env._cenario = cenario
+    env._preparar_cenario(cenario)
     env._agent_type, env._control_abstraction = 'Hydrone', 'cmd_vel_yaw'
     env._location, env._rotation = list(env._cena['spawn']), [0, 0, 0]
     env._batch_size, env._action_repeat, env._on_target_buf = 1, 1, 0
     env._env_version, env._observation_type = 'v2', 'DynamicsSensor'
     env.rng = np.random.default_rng(0)
     env.env_cfg, env.obs_cfg = env._build_params()
-    env._env = SimFalso(estado(env._cena['spawn']))
+    env._env = SimFalso(estado(env._cena['spawn']), len(env._geo['centro']))
     env._acao_ant = np.zeros(3, np.float32)
     env._integrar_dinamica, env._acc = False, np.zeros(6)
     return env
@@ -54,7 +53,7 @@ def test_v1_espacos_e_observacao():
     inicio = estado(env._cena['spawn'])
     inicio['RGBCamera'] = np.full((256, 256, 4), 200, np.uint8)
     inicio['DepthCamera'] = {'depth_map': np.full((256, 256), 2.5, np.float32)}
-    env._env = SimFalso(inicio)
+    env._env = SimFalso(inicio, len(env._geo['centro']))
     obs, _ = env._reset()
     assert obs['rgb'].shape == (9, 100, 100) and np.all(obs['rgb'] == 200)
     assert np.allclose(obs['depth'], 127.5) and obs['state'].shape == (9,)
