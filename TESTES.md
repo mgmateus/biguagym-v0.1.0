@@ -2070,3 +2070,21 @@ Pedido do usuário: "aprovado, pode fazer da T1 à T12". Detalhes em `specs/ajus
 - Processos: nenhum meu sobrou; só os do treino da outra sessão.
 - Aguardando decisão do usuário: pedir aos autores um mundo com SpawnProp, usar agentes parados como obstáculos, ou
   usar o dique sem pilares (navio e paredes como obstáculos).
+
+### 2026-11-18 — Pilares feitos de agentes (pedido: "Dê um jeito de criar os pilares ou quadrado compridos")
+
+- As paredes do mapa não formam blocos dentro da água: a análise com blocos de até 12 m continua com 1 só candidato.
+- Ferramenta `tools/pilares_agentes.py`:
+  - cada pilar é uma coluna de 3 TorpedoAUV em pé, em `accel`;
+  - a posição de cada torpedo é reimposta a cada tick, com 15 cm de folga entre os empilhados.
+- Lab, 14:55–15:05, combinado com a outra sessão:
+  - **1ª rodada:** TypeError ao ler o estado dos clones. Era erro da ferramenta e foi corrigido.
+  - **2ª rodada:** sem reimpor a posição, os agentes derivaram e os empilhados encostados foram arremessados.
+  - **3ª rodada:**
+    - 17,96 passos/s;
+    - 11 de 12 agentes no lugar; 1 não chegou porque o teleporte foi bloqueado no caminho (a correção é chegar por cima);
+    - **o LiDAR mede os pilares** (4,28 m contra 4,52 m geométricos etc.);
+    - **as colunas aparecem na câmera RGB**.
+- Proposta de mudança no design do `GotoEnv` (pilares de agentes no lugar do `spawn_prop`) em
+  `specs/hydrone-goto-dique/design.md`, aguardando aprovação.
+- Processos: nenhum meu sobrou.
