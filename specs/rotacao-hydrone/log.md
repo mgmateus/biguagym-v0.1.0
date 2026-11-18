@@ -127,3 +127,26 @@ o motor passa a mover o Hydrone.
   - Os 3 testes novos falharam na primeira versão por erro do próprio teste: o envoltório captura o `step` original na
     instalação, então trocar o `_step_original` depois não tinha efeito. A aceleração do modelo falso passou a ser um atributo.
 - `tools/diag_goto.py ... avanco` imprime também o v integrado.
+
+## 2026-11-18 — T9 no lab: integrador com v/ω próprios (`~/testar_dormindo.log`, 02:46–02:53)
+Lab em `01ffa5d`/`ac6ff26`; a outra sessão (TCC) liberou o lab, e o treino `teste_5m_rotft_1` dela rodava junto.
+Comando: `bash tools/testar_goto_lab.sh` seguido de `tools/diag_goto.py HydroneGotoPilares-v0 5 avanco`.
+
+| Critério | Resultado |
+|---|---|
+| pytest | 173 passed |
+| v_x e ω_z medidos / previstos (`diag_rotacao_hydrone.py goto`) | mediana 1,000 / 1,000 no ar e na água |
+| água, cmd_vel_yaw [0,3, 0, 0, 5°], 60 ticks | anda 0,36 m e gira 16,7° (igual ao T7) |
+| ar, mesmo comando | diverge como no T7 (desvio **fixo** de 5°, entrada fora do uso do `GotoEnv`) |
+| R4 guinada pelo `GotoEnv` | +1,514 / −1,527 rad |
+| R5 subida | +1,485 m |
+| R6 avanço no `diag_goto` (em movimento) | +0,509 m |
+| **R6 avanço a partir do reset** (`diag_goto.py ... avanco`, 100 passos) | **+0,44 m, v = 0,16 m/s** com a integração (o mesmo da dinâmica dos autores integrada em Python: 0,44 m e 0,16 m/s); sem ela, 0 m |
+| smokes `-v0/-v1/-v2` | ok, 6,18 / 6,23 / 7,49 passos/s (treino concorrente), 0 passos com NaN |
+| processos | só os 4 do treino da outra sessão (PIDs 456635, 456638, 456684, 456784); 0 órfãos meus |
+
+Na fase `avanco` com a integração, a v medida pelo motor acompanha a integrada desde o passo 19 (0,03 / 0,036 m/s; 0,16 /
+0,161 m/s no passo 99): o corpo acorda logo e o motor passa a respeitar a velocidade imposta. Todos os critérios (R1–R6)
+estão atendidos. Para os autores: aceleração angular do Hydrone ignorada pelo motor; acelerações lineares pequenas
+descartadas; amortecimento de 1 s⁻¹ em v e ω; corpo dormindo que não acorda com velocidades pequenas; controlador
+`cmd_vel_yaw` que diverge no ar com desvio de guinada fixo.
