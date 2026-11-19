@@ -175,3 +175,17 @@ com `EXTRA="... +env_kwargs.reward_version=v0 +env_kwargs.env_version=v0"`; mode
 Desde a spec `colapso-blueboat` (2026-10-20) o padrão é `env_version=v2`, que só muda o BlueBoatNav (alvo a 3 m da borda,
 raio de sucesso de 1 m, ação em [−1, 1]). Os 250k iniciados em 2026-10-20 rodaram com a v1: para reproduzi-los, use
 `EXTRA="eval_freq=250000 +env_kwargs.env_version=v1"`. Não faça `git pull` no PC do lab com a fila rodando.
+
+## HydroneGoto no cluster2 (BiguaSim 1.1.0, 2026-11-19)
+Pedido do usuário: 5M passos, 5 seeds por experimento (`runs_goto.csv`: `HydroneGotoPilares-v1` + cuprl e
+`HydroneGotoPilares-v2` + td3). O cluster só é alcançado pelo PC do lab.
+1. No lab: `nohup bash tools/copiar_mundo_cluster.sh > ~/copiar_mundo.log 2>&1 &` (mundo SkyDive 1.1.0 + manifesto).
+2. No cluster2: `cd ~/biguagym-v0.1.0 && git pull && bash tools/instalar_cluster_goto.sh` (Miniconda, venv 3.12, BiguaSim 1.1.0).
+3. Medir a RAM de um simulador do `-v2` (sonar) antes da fila: no piloto do lab, 2 simuladores ocuparam ~19 GB.
+4. Fila (valores a ajustar pela medição; a GPU 0 do cluster2 tinha outro trabalho em 2026-11-19):
+   ```bash
+   RUNS=treinos/cluster/runs_goto.csv OUT=treinos/cluster/saida_goto STEPS=5000000 TIMEOUT=3024000 \
+   GPUS=1 WORKERS=1 MIN_RAM_MB=30000 \
+   nohup setsid bash treinos/cluster/fila_cluster.sh > treinos/cluster/saida_goto.log 2>&1 < /dev/null &
+   ```
+   5M passos a 3,9–5,5 passos/s (lab) são 10–15 dias por run; TIMEOUT=3024000 s = 35 dias.

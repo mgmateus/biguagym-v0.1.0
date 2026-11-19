@@ -29,6 +29,8 @@ OUT=${OUT:-$CL/saida}
 RUNS=${RUNS:-$CL/runs.csv}
 STEPS=${STEPS:-100000}
 MIN_VRAM_MB=${MIN_VRAM_MB:-4000}        # VRAM livre mínima para começar um run (um treino chega a ~4 GB: 3 simuladores)
+MIN_RAM_MB=${MIN_RAM_MB:-0}             # RAM disponível (free, coluna available) mínima para começar um run; 0 = não confere.
+                                        # HydroneGoto-v2: ~19 GB em 2 simuladores com sonar (piloto no lab, 2026-11-19)
 INTERVALO_INICIO=${INTERVALO_INICIO:-60}  # segundos mínimos entre inícios de runs
 EXTRA=${EXTRA:-}                     # argumentos extras do run.py (ex.: EXTRA="eval_freq=250000" nos 250k)
 TIMEOUT=${TIMEOUT:-432000}          # 120 h por run (sonar: ~0,6 passos/s no notebook → ~48 h só de passos)
@@ -124,11 +126,12 @@ EOF
             if flock "$LOCK.inicio" bash -c '
                 livre=$("$1" -i "$2" --query-gpu=memory.free --format=csv,noheader,nounits | head -1 | tr -d " ")
                 ultimo=$(stat -c %Y "$4" 2>/dev/null || echo 0)
-                [ "$livre" -ge "$3" ] && [ $(( $(date +%s) - ultimo )) -ge "$5" ] && touch "$4"' \
-                _ "$REAL_SMI" "$gpu" "$MIN_VRAM_MB" "$OUT/.ultimo_inicio" "$INTERVALO_INICIO"; then
+                disp=$(free -m | awk "/^Mem:/{print \$7}")
+                [ "$livre" -ge "$3" ] && [ "$disp" -ge "$6" ] && [ $(( $(date +%s) - ultimo )) -ge "$5" ] && touch "$4"' \
+                _ "$REAL_SMI" "$gpu" "$MIN_VRAM_MB" "$OUT/.ultimo_inicio" "$INTERVALO_INICIO" "$MIN_RAM_MB"; then
                 break
             fi
-            [ $avisou -eq 0 ] && echo "$(date +%T) w$w: esperando ${MIN_VRAM_MB} MiB livres na GPU $gpu"
+            [ $avisou -eq 0 ] && echo "$(date +%T) w$w: esperando ${MIN_VRAM_MB} MiB livres na GPU $gpu e ${MIN_RAM_MB} MB de RAM disponível"
             avisou=1; sleep 30
         done
         local linha
