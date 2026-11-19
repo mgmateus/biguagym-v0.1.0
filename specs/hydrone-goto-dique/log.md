@@ -289,3 +289,21 @@ Causas e correções (sem simulador; `pytest tests` → 220 passed):
   '.../treinos/piloto_goto/HydroneGotoPilares-v1_cuprl/curves'` (o `run.py` não cria a pasta de `curves_path`; a fila do
   cluster criava) e a contagem do grupo dava `0\n0` com `pipefail` (`integer expression expected`). Erros do script, corrigidos;
   nenhum simulador aberto.
+- 2º lançamento do piloto (14:33, `a1e5644`), parado:
+  - `HydroneGotoPilares-v1` + cuprl: `TypeError: GotoEnv.__init__() got an unexpected keyword argument 'pixel_channels' was
+    raised from the environment creator for HydroneGotoPilares-v1 with kwargs ({'seed': 42, 'agent_type': 'Hydrone',
+    'control_abstraction': 'cmd_vel_yaw', 'cenario': 'pilares', 'pixel_channels': ['rgb', 'depth'], 'include_state': True,
+    'frame_size': [100, 100]})` (`run.py:150 __init__` → `:156 train` → `gym.make`). Causa: `run.py` `_resolve_env`
+    (linhas 83–86) sempre põe `pixel_channels`/`include_state`/`frame_size` quando o agente é cuprl, e o
+    `GotoPixelEnv.__init__` (`core/goto.py:624`) só aceita `frame_size`. O smoke não passa esses kwargs. **Correção proposta,
+    não aplicada.**
+  - `HydroneGotoPilares-v2` + td3: a memória disponível caiu de 23.920 MB para 5.114 MB em 86 s; o vigia encerrou o grupo
+    (14:34:39), 0 processos meus depois, 24 GB disponíveis de novo. O buffer do td3 não é a causa (medido no notebook com os
+    mesmos espaços: 0,2 GB para 1M transições, RSS 550 MB depois de 20k `store`). Suspeita: a octree do `ProfilingSonar`
+    (`InitOctreeRange` 20 m, folha padrão `octree_min` 0,02 m) em cada simulador (treino + avaliação). Não medido.
+- **Incidente:** às 14:23:18 o kernel matou por OOM o Python do `teste_5m_rotrc_1` da sessão "tcc" (pid 525540), durante o
+  meu smoke do `-v2` (14:22:31–14:25:11), o provável causador; o treino dela voltou do checkpoint de 1,25M. O vigia de
+  memória só existia no piloto. Combinado com a "tcc": nenhum treino meu no nautec enquanto o rotrc estiver ativo (~4 h),
+  salvo aprovação do usuário; smokes curtos só com aviso; o `-v2` não roda no lab até a memória dele ser medida.
+- Do PC do lab, `ssh -o BatchMode=yes teteu@10.230.108.173 hostname` responde (`2titancluster.cluster.local`): o cluster
+  pode ser preparado a partir do lab.
