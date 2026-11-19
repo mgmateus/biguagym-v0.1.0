@@ -285,3 +285,7 @@ Causas e correções (sem simulador; `pytest tests` → 220 passed):
   e `-v2`+td3, `learning_starts=1000` (o padrão do td3, 25000, passa do piloto), avaliação a cada 10k com 1 episódio;
   encerra o meu run se a memória disponível cair abaixo de 5 GB (condição da "tcc").
 - Cluster: `ssh -J teteu@10.230.108.173 teteu@cluster2` deu timeout do notebook (fora da rede da universidade).
+- 1º lançamento do piloto (14:31): os dois runs saíram em 10 s com `OSError: Cannot save file into a non-existent directory:
+  '.../treinos/piloto_goto/HydroneGotoPilares-v1_cuprl/curves'` (o `run.py` não cria a pasta de `curves_path`; a fila do
+  cluster criava) e a contagem do grupo dava `0\n0` com `pipefail` (`integer expression expected`). Erros do script, corrigidos;
+  nenhum simulador aberto.

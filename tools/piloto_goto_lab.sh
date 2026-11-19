@@ -28,7 +28,7 @@ disp_mb() { free -m | awk '/^Mem:/{print $7}'; }
 
 for par in $RUNS; do
     env=${par%%:*}; agent=${par##*:}
-    d=$OUT/${env}_${agent}; mkdir -p "$d"
+    d=$OUT/${env}_${agent}; mkdir -p "$d/curves" "$d/logs"   # o run.py não cria a pasta das curvas
     echo "$(date +%T) início $env ($agent), $STEPS passos, disponível $(disp_mb) MB, simuladores $(pgrep -c -f "$SIM_RE")"
     ini=$(date +%s)
     (
@@ -54,7 +54,7 @@ for par in $RUNS; do
     done
     wait $sub; rc=$?
     sleep 5
-    sobra=$( [ -n "$pg" ] && pgrep -g "$pg" | wc -l || echo 0 )
+    sobra=0; [ -n "$pg" ] && sobra=$(pgrep -g "$pg" | wc -l)
     [ "$sobra" -gt 0 ] && { pkill -TERM -g "$pg"; sleep 10; pkill -KILL -g "$pg" 2>/dev/null; }
     min=$(( ($(date +%s) - ini) / 60 ))
     echo "$(date +%T) fim $env: exit $rc, $min min, processos do grupo ao fim $sobra${motivo:+, parado: $motivo}"
