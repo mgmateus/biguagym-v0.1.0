@@ -27,5 +27,7 @@ explorar o mapa (não rodar ao mesmo tempo).
   - Verificação: `pytest tests` → anteriores + novos passando
 - [x] T10 — `tools/conferir_obstaculos.py` (posicionamento, calibração da origem, fotos, LiDAR, passos/s)
   - Verificação: `python -m py_compile tools/conferir_obstaculos.py` e teste da análise sem simulador
-- [ ] T11 — ⏱ Lab: `conferir_obstaculos.py` nos cenários `pilares` e `dique`; smokes `-v0/-v1/-v2`
+- [x] T11 — ⏱ Lab: `conferir_obstaculos.py` nos cenários `pilares` e `dique`; smokes `-v0/-v1/-v2`
   - Verificação: tabela no log.md (torpedos no lugar, origem calibrada, fotos, LiDAR, passos/s, 0 órfãos)
+  - Concluída (2026-11-18, 5 rodadas; ver log.md): 0 torpedos fora do lugar nos dois cenários, coluna medida pelo LiDAR
+    −1,0 a 5,4 m (geométrica −1,2 a 5,4), smokes `-v0/-v1/-v2` ok, 7,18 / 6,24 passos/s (`pilares` / `dique`, -v0), 0 órfãos.

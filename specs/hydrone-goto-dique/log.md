@@ -254,3 +254,15 @@ Causas e correções (sem simulador; `pytest tests` → 220 passed):
 - Incidente: numa reconexão do AnyDesk, o Chrome do notebook ganhou o foco com uma aba de propaganda do AnyDesk e um comando
   meu (`kill -0 536798 ... kill -9`) foi digitado nessa página (sem campo de texto em foco; nada mudou). Não mexi no Chrome;
   a janela do AnyDesk foi reativada por `xdotool windowactivate`.
+- 5ª rodada (21:10–21:21, `656a851`/`58674b3`): **resolvido.**
+
+| Item | `pilares` (48 torpedos) | `dique` (66 torpedos) |
+|---|---|---|
+| Hydrone depois do reset (`diag_reset_goto.py`, 3 resets) | no spawn (133,88; −152,6; 2,0), 3 passos sem término | igual |
+| torpedos fora do lugar | 0 (reset 6,15 s) | 0 |
+| conferência, passos/s com 3 câmeras 960², profundidade e LiDAR 360 | 5,22, nenhum término em 100 passos | (4ª rodada: 4,61) |
+| smoke `-v0` (200 passos) | 7,18 passos/s (4,53 h por 100k), reset 5,05 s, 2 episódios, sem erro | 6,24 passos/s (5,36 h por 100k), reset 6,51 s, 2 episódios, sem erro |
+
+  Smokes `HydroneGotoPilares-v1/-v2` ok na 2ª rodada (antes do teleport e do retorno do robô; o caminho do estado é o mesmo).
+  Fotos no lab: `conferir_obstaculos/20261118-203620/{pilares,dique}/` (ar, água, profundidade, de cima). 0 processos meus
+  no fim; sessão "tcc" avisada.

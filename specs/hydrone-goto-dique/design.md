@@ -136,6 +136,14 @@ paradas, apareceram na câmera RGB e o LiDAR as mediu onde estavam (17,96 passos
   cápsulas. `_spawn_pilares` (spawn_prop) sai.
 - A recompensa e o resto do término não mudam.
 
+**Ajustes de implementação feitos no lab (2026-11-18, T11; mesma solução, detalhes no log.md):** feixe com 0,32 m entre eixos
+(`folga_feixe` 0,13: as aletas têm ~0,27 m); só o DynamicsSensor com `UseCOM` em cada torpedo (o deslocamento de 0,861 m era o
+`IMUSocket`, no nariz; `origem_eixo` fica 0); dinâmica dos torpedos devolvendo zero; no posicionamento os torpedos andam com
+`teleport` (o `set_physics_state` varre o caminho e prendia os clones sobrepostos no nascimento) e depois são segurados com
+`set_physics_state`; os clones nascem 30 m ao lado e 50 m acima (a separação violenta deles empurrava o Hydrone) e o Hydrone
+volta ao spawn, parado, no fim do posicionamento; com vários agentes o BiguaSim devolve cada sensor do robô numa lista de um
+elemento (o `_unwrap_state` tira); o `GotoEnv` sobe o limite de arquivos abertos do processo (66 torpedos estouravam 1024).
+
 **Riscos:** passos/s menores (66 torpedos; medir no lab; se ficar < ~12 passos/s, reduzir o `dique`); o Hydrone empurra um
 torpedo num contato (o episódio termina na colisão e a posição é reimposta no tick seguinte); sinal do deslocamento da origem
 do ator (calibrar no lab: varredura vertical do LiDAR junto a um pilar; com 3 níveis a faixa de voo fica coberta nos dois
