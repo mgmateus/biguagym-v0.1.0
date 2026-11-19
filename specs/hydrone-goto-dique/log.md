@@ -307,3 +307,18 @@ Causas e correções (sem simulador; `pytest tests` → 220 passed):
   salvo aprovação do usuário; smokes curtos só com aviso; o `-v2` não roda no lab até a memória dele ser medida.
 - Do PC do lab, `ssh -o BatchMode=yes teteu@10.230.108.173 hostname` responde (`2titancluster.cluster.local`): o cluster
   pode ser preparado a partir do lab.
+
+## 2026-11-19 — Cluster2 para os treinos HydroneGoto (decisão do usuário: "Isso é para rodar nos clusters, não no pc do lab")
+- Do notebook o ssh ao cluster dá timeout; o lab serve só de ponte de ssh (sem simulador nem treino lá).
+- Cluster2 (16:39): 20 CPUs, 62 GB de RAM (50 disponíveis), `/home` com 322 GB livres, 2× Tesla V100S 32 GB (GPU 0 a 99%
+  com 24,9 GB em uso por outro trabalho; GPU 1 com 1 GB). **O kit nunca tinha sido instalado lá** (sem `~/biguagym-v0.1.0`,
+  venv nem mundos; só `~/biguasim_gold`, de outro trabalho, não tocado). Tem rsync, zstd, git e gcc; não tem python3.12
+  nem conda.
+- `setup/instalar_pc_lab.sh` (`735c844`): `SIM_VERSAO=1.1.0` usa a tag pública `v1.1.0` do hydrone-furg/biguasim (só
+  leitura), a pasta `~/.local/share/biguasim/1.1.0/worlds`, `pip install -e --ignore-requires-python` (a 1.1.0 declara
+  ==3.11 e roda no 3.12) e o manifesto `setup/skydive_manifest_1.1.0.txt`; o padrão (1.0.0) não muda.
+- `tools/copiar_mundo_cluster.sh` e `tools/instalar_cluster_goto.sh` (`f2c69c6`): o mundo SkyDive 1.1.0 vai do lab ao cluster
+  por rsync (com o manifesto); no cluster, Miniconda no home e o venv 3.12 pelo conda-forge, depois o instalador.
+- Clonado no cluster: `~/biguagym-v0.1.0` na `spec/rotacao-hydrone` (`735c844`).
+- 16:43: a sequência (cópia do mundo + instalação) foi digitada no terminal do lab, mas o AnyDesk caiu na digitação e não
+  reconectou mais (preso em "Connecting"). Não sei se o comando foi aceito (log esperado: `~/cluster_setup.log` no lab).
