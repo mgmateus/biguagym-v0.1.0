@@ -266,3 +266,22 @@ Causas e correções (sem simulador; `pytest tests` → 220 passed):
   Smokes `HydroneGotoPilares-v1/-v2` ok na 2ª rodada (antes do teleport e do retorno do robô; o caminho do estado é o mesmo).
   Fotos no lab: `conferir_obstaculos/20261118-203620/{pilares,dique}/` (ar, água, profundidade, de cima). 0 processos meus
   no fim; sessão "tcc" avisada.
+
+## 2026-11-19 — Smokes finais e piloto de treino (pedido do usuário: rodar no cluster com ~5M passos; aprovado "Sim" para smokes, kit do cluster e piloto)
+- Lab (14:21–14:30, `acfa555`/`58674b3`, branch `spec/rotacao-hydrone`; laço de `smoke_test.py --steps 200 --frame-every 50`,
+  saída em `~/smokes_goto.log`), com o treino da sessão "tcc" rodando ao mesmo tempo:
+
+| Ambiente | passos/s | h por 100k | abrir (s) | obs | resultado |
+|---|---|---|---|---|---|
+| `HydroneGotoPilares-v1` | 5,48 | 5,9 | 7,66 | depth 9×100×100, rgb 9×100×100, state 9 | ok, 2 episódios, sem NaN/inf, obs no espaço |
+| `HydroneGotoPilares-v2` | 3,88 | 10,6 | 21,06 | 26 | ok, idem |
+| `HydroneGotoPilares-v0` | 5,65 | 5,7 | 8,44 | 12 | ok |
+| `HydroneGotoDique-v0` | 5,71 | 5,8 | 7,88 | 12 | ok |
+
+  0 simuladores meus no fim: os 4 processos do filtro eram da "tcc" (laço `teste_5m_rotrc_1`, o Python de treino e 2
+  Holodeck). Com isso os smokes de `-v1`/`-v2` valem com o código final (teleport e robô de volta ao spawn).
+- 5M passos nessas velocidades: ~10 dias (`-v1`) e ~15 dias (`-v2`) por run.
+- `tools/piloto_goto_lab.sh` (novo): piloto de 20k passos, um run por vez (pedido da "tcc", por causa da RAM), `-v1`+cuprl
+  e `-v2`+td3, `learning_starts=1000` (o padrão do td3, 25000, passa do piloto), avaliação a cada 10k com 1 episódio;
+  encerra o meu run se a memória disponível cair abaixo de 5 GB (condição da "tcc").
+- Cluster: `ssh -J teteu@10.230.108.173 teteu@cluster2` deu timeout do notebook (fora da rede da universidade).
