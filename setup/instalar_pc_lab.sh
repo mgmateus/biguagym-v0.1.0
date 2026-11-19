@@ -9,6 +9,7 @@
 #   - driver NVIDIA, git, zstd, gcc e Python 3.12 (python3.12 do sistema ou conda).
 #
 # Uso:  bash setup/instalar_pc_lab.sh
+#       SIM_VERSAO=1.1.0 bash setup/instalar_pc_lab.sh   # BiguaSim 1.1.0 (Hydrone; ambientes HydroneGoto*), ver abaixo
 # Pode ser rodado de novo: o que já está feito é pulado.
 set -euo pipefail
 export GIT_PAGER=cat PAGER=cat     # sem paginador: em alguns PCs o `git log` abria o less e parava em (END)
@@ -17,9 +18,12 @@ REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 LEVA=${LEVA:-$HOME/leva}
 BIGUASIM=${BIGUASIM:-$HOME/biguasim}
 VENV=${VENV:-$HOME/venv-biguagym}
-WORLDS=${WORLDS:-$HOME/.local/share/biguasim/1.0.0/worlds}
+SIM_VERSAO=${SIM_VERSAO:-1.0.0}
+WORLDS=${WORLDS:-$HOME/.local/share/biguasim/$SIM_VERSAO/worlds}
+MANIFEST=$REPO/setup/skydive_manifest.txt
 
 SIM_URL=https://github.com/ttszin/biguasim.git             # fork com os patches do biguasim 1.0.0
+SIM_REF=testes-biguagym
 
 # Commits esperados (os mesmos do notebook)
 SUB_COMMIT=$(git -C "$REPO" ls-tree HEAD biguagym | awk '{print $3}')   # o que a branch clonada aponta (testes-ambientes: 32698e5; spec/recompensas: fcf4358)
@@ -27,6 +31,16 @@ SIM_COMMIT=53ad1f9dfd5e22ebe6e55c02da5f660a311335c7        # biguasim testes-big
 WORLD_MD5=bd371b063645adabe9ef38c13fdb5b6d                 # SkyDive.tar.zst
 WORLD_REPO=${WORLD_REPO:-ttszin/biguasim}                 # release pública com o SkyDive.tar.zst (baixado se faltar em $LEVA)
 WORLD_TAG=${WORLD_TAG:-skydive-20261002}
+
+# BiguaSim 1.1.0 (2026-11-19, treinos HydroneGoto no cluster): a tag pública do hydrone-furg (só leitura, sem push), sem
+# os patches da 1.0.0, que não são usados pelos ambientes do Hydrone. O mundo SkyDive 1.1.0 só sai do servidor de mundos da
+# universidade: copie-o de uma máquina que já o tem para $WORLDS/SkyDive antes de rodar (ver treinos/cluster/LEIAME.md).
+if [ "$SIM_VERSAO" = 1.1.0 ]; then
+    SIM_URL=https://github.com/hydrone-furg/biguasim.git
+    SIM_REF=v1.1.0
+    SIM_COMMIT=743c6d90fc52999a704c916e835bf59d49d1f3be
+    MANIFEST=$REPO/setup/skydive_manifest_1.1.0.txt
+fi
 
 passo() { printf '\n== %s\n' "$*"; }
 falha() { printf '\nERRO: %s\n' "$*" >&2; exit 1; }
@@ -47,16 +61,16 @@ git -C "$REPO" submodule update --init
 [ "$(git -C "$SUB" rev-parse HEAD)" = "$SUB_COMMIT" ] || falha "submódulo não está em $SUB_COMMIT"
 git -C "$SUB" log --oneline -1
 
-passo "3/6 biguasim em $BIGUASIM → $SIM_COMMIT"
+passo "3/6 biguasim $SIM_VERSAO em $BIGUASIM → $SIM_COMMIT"
 if [ ! -e "$BIGUASIM/.git" ]; then
-    git clone -q -b testes-biguagym "$SIM_URL" "$BIGUASIM"
+    git clone -q -b "$SIM_REF" "$SIM_URL" "$BIGUASIM"
 fi
 if [ "$(git -C "$BIGUASIM" rev-parse HEAD)" != "$SIM_COMMIT" ]; then
     # ~/biguasim já existia (ex.: clonado do hydrone-furg ou do bundle): traz a branch do fork sem mexer no origin.
     [ -z "$(git -C "$BIGUASIM" status --porcelain --untracked-files=no)" ] \
         || falha "$BIGUASIM tem alterações locais; resolva antes"
-    git -C "$BIGUASIM" fetch -q "$SIM_URL" testes-biguagym
-    git -C "$BIGUASIM" checkout -q -B testes-biguagym FETCH_HEAD
+    git -C "$BIGUASIM" fetch -q "$SIM_URL" "$SIM_REF"
+    git -C "$BIGUASIM" checkout -q -B "biguasim-$SIM_VERSAO" FETCH_HEAD
 fi
 [ "$(git -C "$BIGUASIM" rev-parse HEAD)" = "$SIM_COMMIT" ] || falha "biguasim não está em $SIM_COMMIT"
 git -C "$BIGUASIM" log --oneline -1
@@ -83,11 +97,14 @@ fi
 "$PY" -m pip install -q -U pip
 "$PY" -m pip install -q -r "$REPO/requirements-venv.txt" \
     || falha "pip falhou. Se foi no evdev: sudo apt install build-essential python3.12-dev linux-libc-dev"
-"$PY" -m pip install -q -e "$BIGUASIM" --no-deps
+# --ignore-requires-python: a 1.1.0 declara ==3.11, mas roda no 3.12 (notebook e PC do lab desde 2026-11-17)
+"$PY" -m pip install -q -e "$BIGUASIM" --no-deps --ignore-requires-python
 
 passo "5/6 Mundo SkyDive em $WORLDS"
 if [ -f "$WORLDS/SkyDive/config.json" ]; then
     echo "já existe, extração pulada"
+elif [ "$SIM_VERSAO" != 1.0.0 ]; then
+    falha "o mundo SkyDive $SIM_VERSAO não está em $WORLDS/SkyDive: copie-o de uma máquina que o tenha (treinos/cluster/LEIAME.md)"
 else
     if [ ! -f "$LEVA/SkyDive.tar.zst" ]; then
         # Baixa da release do GitHub (sem cópia manual). Release privada: precisa do gh logado (gh auth login).
@@ -114,8 +131,8 @@ fi
 (cd "$WORLDS/SkyDive" && find config.json idColors.txt materials.csv palette.json Linux -type f \
     -not -path "*/_P_backups/*" -not -path "*/_BASE_backups/*" -not -path "Linux/Biguasim/Saved/*" \
     -printf "%s %p\n" | sort -k2) \
-    | diff -q "$REPO/setup/skydive_manifest.txt" - >/dev/null \
-    && echo "mundo idêntico ao do notebook ($(wc -l < "$REPO/setup/skydive_manifest.txt") arquivos; Saved/ ignorada)" \
+    | if [ -f "$MANIFEST" ]; then diff -q "$MANIFEST" - >/dev/null; else echo "sem $MANIFEST: conferência do mundo pulada" >&2; cat >/dev/null; fi \
+    && echo "mundo conferido ($MANIFEST; Saved/ ignorada)" \
     || falha "o mundo em $WORLDS/SkyDive difere de setup/skydive_manifest.txt (extração incompleta? em 2026-10-17 o
        Holodeck do PC do lab tinha 79 MB em vez de 241 MB e o simulador dava segfault). Refaça:
          df -h $WORLDS      # precisa de alguns GB livres
