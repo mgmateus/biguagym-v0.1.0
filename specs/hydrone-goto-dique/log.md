@@ -237,3 +237,20 @@ Causas e correções (sem simulador; `pytest tests` → 220 passed):
   takes 1 positional argument but 2 were given` (a sobrescrita da ferramenta não recebia o parâmetro `teleporte` novo);
   corrigido na ferramenta. Antes disso: sem obstáculos 5,74 passos/s. A espera da fila (`pgrep -f testar_obstaculos_lab.sh`)
   achava o próprio `bash -c` e nunca terminava; o processo (meu) foi morto e a rodada relançada sem a espera.
+- 4ª rodada (20:35–21:06, `432695f`): **com `teleport` no posicionamento, 0 torpedos fora do lugar** nos dois cenários
+  (`pilares` 48, reset 6,64 s; `dique` 66 incluindo as vigas, reset 7,81 s; medido − imposto mediano 0,0 m por orientação).
+  Varredura vertical: coluna medida −1,0 a 5,4 m × geométrica −1,2 a 5,4 m (passo 0,2 m; `origem_eixo` sugerida −0,1, dentro
+  da resolução: fica 0). LiDAR × cápsulas, mediana por pilar: ar −0,16 / −0,09 / −0,15 m, água −0,20 / −0,28 / −0,13 m (o
+  LiDAR mede um pouco antes: aletas). Perfil -v0: sem obstáculos 5,89; 12 torpedos 5,87 (6,02 segurando a cada 10 ticks).
+- Mas o `pilares` terminou por "parede" no 1º passo depois de todo reset (conferência: 100 de 100; perfil com 48 torpedos:
+  0,20 passos/s, 3503 ticks em 100 passos). `tools/diag_reset_goto.py` (`62ae78f`): no `pilares`, o Hydrone fica em
+  (136,08; −153,84; 1,9) depois do reset (2,5 m do spawn, fora da área); no `dique`, no spawn. Causa provável: os clones
+  nascem sobrepostos 28 m acima do spawn, o motor os separa com violência e algum acerta o robô (o resultado muda com o
+  número de clones). Correções: (1) `_robo_no_spawn` no fim do posicionamento (teleport e depois set_physics_state no
+  spawn, parado); (2) os clones nascem 30 m ao lado e 50 m acima da água (`NASCIMENTO_DESLOC`). `pytest tests` → 222 passed.
+- Órfão meu: `pkill -f tools/perfil_obstaculos.py` (para encerrar o último caso, lento) deixou o simulador dele aberto (pid
+  536798, SkyDive 1.1.0, iniciado 20:59:26). Morto com `kill`; os Holodeck da sessão "tcc" (bg_home/1.0.0, 19:44) não
+  foram tocados.
+- Incidente: numa reconexão do AnyDesk, o Chrome do notebook ganhou o foco com uma aba de propaganda do AnyDesk e um comando
+  meu (`kill -0 536798 ... kill -9`) foi digitado nessa página (sem campo de texto em foco; nada mudou). Não mexi no Chrome;
+  a janela do AnyDesk foi reativada por `xdotool windowactivate`.

@@ -49,7 +49,9 @@ class SimFalso:
         self.inicio = inicio
         self.fila, self.acoes, self.resets = [], [], 0
         self.clones = [Clone() for _ in range(n_obst)]
+        self.robo = Clone()
         self.agents = {f'obstaculo-id{j}': c for j, c in enumerate(self.clones)}
+        self.agents['robot-id0'] = self.robo
         self.medir = medir
         self.locais_por_tick = []
 
@@ -91,6 +93,7 @@ def montar(cenario='pilares', inicio=None, seed=0, obstaculos=True, medir=None):
     z0, z1 = env._cena['z_limites']
     agua = env._cena['nivel_agua']
     env._bounds = np.array([[x0, y0, agua + z0], [x1, y1, agua + z1]], dtype=np.float64)
+    env._location, env._rotation = list(env._cena['spawn']), [0.0, 0.0, 0.0]
     env._env = SimFalso(inicio if inicio is not None else estado(env._cena['spawn']), len(env._geo['centro']), medir)
     env._init_spaces()
     return env
@@ -241,7 +244,7 @@ def test_agente_obstaculo_no_cenario_do_simulador():
     ob = env_params['agents'][-1]
     assert ob['agent_name'] == 'obstaculo' and ob['agent_type'] == 'TorpedoAUV'
     assert ob['control_abstraction'] == 'accel' and ob['dynamics']['batch_size'] == 48
-    assert ob['location'] == [133.88, -152.6, GotoEnv.ALTURA_ESPERA]
+    assert ob['location'] == [133.88 + 30.0, -152.6, 50.0]                 # longe do Hydrone (nascem sobrepostos)
     (sensor,) = ob['sensors']                                     # só o que a dinâmica exige, no centro de massa
     assert sensor['sensor_type'] == 'DynamicsSensor' and sensor['configuration']['UseCOM'] is True
 
@@ -259,7 +262,7 @@ def test_reset_desce_um_nivel_por_tick_e_termina_no_lugar():
     nivel0 = np.isclose(geo['centro'][:, 2], agua - 0.15)
     assert np.allclose(ticks[1][nivel0], geo['imposto'][nivel0])                    # 1º tick: só o nível de baixo
     assert np.allclose(ticks[1][~nivel0], espera[~nivel0])
-    assert np.allclose(ticks[3], geo['imposto']) and len(ticks) == 5                # 3 níveis + espera + medição
+    assert np.allclose(ticks[3], geo['imposto']) and len(ticks) == 7    # espera + 3 níveis + medição + robô no spawn (2)
     assert env._env.resets == 1
 
 
@@ -267,10 +270,18 @@ def test_posiciona_com_teleporte_e_segura_com_fisica():
     env = montar()
     env._reset()
     cmds = env._env.clones[0].comandos
-    assert cmds == ['teleporte'] * 4 + ['fisica']                 # espera + 3 níveis; o último zera a velocidade
+    assert cmds == ['teleporte'] * 4 + ['fisica'] * 3             # espera + 3 níveis; depois zera a velocidade e segura
     env._env.fila.append(estado(env._cena['spawn']))
     env._step(np.zeros(3, np.float32))
     assert cmds[-1] == 'fisica'
+
+
+def test_reset_poe_o_robo_de_volta_no_spawn():
+    env = montar()
+    env._reset()
+    robo = env._env.robo
+    assert robo.comandos == ['teleporte', 'fisica']
+    assert all(np.allclose(l, env._cena['spawn']) for l in robo.locais)
 
 
 def test_reset_repete_quem_nao_chegou():
@@ -286,7 +297,7 @@ def test_reset_repete_quem_nao_chegou():
         w.simplefilter('error')
         env._reset()
     ticks = env._env.locais_por_tick
-    assert len(ticks) == 8                     # 1ª tentativa: espera + 3 níveis + medição; 2ª: só ele (1 nível)
+    assert len(ticks) == 10                    # 1ª tentativa: espera + 3 níveis + medição; 2ª: só ele (1 nível); robô (2)
     assert ticks[5][deslocado][2] > 25 and np.allclose(ticks[5][0], env._geo['imposto'][0])   # só ele sobe de novo
     assert np.allclose(env._obst_ponto, env._geo['imposto'])
 
@@ -303,7 +314,7 @@ def test_deslocamento_por_orientacao_nao_e_fora_do_lugar():
     env._env.medir = lambda j, local, tick: local + 0.861 * env._geo['eixo'][j]
     env._reset()
     n_niveis = len(np.unique(np.round(env._geo['centro'][:, 2], 3)))                 # 6: 3 dos pilares + 3 das vigas
-    assert len(env._env.locais_por_tick) == n_niveis + 2 and not len(env._fora_do_lugar())
+    assert len(env._env.locais_por_tick) == n_niveis + 4 and not len(env._fora_do_lugar())
 
 
 def test_estado_por_agente_tira_o_robo_da_lista():
@@ -508,7 +519,7 @@ def test_nivel_da_agua_vai_para_a_dinamica(monkeypatch):
     assert any(s['sensor_type'] == 'CollisionSensor' for s in robo['sensors'])
     assert env._bounds[0, 2] == pytest.approx(-0.4 - 1.1)
     obst = env_params['agents'][-1]
-    assert obst['dynamics']['water_level'] == -0.4 and obst['location'][2] == pytest.approx(-0.4 + GotoEnv.ALTURA_ESPERA)
+    assert obst['dynamics']['water_level'] == -0.4 and obst['location'][2] == pytest.approx(-0.4 + 50.0)
 
 
 def test_modulo_sem_simulador():
