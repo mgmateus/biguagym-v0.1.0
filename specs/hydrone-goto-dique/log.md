@@ -322,3 +322,6 @@ Causas e correções (sem simulador; `pytest tests` → 220 passed):
 - Clonado no cluster: `~/biguagym-v0.1.0` na `spec/rotacao-hydrone` (`735c844`).
 - 16:43: a sequência (cópia do mundo + instalação) foi digitada no terminal do lab, mas o AnyDesk caiu na digitação e não
   reconectou mais (preso em "Connecting"). Não sei se o comando foi aceito (log esperado: `~/cluster_setup.log` no lab).
+- Correção do `-v1` + cuprl aplicada (usuário: "Conecta pelo pc do lab mesmo, e coloca 5 seeds por experimento"):
+  `GotoPixelEnv.__init__` aceita `pixel_channels`/`include_state` e dá `ValueError` se pedirem algo diferente de
+  `['rgb','depth']` com a pose. Testes novos em `tests/test_sensores_goto.py`; `pytest -q tests`: 225 passed.

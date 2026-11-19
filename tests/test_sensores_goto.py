@@ -141,3 +141,20 @@ def test_registro_ids_v1_v2():
     for nome in ('Pilares', 'Dique'):
         assert gym.spec(f"HydroneGoto{nome}-v1").entry_point == "core.goto:GotoPixelEnv"
         assert gym.spec(f"HydroneGoto{nome}-v2").entry_point == "core.goto:GotoRangeEnv"
+
+
+# --- kwargs que o run.py manda ao CUPRL (piloto de 2026-11-19: TypeError 'pixel_channels') --------------------------------
+def test_v1_aceita_kwargs_do_cuprl(monkeypatch):
+    from core import goto
+    chamadas = {}
+    monkeypatch.setattr(goto.GotoEnv, '__init__', lambda self, seed, **kw: chamadas.setdefault('base', kw))
+    monkeypatch.setattr(GotoPixelEnv, '_setup_pixel', lambda self, *a: chamadas.setdefault('pixel', a))
+    GotoPixelEnv(42, pixel_channels=['rgb', 'depth'], include_state=True, frame_size=[100, 100], cenario='pilares')
+    assert chamadas['base'] == {'cenario': 'pilares'}          # não repassa pixel_channels/include_state ao GotoEnv
+    assert list(chamadas['pixel'][1]) == [100, 100]
+
+
+@pytest.mark.parametrize('kw', [{'pixel_channels': ['rgb']}, {'include_state': False}])
+def test_v1_recusa_canais_que_nao_entrega(kw):
+    with pytest.raises(ValueError):
+        GotoPixelEnv(42, **kw)
