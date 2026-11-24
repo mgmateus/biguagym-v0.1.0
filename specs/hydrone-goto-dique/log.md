@@ -373,3 +373,8 @@ Causas e correções (sem simulador; `pytest tests` → 220 passed):
   GB), o de avaliação (129352) com 5,8 GB. Encerrei o grupo do run (`kill -TERM -128999`, depois `-KILL`): 0 processos
   restantes, 55 GB disponíveis. O `-v1` continuou (simuladores de 1,6 e 1,3 GB). Suspeita: a octree do `ProfilingSonar`
   (folha `octree_min` 0,02 m) cresce conforme o veículo visita regiões novas. **O `-v2` não pode rodar 5M passos assim.**
+- 06:11 — piloto do `-v1`+cuprl concluído (`estado.csv`: exit 0, 145 min, 0 simuladores ao fim): 20k passos, 133
+  episódios, avaliações em 0/10k/20k (MR −1,02 / −1,04 / −1,03, 1 episódio cada; o agente ainda não aprendeu, esperado com
+  20k passos); ~2,3 passos/s contando abertura e avaliações. Perdas finitas (último: A_LOSS −2,96, CR_LOSS 0,0035,
+  CU_LOSS 0,40). Ao fim: 0 simuladores (o "1" do `pgrep -c -f` era o próprio `bash -c`), GPUs com 0 MiB, 62,5 GB disponíveis.
+  `estado.csv` do `-v2`: exit 143 (o meu kill das 04:41), 57 min.
