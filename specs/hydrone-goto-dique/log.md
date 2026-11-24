@@ -325,3 +325,38 @@ Causas e correções (sem simulador; `pytest tests` → 220 passed):
 - Correção do `-v1` + cuprl aplicada (usuário: "Conecta pelo pc do lab mesmo, e coloca 5 seeds por experimento"):
   `GotoPixelEnv.__init__` aceita `pixel_channels`/`include_state` e dá `ValueError` se pedirem algo diferente de
   `['rgb','depth']` com a pose. Testes novos em `tests/test_sensores_goto.py`; `pytest -q tests`: 225 passed.
+
+## 2026-11-19 a 2026-11-24 — Lab fora do ar; setup do cluster concluído; smoke e piloto no cluster2
+- O AnyDesk do lab ficou em "Connecting" de 19/11 16:43 até 22/11 03:52 (o AnyDesk do lab travou; o PC reiniciou em 21/11
+  ~08:44). Nesse tempo, nada rodou.
+- `~/cluster_setup.log` no lab: a sequência de 19/11 tinha sido aceita e terminou antes do reinício (`FIM_SETUP rc=0`):
+  mundo SkyDive 1.1.0 copiado (11 GB, 348 arquivos, 16:42–16:58) e conferido pelo manifesto; Miniconda + venv 3.12
+  (conda-forge) em `/home/users/teteu`; biguasim `743c6d9`; torch 2.7.1+cu126 com CUDA (V100S); 54 ids registrados.
+  O submódulo ficou em `58674b3` (antes da correção do `-v1`): `git pull` + `submodule update` no cluster → `7b0b020`/`364ba77`.
+- Uso da tela do lab combinado com a sessão "tcc" (ela e eu digitamos no mesmo AnyDesk): quem precisa pede e espera o "TELA
+  LIVRE" do outro. Meu terminal é uma janela Terminator própria (`~/biguagym-v0.1.0`); a sessão AnyDesk (licença gratuita)
+  cai a cada ~5 min e volta com Retry.
+- 24/11 03:31 — `tools/smoke_ram_cluster.sh` (novo, `7b0b020`): smoke de 300 passos, GPU 1 (`CUDA_VISIBLE_DEVICES` +
+  nvidia-smi falso, como na fila), RAM do grupo a cada 5 s. Cluster ocioso (as 2 GPUs com 0 MiB, 62,5 GB disponíveis).
+
+  | ambiente | exit | passos/s (lab) | h/100k | make | pico RSS do grupo | NaN/inf | obs no espaço |
+  |---|---|---|---|---|---|---|---|
+  | HydroneGotoPilares-v2 | 0 | 2,06 (3,88) | 20,8 | 139,5 s | 11,4 GB (simulador ~10 GB) | 0 | sim |
+  | HydroneGotoPilares-v1 | 0 | 4,15 (5,48) | 8,3 | — | 3,6 GB | 0 | sim |
+  | HydroneGotoPilares-v0 | 0 | (a ler) | | | | | |
+
+  - A memória do `-v2` é do simulador (o RSS do Holodeck sobe a ~10 GB na abertura e fica estável); com o vazamento do
+    `close()` (`sim_alive_after_env_close: true`), um run do `-v2` pode chegar a ~30 GB (3 simuladores).
+  - O Unreal foi para a GPU 0 (2,1–2,9 GB) mesmo com `CUDA_VISIBLE_DEVICES=1`; o Python ficou na GPU 1 (466 MB).
+  - O cluster é mais lento que o lab: 5M passos ≈ 28 dias (`-v2`) e ≈ 14 dias (`-v1`) por run, com 1 run por ambiente.
+  - 0 simuladores ao fim de cada ambiente.
+- 03:42 — piloto pela fila (`treinos/cluster/runs_piloto_goto.csv`, `e43b208`; 20k passos, `eval_freq=10000`,
+  `num_eval_episodes=1`, `agent.learning_starts=1000`, WORKERS=2, GPUS=1, MIN_RAM_MB=30000). 1ª tentativa falhou na hora:
+  ```
+  treinos/cluster/fila_cluster.sh: line 170: treinos/cluster/piloto_goto/runs/HydroneGotoPilares-v2_s0/saida.log: No such file or directory
+  03:43:02 w0: fim HydroneGotoPilares-v2_s0 exit=1 processos_restantes=0
+  ```
+  Causa: `OUT` relativo; o worker faz `cd` para a pasta dele antes de gravar `$d/saida.log`. Parei a fila (kill do grupo;
+  nenhum processo meu sobrou), apaguei a saída e relancei com `OUT` absoluto. Correção proposta (não aplicada):
+  `OUT=$(realpath -m "$OUT")` no início da `fila_cluster.sh`.
+- 03:44:38 piloto `-v2`+td3 e 03:45:38 `-v1`+cuprl em andamento (log `~/piloto_goto.log` no cluster).
