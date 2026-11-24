@@ -360,3 +360,16 @@ Causas e correções (sem simulador; `pytest tests` → 220 passed):
   nenhum processo meu sobrou), apaguei a saída e relancei com `OUT` absoluto. Correção proposta (não aplicada):
   `OUT=$(realpath -m "$OUT")` no início da `fila_cluster.sh`.
 - 03:44:38 piloto `-v2`+td3 e 03:45:38 `-v1`+cuprl em andamento (log `~/piloto_goto.log` no cluster).
+- 04:22 — progresso com os dois runs em paralelo: `-v1`+cuprl 4.995 passos (~2,5 passos/s); `-v2`+td3 1.690 passos
+  (~1,0–1,4 passos/s); perdas finitas, curvas sendo gravadas; 4 simuladores, VRAM 8,2 GB na GPU 0 e 1,8 GB na GPU 1 (todo
+  Unreal renderiza na GPU 0). A ~2,5 e ~1,2 passos/s, 5M passos levariam ~23 dias (`-v1`) e ~45 dias (`-v2`) por run.
+- Escolher a GPU do Unreal: o biguasim 1.1.0 monta os argumentos do Holodeck numa lista fixa
+  (`environments.py:1047-1088`, `__linux_start_process__`; sem `-graphicsadapter`). O processo herda o ambiente, mas o
+  cluster não tem a camada Vulkan `device-select` do Mesa (só `nvidia_layers.json`; loader 1.3.239), então `DRI_PRIME`
+  não serve. GPUs: 0 = `17:00.0`, 1 = `65:00.0`. Restaria `r.GraphicsAdapter` no `Engine.ini` do mundo (todos os
+  simuladores numa só GPU).
+- **04:41 — vazamento de memória no simulador do `-v2` durante o treino.** RAM disponível do cluster em 5,5 GB; o
+  Holodeck de treino do `-v2` (pid 129063) com RSS de 42→43,9 GB depois de ~57 min (no smoke de 300 passos ficava em ~10
+  GB), o de avaliação (129352) com 5,8 GB. Encerrei o grupo do run (`kill -TERM -128999`, depois `-KILL`): 0 processos
+  restantes, 55 GB disponíveis. O `-v1` continuou (simuladores de 1,6 e 1,3 GB). Suspeita: a octree do `ProfilingSonar`
+  (folha `octree_min` 0,02 m) cresce conforme o veículo visita regiões novas. **O `-v2` não pode rodar 5M passos assim.**
